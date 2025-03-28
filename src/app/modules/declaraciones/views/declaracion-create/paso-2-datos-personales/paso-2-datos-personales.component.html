@@ -1,0 +1,127 @@
+<div class="p-3">
+  <h3>Datos Personales</h3>
+
+  <form [formGroup]="datosPersonalesForm" (ngSubmit)="guardarDatosPersonales()">
+    <div class="row mb-3">
+      <div class="col-md-3">
+        <mat-form-field appearance="fill" class="w-100">
+          <mat-label>R.U.T.</mat-label>
+          <input matInput formControlName="rut" placeholder="15381086-9" />
+        </mat-form-field>
+      </div>
+      <div class="col-md-3">
+        <mat-form-field appearance="fill" class="w-100">
+          <mat-label>Nombres</mat-label>
+          <input matInput formControlName="nombres" />
+        </mat-form-field>
+      </div>
+      <div class="col-md-3">
+        <mat-form-field appearance="fill" class="w-100">
+          <mat-label>Apellido Paterno</mat-label>
+          <input matInput formControlName="apellidoPaterno" />
+        </mat-form-field>
+      </div>
+      <div class="col-md-3">
+        <mat-form-field appearance="fill" class="w-100">
+          <mat-label>Apellido Materno</mat-label>
+          <input matInput formControlName="apellidoMaterno" />
+        </mat-form-field>
+      </div>
+    </div>
+
+    <div class="row mb-3">
+      <div class="col-md-4">
+        <mat-form-field appearance="fill" class="w-100">
+          <mat-label>Profesión / Oficio</mat-label>
+          <input matInput formControlName="profesion" />
+        </mat-form-field>
+      </div>
+      <div class="col-md-4">
+        <label class="d-block">Lugar donde reside</label>
+        <mat-radio-group formControlName="lugarReside" class="d-flex gap-3">
+          <mat-radio-button [value]="'chile'">Chile</mat-radio-button>
+          <mat-radio-button [value]="'extranjero'">Extranjero</mat-radio-button>
+        </mat-radio-group>
+      </div>
+    </div>
+
+    <div class="row mb-3" *ngIf="datosPersonalesForm.value.lugarReside === 'chile'">
+      <div class="col-md-3">
+        <mat-form-field appearance="fill" class="w-100">
+          <mat-label>Región</mat-label>
+          <input matInput formControlName="region" placeholder="METROPOLITANA" />
+        </mat-form-field>
+      </div>
+      <div class="col-md-3">
+        <mat-form-field appearance="fill" class="w-100">
+          <mat-label>Comuna</mat-label>
+          <input matInput formControlName="comuna" placeholder="SANTIAGO" />
+        </mat-form-field>
+      </div>
+      <div class="col-md-6">
+        <mat-form-field appearance="fill" class="w-100">
+          <mat-label>Domicilio Particular</mat-label>
+          <input matInput formControlName="domicilioParticular" />
+        </mat-form-field>
+      </div>
+    </div>
+
+    <div class="row mb-3">
+      <div class="col-md-3">
+        <mat-form-field appearance="fill" class="w-100">
+          <mat-label>Estado Civil</mat-label>
+          <mat-select formControlName="estadoCivil">
+            <mat-option value="">Seleccione</mat-option>
+            <mat-option value="SOLTERO(A)">SOLTERO(A)</mat-option>
+            <mat-option value="CASADO(A)">CASADO(A)</mat-option>
+            <mat-option value="VIUDO(A)">VIUDO(A)</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <div class="col-md-3">
+        <mat-form-field appearance="fill" class="w-100">
+          <mat-label>Régimen Patrimonial</mat-label>
+          <mat-select formControlName="regimenPatrimonial">
+            <mat-option value="">Seleccione</mat-option>
+            <mat-option value="SOCIEDAD CONYUGAL">SOCIEDAD CONYUGAL</mat-option>
+            <mat-option value="SEPARACIÓN DE BIENES">SEPARACIÓN DE BIENES</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <!-- Datos del Cónyuge -->
+    <div class="row mb-3">
+      <div class="col-md-3">
+        <mat-form-field appearance="fill" class="w-100">
+          <mat-label>R.U.N. Cónyuge</mat-label>
+          <input matInput formControlName="rutConyuge" />
+        </mat-form-field>
+      </div>
+      <div class="col-md-3">
+        <mat-form-field appearance="fill" class="w-100">
+          <mat-label>Nombres Cónyuge</mat-label>
+          <input matInput formControlName="nombresConyuge" />
+        </mat-form-field>
+      </div>
+      <div class="col-md-3">
+        <mat-form-field appearance="fill" class="w-100">
+          <mat-label>Apellido Paterno Cónyuge</mat-label>
+          <input matInput formControlName="apellidoPaternoConyuge" />
+        </mat-form-field>
+      </div>
+      <div class="col-md-3">
+        <mat-form-field appearance="fill" class="w-100">
+          <mat-label>Apellido Materno Cónyuge</mat-label>
+          <input matInput formControlName="apellidoMaternoConyuge" />
+        </mat-form-field>
+      </div>
+    </div>
+
+    <div class="text-end">
+      <button mat-raised-button color="primary" type="submit">
+        Guardar
+      </button>
+    </div>
+  </form>
+</div>

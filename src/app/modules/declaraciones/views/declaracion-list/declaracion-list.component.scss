@@ -1,0 +1,57 @@
+/* Ajustes generales */
+.container-fluid {
+  padding: 1rem;
+}
+
+.component-title {
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+/* Estilos para la tabla */
+.small-table {
+  font-size: 0.875rem; /* Fuente más pequeña */
+  background-color: #fafafa;
+
+ 
+
+  /* Cabecera personalizada */
+  mat-header-row {
+    background-color: #1976d2; /* Color de cabecera (azul) */
+    color: #fff;
+  }
+  mat-header-cell {
+    font-weight: 600;
+  }
+
+  /* Filas alternadas (striped) */
+  mat-row:nth-child(odd) {
+    background-color: #f1f1f1;
+  }
+}
+
+/* Asegurar que los botones de acciones se muestren en línea */
+.actions-cell {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+/* Selectores y datepicker más compactos */
+.small-form-field .mat-form-field-wrapper {
+  padding-bottom: 0 !important;
+}
+.small-form-field .mat-form-field-flex {
+  min-height: 36px;
+  font-size: 0.875rem;
+}
+.small-form-field .mat-select-trigger {
+  min-height: 36px;
+}
+
+/* Opcional: ajustar márgenes de los botones */
+.me-2 {
+  margin-right: 0.5rem !important;
+}

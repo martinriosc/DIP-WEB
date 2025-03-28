@@ -1,0 +1,216 @@
+<mat-card>
+  <mat-card-title>Derechos o Acciones en entidades constituidas en Chile</mat-card-title>
+
+  <!-- Botón para abrir el diálogo y agregar un nuevo elemento -->
+  <div class="d-flex justify-content-end mb-2">
+    <button class="btn btn-primary" (click)="openDialog()">Agregar</button>
+  </div>
+
+  <!-- Tabla con la lista de derechos/acciones -->
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Título</th>
+        <th>Cantidad/Porcentaje</th>
+        <th>Razón Social</th>
+        <th>RUT</th>
+        <th>Fecha Adquisición</th>
+        <th>Valor</th>
+        <th>Controlador?</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let item of derechosAcciones; let i = index">
+        <td>{{ item.titulo }}</td>
+        <td>{{ item.tipoCantidadPorcentaje }}: {{ item.cantidadPorcentaje }}</td>
+        <td>{{ item.razonSocial }}</td>
+        <td>{{ item.rut }}</td>
+        <td>{{ item.fechaAdquisicion }}</td>
+        <td>{{ item.tipoValor }}: {{ item.valor }}</td>
+        <td>{{ item.controlador ? 'Sí' : 'No' }}</td>
+        <td>
+          <!-- Editar -->
+          <button
+            class="btn btn-link text-primary p-0 mr-2"
+            (click)="openDialog(item, i)"
+          >
+            <mat-icon>edit</mat-icon>
+          </button>
+          <!-- Eliminar -->
+          <button
+            class="btn btn-link text-danger p-0"
+            (click)="deleteItem(i)"
+          >
+            <mat-icon>delete</mat-icon>
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</mat-card>
+
+<!-- ================== DIALOG (mat-dialog) ================== -->
+<ng-template #dialogTemplate>
+  <!-- Header con color personalizado -->
+  <div class="dialog-header text-white">
+    <h2 mat-dialog-title class="m-0">
+      {{ isEditing ? 'Modificar Derecho o Acción' : 'Agregar Derecho o Acción' }}
+    </h2>
+  </div>
+
+  <!-- Contenido principal del diálogo -->
+  <div mat-dialog-content>
+    <form [formGroup]="formDerechoAccion" class="p-2">
+      <!-- TÍTULO (DERECHO O ACCIÓN) -->
+      <div class="row form-group">
+        <div class="col-md-4 d-flex align-items-center">
+          <label class="mb-0 font-weight-bold">
+            TÍTULO (DERECHO O ACCIÓN) (*) :
+          </label>
+        </div>
+        <div class="col-md-8">
+          <mat-form-field appearance="outline" class="w-100">
+            <input matInput formControlName="titulo" />
+          </mat-form-field>
+        </div>
+      </div>
+
+      <!-- CANTIDAD O PORCENTAJE + RADIO + CAMPO NUMÉRICO -->
+      <div class="row form-group">
+        <div class="col-md-4 d-flex align-items-center">
+          <label class="mb-0 font-weight-bold">
+            CANTIDAD O PORCENTAJE (*) :
+          </label>
+        </div>
+        <div class="col-md-8">
+          <!-- Radio para Cantidad / Porcentaje -->
+          <mat-radio-group formControlName="tipoCantidadPorcentaje" class="d-block mb-2">
+            <mat-radio-button class="mr-3" [value]="'Cantidad'">Cantidad</mat-radio-button>
+            <mat-radio-button [value]="'Porcentaje'">Porcentaje</mat-radio-button>
+          </mat-radio-group>
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Cantidad / Porcentaje</mat-label>
+            <input matInput formControlName="cantidadPorcentaje" />
+            <mat-hint>Ingrese solo números, sin puntos ni comas. Ej: 123456</mat-hint>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <!-- NOMBRE O RAZÓN SOCIAL DE LA EMPRESA -->
+      <div class="row form-group">
+        <div class="col-md-4 d-flex align-items-center">
+          <label class="mb-0 font-weight-bold">
+            NOMBRE O RAZÓN SOCIAL DE LA EMPRESA (*) :
+          </label>
+        </div>
+        <div class="col-md-8">
+          <mat-form-field appearance="outline" class="w-100">
+            <input matInput formControlName="razonSocial" />
+          </mat-form-field>
+        </div>
+      </div>
+
+      <!-- RUT -->
+      <div class="row form-group">
+        <div class="col-md-4 d-flex align-items-center">
+          <label class="mb-0 font-weight-bold">
+            RUT (*) :
+          </label>
+        </div>
+        <div class="col-md-8">
+          <mat-form-field appearance="outline" class="w-100">
+            <input matInput formControlName="rut" />
+          </mat-form-field>
+        </div>
+      </div>
+
+      <!-- GIRO REGISTRADO SII -->
+      <div class="row form-group">
+        <div class="col-md-4 d-flex align-items-center">
+          <label class="mb-0 font-weight-bold">
+            GIRO REGISTRADO SII (*) :
+          </label>
+        </div>
+        <div class="col-md-8">
+          <mat-form-field appearance="outline" class="w-100">
+            <input matInput formControlName="giro" />
+          </mat-form-field>
+        </div>
+      </div>
+
+      <!-- FECHA ADQUISICIÓN -->
+      <div class="row form-group">
+        <div class="col-md-4 d-flex align-items-center">
+          <label class="mb-0 font-weight-bold">
+            FECHA ADQUISICIÓN (*) :
+          </label>
+        </div>
+        <div class="col-md-8">
+          <mat-form-field appearance="outline" class="w-100">
+            <input matInput formControlName="fechaAdquisicion" placeholder="DD/MM/AAAA" />
+          </mat-form-field>
+        </div>
+      </div>
+
+      <!-- VALOR CORRIENTE O VALOR LIBRO -->
+      <div class="row form-group mb-5">
+        <div class="col-md-4 d-flex align-items-center">
+          <label class="mb-0 font-weight-bold">
+            VALOR CORRIENTE EN PLAZA O VALOR LIBRO (*) :
+          </label>
+        </div>
+        <div class="col-md-8">
+          <mat-radio-group formControlName="tipoValor" class="d-block mb-2">
+            <mat-radio-button class="mr-3" [value]="'Valor corriente'">
+              Valor corriente
+            </mat-radio-button>
+            <mat-radio-button [value]="'Valor libro'">
+              Valor libro
+            </mat-radio-button>
+          </mat-radio-group>
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Valor</mat-label>
+            <input matInput formControlName="valor" />
+            <mat-hint>
+              Ingrese número entero, no se permiten puntos ni comas Ej: 123456
+            </mat-hint>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <!-- GRAVÁMENES -->
+      <div class="row form-group">
+        <div class="col-md-4 d-flex align-items-center">
+          <label class="mb-0 font-weight-bold">GRAVÁMENES (*) :</label>
+        </div>
+        <div class="col-md-8">
+          <mat-form-field appearance="outline" class="w-100">
+            <input matInput formControlName="gravamenes" />
+          </mat-form-field>
+        </div>
+      </div>
+
+      <!-- CONTROLADOR -->
+      <div class="row form-group">
+        <div class="col-md-4 d-flex align-items-center">
+          <label class="mb-0 font-weight-bold">
+            ¿TIENE UD. LA CALIDAD DE CONTROLADOR... (*) :
+          </label>
+        </div>
+        <div class="col-md-8">
+          <mat-radio-group formControlName="controlador" class="d-block">
+            <mat-radio-button class="mr-4" [value]="true">Sí</mat-radio-button>
+            <mat-radio-button [value]="false">No</mat-radio-button>
+          </mat-radio-group>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- Footer del diálogo -->
+  <div mat-dialog-actions class="d-flex justify-content-end p-2">
+    <button mat-button (click)="closeDialog()">Cancelar</button>
+    <button mat-button color="primary" (click)="saveDialog()">Guardar</button>
+  </div>
+</ng-template>

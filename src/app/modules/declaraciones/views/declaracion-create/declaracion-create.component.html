@@ -1,0 +1,58 @@
+<!-- Mat Horizontal Stepper -->
+<mat-horizontal-stepper
+  #stepper
+  [linear]="true"
+  (selectionChange)="onSelectionChange($event)"
+  class="custom-horizontal-stepper"
+>
+  <mat-step
+    *ngFor="let step of steps; let i = index"
+    [stepControl]="formGroups[i]"
+  >
+    <!-- Etiqueta del Paso (sin truncar) -->
+    <ng-template matStepLabel>
+      {{ step.label }}
+    </ng-template>
+
+        <!-- Ícono personalizado cuando el paso está en modo edición (no completado) -->
+        <ng-template matStepperIcon="edit">
+          <!-- Ícono de “lapiz” o lo que prefieras cuando NO está completado -->
+          <mat-icon>edit</mat-icon>
+        </ng-template>
+    
+        <!-- Ícono personalizado cuando el paso está completado -->
+        <ng-template matStepperIcon="done">
+          <!-- Ícono de “check_circle” o similar cuando SÍ está completado -->
+          <mat-icon color="primary">check_circle</mat-icon>
+        </ng-template>
+
+    <!-- CONTENIDO del Paso -->
+    <form [formGroup]="formGroups[i]" class="step-content-area">
+      <!-- Aquí puedes invocar tu componente dinámico o HTML directamente -->
+      <ng-container *ngIf="step.component">
+        <ng-container *ngComponentOutlet="step.component"></ng-container>
+      </ng-container>
+
+      <div class="buttons">
+        <button mat-button matStepperPrevious *ngIf="i > 0">Atrás</button>
+        <button
+          mat-button
+          matStepperNext
+          *ngIf="i < steps.length - 1"
+          [disabled]="formGroups[i].invalid"
+        >
+          Siguiente
+        </button>
+        <button
+          mat-button
+          color="primary"
+          (click)="submit()"
+          *ngIf="i === steps.length - 1"
+          [disabled]="formGroups[i].invalid"
+        >
+          Finalizar
+        </button>
+      </div>
+    </form>
+  </mat-step>
+</mat-horizontal-stepper>

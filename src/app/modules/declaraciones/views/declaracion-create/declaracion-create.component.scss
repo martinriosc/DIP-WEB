@@ -1,0 +1,42 @@
+.custom-horizontal-stepper {
+  /* Ocupa ancho completo de su contenedor */
+  width: 100%;
+
+  /* La barra que contiene los headers (pasos) se llama .mat-horizontal-stepper-header-container */
+  ::ng-deep .mat-horizontal-stepper-header-container {
+    /* Scroll solo en la barra de pasos */
+    overflow-x: auto;
+    white-space: nowrap;
+
+    /* Para que cada step-header se muestre completo y no se corte */
+    .mat-step-header {
+      flex: 0 0 auto;       /* Permite que cada paso tenga ancho "auto" */
+      min-width: 140px;     /* Ajusta según el texto que tengas */
+      max-width: 300px;     /* Quita o ajusta si necesitas más espacio */
+
+      /* Evita la elipsis y permite ver el texto completo */
+      .mat-step-label {
+        white-space: nowrap;
+        overflow: visible;
+        text-overflow: unset;
+      }
+    }
+  }
+
+  /* Contenedor del contenido de cada paso */
+  ::ng-deep .mat-horizontal-stepper-content-container {
+    width: 100%; /* Asegura que el área del formulario siempre ocupe todo el ancho */
+    overflow-x: hidden; /* Evita que el contenido genere scroll horizontal */
+  }
+
+  /* Opcionalmente, ajusta cada "contenido" */
+  .step-content-area {
+    width: 100%;
+    padding: 1rem 0;
+  }
+}
+
+/* Botones en la parte inferior */
+.buttons {
+  margin-top: 1rem;
+}

@@ -1,0 +1,178 @@
+<div class="container-fluid">
+  <!-- Breadcrumb -->
+  <nav aria-label="breadcrumb" class="mb-2">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a routerLink="/">Inicio</a>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">
+        Declaraciones
+      </li>
+    </ol>
+  </nav>
+
+  <!-- Título del componente -->
+  <h2 class="component-title mb-3">Lista de Declaraciones</h2>
+
+  <!-- Filtro global (buscador por escritura) -->
+  <!-- <div class="row mb-3">
+    <div class="col-md-4">
+      <mat-form-field appearance="fill" class="w-100">
+        <mat-label>Buscar</mat-label>
+        <input
+          matInput
+          placeholder="Escribe para buscar..."
+          [formControl]="filterControl"
+          (keyup)="applyFilter()"
+        />
+      </mat-form-field>
+    </div>
+  </div> -->
+
+  <!-- Filtros avanzados -->
+  <div class="row align-items-end g-2 mb-3">
+    <!-- Fecha Declaración -->
+    <div class="col-md-2">
+      <mat-form-field appearance="outline" class="small-form-field w-100">
+        <mat-label>Fecha Declaración</mat-label>
+        <input matInput [matDatepicker]="picker" [formControl]="fechaDeclaracion">
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+      </mat-form-field>
+    </div>
+
+    <!-- Tipo -->
+    <div class="col-md-2">
+      <mat-form-field appearance="outline" class="small-form-field w-100">
+        <mat-label>Tipo</mat-label>
+        <mat-select [formControl]="tipo">
+          <mat-option value="">TODOS</mat-option>
+          <mat-option value="FIRMA DECLARACIÓN">FIRMA DECLARACIÓN</mat-option>
+          <mat-option value="PRIMERA DECLARACIÓN">PRIMERA DECLARACIÓN</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <!-- Servicio -->
+    <div class="col-md-2">
+      <mat-form-field appearance="outline" class="small-form-field w-100">
+        <mat-label>Servicio</mat-label>
+        <mat-select [formControl]="servicio">
+          <mat-option value="">TODOS</mat-option>
+          <mat-option value="CONTRALORÍA GENERAL">CONTRALORÍA GENERAL</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <!-- Cargo -->
+    <div class="col-md-2">
+      <mat-form-field appearance="outline" class="small-form-field w-100">
+        <mat-label>Cargo</mat-label>
+        <mat-select [formControl]="cargo">
+          <mat-option value="">TODOS</mat-option>
+          <mat-option value="JEFE DE UNIDAD">JEFE DE UNIDAD</mat-option>
+          <mat-option value="ANALISTA">ANALISTA</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <!-- Estado -->
+    <div class="col-md-2">
+      <mat-form-field appearance="outline" class="small-form-field w-100">
+        <mat-label>Estado</mat-label>
+        <mat-select [formControl]="estado">
+          <mat-option value="">TODOS</mat-option>
+          <mat-option value="RECEPCIONADA">RECEPCIONADA</mat-option>
+          <mat-option value="ARCHIVADA">ARCHIVADA</mat-option>
+          <mat-option value="RECIBIDA">RECIBIDA</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <!-- Botones de búsqueda -->
+    <div class="col-md-2 d-flex mt-0 pb-4">
+      <button mat-raised-button color="primary" class="me-2" (click)="buscar()">
+        Buscar
+      </button>
+      <button mat-raised-button color="warn" (click)="limpiar()">
+        Limpiar
+      </button>
+    </div>
+  </div>
+
+  <!-- Tabla -->
+  <div class="row">
+
+    <div class="text-end mb-3">
+      <button mat-raised-button color="primary" [routerLink]="['/declaraciones/nueva']">
+        Agregar Declaración
+      </button>
+    </div>
+    <div class="col-12">
+      <table mat-table [dataSource]="dataSource" class="small-table mat-elevation-z8 w-100">
+        <!-- Nro Declaración -->
+        <ng-container matColumnDef="nro">
+          <th mat-header-cell *matHeaderCellDef style="background-color: rgb(210, 105, 25); color: white;"> Nro Declaración </th>
+          <td mat-cell *matCellDef="let element"> {{ element.nro }} </td>
+        </ng-container>
+
+        <!-- Fecha Recepción -->
+        <ng-container matColumnDef="fechaRecepcion">
+          <th mat-header-cell *matHeaderCellDef style="background-color: rgb(210, 105, 25); color: white;"> Fecha Recepción </th>
+          <td mat-cell *matCellDef="let element"> {{ element.fechaRecepcion }} </td>
+        </ng-container>
+
+        <!-- Tipo -->
+        <ng-container matColumnDef="tipo">
+          <th mat-header-cell *matHeaderCellDef style="background-color: rgb(210, 105, 25); color: white;"> Tipo </th>
+          <td mat-cell *matCellDef="let element"> {{ element.tipo }} </td>
+        </ng-container>
+
+        <!-- Servicio -->
+        <ng-container matColumnDef="servicio">
+          <th mat-header-cell *matHeaderCellDef style="background-color: rgb(210, 105, 25); color: white;"> Servicio </th>
+          <td mat-cell *matCellDef="let element"> {{ element.servicio }} </td>
+        </ng-container>
+
+        <!-- Cargo -->
+        <ng-container matColumnDef="cargo">
+          <th mat-header-cell *matHeaderCellDef style="background-color: rgb(210, 105, 25); color: white;"> Cargo </th>
+          <td mat-cell *matCellDef="let element"> {{ element.cargo }} </td>
+        </ng-container>
+
+        <!-- Estado -->
+        <ng-container matColumnDef="estado">
+          <th mat-header-cell *matHeaderCellDef style="background-color: rgb(210, 105, 25); color: white;"> Estado </th>
+          <td mat-cell *matCellDef="let element"> {{ element.estado }} </td>
+        </ng-container>
+
+        <!-- Acciones -->
+        <ng-container matColumnDef="acciones">
+          <th mat-header-cell *matHeaderCellDef style="background-color: rgb(210, 105, 25); color: white;"> Acciones </th>
+          <td mat-cell *matCellDef="let element" class="actions-cell">
+            <button mat-icon-button color="primary" (click)="editar(element)">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button color="warn" (click)="eliminar(element)">
+              <mat-icon>delete</mat-icon>
+            </button>
+            <button mat-icon-button color="accent" (click)="archivar(element)">
+              <mat-icon>archive</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <!-- Cabecera y Filas -->
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- Paginator -->
+  <div class="row mt-2">
+    <div class="col-12 d-flex justify-content-end">
+      <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
+    </div>
+  </div>
+</div>

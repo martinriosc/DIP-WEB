@@ -1,0 +1,15 @@
+/* Ajusta el mat-form-field al 100% en cada columna */
+mat-form-field {
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+/* Manejo de márgenes en la fila */
+.row.form-group {
+  margin-bottom: 0.8rem;
+}
+
+/* Ajusta label */
+label.font-weight-bold {
+  /* Cambia si necesitas mayor personalización */
+}

@@ -1,0 +1,94 @@
+<mat-card>
+  <mat-card-title>Datos de la Declaración</mat-card-title>
+  <mat-card-content>
+    <form [formGroup]="formDeclaracion" class="p-2">
+      <!-- Tipo (*) -->
+      <div class="row form-group">
+        <div class="col-md-4 d-flex align-items-center">
+          <label class="m-0 font-weight-bold">Tipo (*) :</label>
+        </div>
+        <div class="col-md-8">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Seleccione el Tipo</mat-label>
+            <mat-select formControlName="tipo">
+              <mat-option *ngFor="let t of tipos" [value]="t">
+                {{ t }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <!-- Período (*) -->
+      <div class="row form-group">
+        <div class="col-md-4 d-flex align-items-center">
+          <label class="m-0 font-weight-bold">Periodo (*) :</label>
+        </div>
+        <div class="col-md-8">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Seleccione el Período</mat-label>
+            <mat-select formControlName="periodo">
+              <mat-option *ngFor="let p of periodos" [value]="p">
+                {{ p }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <!-- Lugar donde se realiza (*) (Chile / Extranjero) -->
+      <div class="row form-group">
+        <div class="col-md-4 d-flex align-items-center">
+          <label class="m-0 font-weight-bold">Lugar donde se realiza (*) :</label>
+        </div>
+        <div class="col-md-8">
+          <mat-radio-group formControlName="lugar" class="d-block">
+            <mat-radio-button class="mr-4" [value]="'Chile'">Chile</mat-radio-button>
+            <mat-radio-button [value]="'Extranjero'">Extranjero</mat-radio-button>
+          </mat-radio-group>
+        </div>
+      </div>
+
+      <!-- Región (*) -->
+      <div class="row form-group">
+        <div class="col-md-4 d-flex align-items-center">
+          <label class="m-0 font-weight-bold">Región (*) :</label>
+        </div>
+        <div class="col-md-8">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Seleccione la Región</mat-label>
+            <mat-select formControlName="region">
+              <mat-option *ngFor="let r of regiones" [value]="r">
+                {{ r }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <!-- Comuna (*) -->
+      <div class="row form-group">
+        <div class="col-md-4 d-flex align-items-center">
+          <label class="m-0 font-weight-bold">Comuna (*) :</label>
+        </div>
+        <div class="col-md-8">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Seleccione la Comuna</mat-label>
+            <mat-select formControlName="comuna">
+              <mat-option *ngFor="let c of comunas" [value]="c">
+                {{ c }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
+    </form>
+  </mat-card-content>
+
+  <!-- Footer con botón para enviar o pasar al siguiente paso -->
+  <mat-card-actions class="d-flex justify-content-end p-2">
+    <button mat-raised-button color="primary" (click)="onSubmit()">
+      Siguiente/Guardar
+    </button>
+  </mat-card-actions>
+</mat-card>
