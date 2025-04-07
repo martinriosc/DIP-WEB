@@ -1,7 +1,6 @@
 @import 'node_modules/bootstrap-icons/font/bootstrap-icons.scss';
 
-
-/* Ajustes básicos para que el container ocupe toda la pantalla */
+/* Ajustes básicos del container para que ocupe toda la vista */
 .app-sidenav-container {
   height: 100vh;
   display: flex;
@@ -10,17 +9,16 @@
 
 /* SIDENAV */
 .app-sidenav {
-  width: 250px; /* ancho por defecto en desktop */
-  /* En mobile, se superpone (over) y cierra/abre con toggle */
+  width: 250px; /* ancho en desktop */
 }
 
 .sidebar-content {
   position: relative;
-  height: 100%; /* Para que el footer se pegue abajo */
+  height: 100%;
   display: flex;
   flex-direction: column;
+  background-color: #fff; /* Lateral en color claro/white */
 
-  /* Botón "X" para mobile */
   .close-mobile {
     position: absolute;
     top: 0.5rem;
@@ -38,15 +36,31 @@
   }
 
   .nav-menu {
-    flex: 1; /* Para que ocupe el espacio restante */
+    flex: 1;
     display: flex;
     flex-direction: column;
+    margin-top: 1rem;
 
     a[mat-list-item] {
       display: flex;
       align-items: center;
+      padding: 10px 20px;
+      color: #495057;
+      text-decoration: none;
+
       mat-icon {
         margin-right: 0.75rem;
+      }
+
+      &:hover {
+        transition: all 0.2s ease-in-out;
+        background-color: #cf5214;
+        color: white;
+      }
+      &.active {
+        background-color: #6c757d;
+        color: white;
+        font-weight: 500;
       }
     }
   }
@@ -54,38 +68,51 @@
   .sidebar-footer {
     text-align: center;
     padding: 1rem;
-    background-color: rgb(210, 105, 25);
-    color: white;
+    background-color: #f0f0f0;
+    color: #6c757d;
     font-size: 11px;
-    /* se coloca al final con flexbox */
   }
 }
 
-/* TOOLBAR (HEADER) */
+/* HEADER (TOOLBAR) */
 .app-toolbar {
-  background-color: rgb(210, 105, 25);
-
+  /* Color principal DIP:
+     Dependiendo de la marca puedes usar un color "light" y texto oscuro,
+     o un color "white" con matTheme. Aquí ejemplo con blanco y bordes. */
+  background-color: #fff !important;
+  border-bottom: 1px solid #dee2e6;
+  color: #343a40; /* Texto oscuro */
   display: flex;
   align-items: center;
+
+  button[mat-icon-button] {
+    color: #343a40; /* Ícono de menú oscuro */
+  }
+
   .app-title {
     margin-left: 1rem;
     font-weight: 500;
+    color: #343a40;
   }
+
   .spacer {
     flex: 1 1 auto;
   }
+
   .user-button {
     display: flex;
     align-items: center;
-    text-transform: none; /* Evita uppercase */
+    text-transform: none;
+    color: #343a40; /* Texto del botón de usuario */
+
     .avatar {
       width: 32px;
       height: 32px;
       border-radius: 50%;
-      margin-right: 0.5rem;
+      margin-left: 0.5rem;
     }
     .username {
-      padding-right: 15px;
+      margin-right: 0.5rem;
     }
   }
 }
@@ -93,43 +120,22 @@
 /* CONTENIDO */
 .app-content {
   padding: 1rem;
+  background-color: #f8f9fa; /* Ejemplo de fondo gris claro */
 }
 
 /* RESPONSIVE */
 @media (max-width: 768px) {
-  /* Sidenav se ocultará por defecto si isSidenavOpen es false */
   .app-sidenav {
     width: 250px;
   }
-  /* Mostrar el nombre en pantallas un poco más grandes, si deseas */
+
   .user-button .username {
-    display: none; /* En móvil, podría ocultarse */
+    display: none; /* Ocultamos el nombre en pantallas muy pequeñas */
   }
 }
 
 @media (min-width: 769px) {
-  /* En desktop, podemos mostrar el nombre */
   .user-button .username {
     display: inline;
   }
 }
-
-.nav-menu-item {
-  background-color: rgb(210, 105, 25);
-  color: white;
-  text-decoration: none;
-  padding: 10px 25px 10px 25px;
-
-  &.active {
-    background-color: rgb(255, 255, 255);
-    color: rgb(210, 105, 25);
-  }
-
-  &:hover {
-    background-color: rgb(162, 83, 23);
-    color: rgb(214, 214, 214);
-    transition: all 0.3s ease;
-  }
-}
-
-  

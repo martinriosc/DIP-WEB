@@ -6,8 +6,9 @@ import {
 } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { ValidadorDeclaracionService } from '../../../services/validador-declaracion.service';
 
-// Interfaz para manejar los datos
+
 export interface DerechoAccion {
   titulo: string;
   tipoCantidadPorcentaje: 'Cantidad' | 'Porcentaje';
@@ -15,7 +16,7 @@ export interface DerechoAccion {
   razonSocial: string;
   rut: string;
   giro: string;
-  fechaAdquisicion: string;  // O Date, según tu necesidad
+  fechaAdquisicion: string;
   tipoValor: 'Valor corriente' | 'Valor libro';
   valor: number;
   gravamenes: string;
@@ -28,39 +29,31 @@ export interface DerechoAccion {
   styleUrls: ['./paso-9-derechos-acciones.component.scss']
 })
 export class Paso9DerechosAccionesComponent implements OnInit {
-
   @ViewChild('dialogTemplate') dialogTemplate!: TemplateRef<any>;
 
-  // Lista de derechos/acciones
   derechosAcciones: DerechoAccion[] = [];
-
-  // Form para agregar / editar
   formDerechoAccion!: FormGroup;
-
-  // Para saber si estamos editando
   isEditing = false;
   editIndex: number | null = null;
-
-  // Para guardar la referencia del diálogo abierto
   dialogRef: MatDialogRef<any> | null = null;
 
   constructor(
     private fb: FormBuilder,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private validadorDeclaracionService: ValidadorDeclaracionService
   ) {}
 
   ngOnInit(): void {
     this.initForm();
+    // Opcional: Si no hay datos iniciales, marca como incompleto
+    this.validadorDeclaracionService.setPasoCompleto('paso9', false);
   }
 
   initForm() {
     this.formDerechoAccion = this.fb.group({
       titulo: ['', Validators.required],
       tipoCantidadPorcentaje: ['Cantidad', Validators.required],
-      cantidadPorcentaje: [
-        '',
-        [Validators.required, Validators.pattern('^[0-9]+$')],
-      ],
+      cantidadPorcentaje: ['', [Validators.required, Validators.pattern('^[0-9]+$')]],
       razonSocial: ['', Validators.required],
       rut: ['', Validators.required],
       giro: [''],
@@ -72,9 +65,7 @@ export class Paso9DerechosAccionesComponent implements OnInit {
     });
   }
 
-  // Abre el diálogo de Material para agregar o editar
   openDialog(item?: DerechoAccion, index?: number): void {
-    // Determina si estamos agregando o editando
     if (item !== undefined && index !== undefined) {
       this.isEditing = true;
       this.editIndex = index;
@@ -82,7 +73,6 @@ export class Paso9DerechosAccionesComponent implements OnInit {
     } else {
       this.isEditing = false;
       this.editIndex = null;
-      // Resetea el form a los valores por defecto
       this.formDerechoAccion.reset({
         tipoCantidadPorcentaje: 'Cantidad',
         tipoValor: 'Valor corriente',
@@ -90,23 +80,22 @@ export class Paso9DerechosAccionesComponent implements OnInit {
       });
     }
 
-    // Abre el diálogo usando la plantilla local (#dialogTemplate)
     this.dialogRef = this.dialog.open(this.dialogTemplate, {
       width: '800px',
-      disableClose: true, // para obligar a usar los botones
+      disableClose: true,
     });
   }
 
-  // Cierra el diálogo sin guardar
   closeDialog(): void {
     if (this.dialogRef) {
       this.dialogRef.close();
     }
   }
 
-  // Guarda los cambios (Agregar o Editar) y cierra el diálogo
   saveDialog(): void {
     if (this.formDerechoAccion.invalid) {
+      // Marca incompleto si no valida
+      this.validadorDeclaracionService.setPasoCompleto('paso9', false);
       return;
     }
 
@@ -120,11 +109,14 @@ export class Paso9DerechosAccionesComponent implements OnInit {
       this.derechosAcciones[this.editIndex] = formValue;
     }
 
+    // Si hay al menos un registro, marcamos como completo
+    this.validadorDeclaracionService.setPasoCompleto('paso9', this.derechosAcciones.length > 0);
     this.closeDialog();
   }
 
-  // Eliminar un elemento de la tabla
   deleteItem(index: number): void {
     this.derechosAcciones.splice(index, 1);
+    // Actualizar si queda vacío
+    this.validadorDeclaracionService.setPasoCompleto('paso9', this.derechosAcciones.length > 0);
   }
 }

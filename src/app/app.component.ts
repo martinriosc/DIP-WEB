@@ -19,13 +19,13 @@ export class AppComponent implements OnInit {
 
   // Ejemplo de menú
   menuItems = [
-    { title: 'Inicio', route: '/dashboard', icon: 'dashboard' },
+    { title: 'Inicio', route: '/inicio', icon: 'dashboard' },
     { title: 'Mis Declaraciones', route: '/declaraciones', icon: 'archive' },
-    { title: 'Revisor', route: '/usuario', icon: 'check2-square' },
-    { title: 'Ministro de Fe', route: '/usuario', icon: 'person' },
-    { title: 'Administración', route: '/usuario', icon: 'inboxes' },
-    { title: 'Organismo Fiscalizador', route: '/usuario', icon: 'bookmark-check' },
-    { title: 'Transparencia Pasiva', route: '/usuario', icon: 'book' },
+    { title: 'Revisor', route: '/revisor', icon: 'check2-square' },
+    { title: 'Ministro de Fe', route: '/ministro-fe', icon: 'person' },
+    { title: 'Administración', route: '/administracion', icon: 'inboxes' },
+    { title: 'Organismo Fiscalizador', route: '/organismo-fiscalizador', icon: 'bookmark-check' },
+    { title: 'Transparencia Pasiva', route: '/transparencia-pasiva', icon: 'book' },
 
     // ...
   ];

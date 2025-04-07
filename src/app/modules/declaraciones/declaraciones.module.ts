@@ -35,6 +35,7 @@ import { Paso14FuenteConflictoComponent } from './views/declaracion-create/paso-
 import { Paso15OtrosBienesComponent } from './views/declaracion-create/paso-15-otros-bienes/paso-15-otros-bienes.component';
 import { Paso16AntecedentesComponent } from './views/declaracion-create/paso-16-antecedentes/paso-16-antecedentes.component';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { Paso17ConfirmacionDatosComponent } from './views/declaracion-create/paso-17-confirmacion-datos/paso-17-confirmacion-datos.component';
 @NgModule({
   declarations: [
     DeclaracionListComponent,
@@ -54,7 +55,8 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
     Paso13PasivosComponent,
     Paso14FuenteConflictoComponent,
     Paso15OtrosBienesComponent,
-    Paso16AntecedentesComponent
+    Paso16AntecedentesComponent,
+    Paso17ConfirmacionDatosComponent
   ],
   imports: [
     CommonModule,

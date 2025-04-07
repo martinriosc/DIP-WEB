@@ -1,0 +1,58 @@
+<mat-card class="tarjeta-declaracion">
+  <div class="encabezado">
+    <h2 class="titulo m-0">Confirmación Final de Datos</h2>
+    <div class="subtitulo">
+      <p class="m-0">
+        Revisa si todos los pasos están completos y confirma tu declaración.
+      </p>
+    </div>
+  </div>
+
+  <hr class="separador" />
+
+  <div class="contenido-form">
+    <!-- Advertencias -->
+    <div class="alert alert-warning" *ngIf="advertencias.length > 0">
+      <h5 class="mb-2">Hay pasos incompletos o datos faltantes:</h5>
+      <ul>
+        <li *ngFor="let msg of advertencias">
+          {{ msg }}
+        </li>
+      </ul>
+      <p class="mb-0">
+        Por favor, revisa los pasos mencionados antes de finalizar esta declaración.
+      </p>
+    </div>
+
+    <!-- Texto de confirmación -->
+    <p *ngIf="advertencias.length === 0">
+      Has completado todos los pasos requeridos. Por favor, revisa detenidamente
+      la declaración. Al marcar la casilla y presionar "Finalizar", confirmas que
+      toda la información proporcionada es veraz y completa.
+    </p>
+
+    <!-- Checkbox "Declaro..." -->
+    <div class="mb-3 form-check" *ngIf="advertencias.length === 0">
+      <input
+        type="checkbox"
+        class="form-check-input"
+        [checked]="aceptaResponsabilidad"
+        (change)="aceptaResponsabilidad = !aceptaResponsabilidad"
+        id="checkboxDeclaro"
+      />
+      <label class="form-check-label" for="checkboxDeclaro">
+        Declaro bajo juramento que la información presentada es fidedigna y completa.
+      </label>
+    </div>
+
+    <!-- Botón Finalizar -->
+    <button
+      mat-raised-button
+      color="primary"
+      (click)="finalizar()"
+      [disabled]="advertencias.length > 0 || !aceptaResponsabilidad"
+    >
+      Finalizar Declaración
+    </button>
+  </div>
+</mat-card>

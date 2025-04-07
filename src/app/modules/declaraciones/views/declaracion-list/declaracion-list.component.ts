@@ -2,6 +2,7 @@ import { Component, ViewChild, AfterViewInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
+import { SelectionModel } from '@angular/cdk/collections';
 
 export interface Declaracion {
   nro: string;
@@ -19,17 +20,16 @@ export interface Declaracion {
 })
 export class DeclaracionListComponent implements AfterViewInit {
 
-  // Filtros individuales
+  // Mostrar / ocultar caja de filtros
+  showFilters = false;
+
+  // Filtros
   fechaDeclaracion = new FormControl();
   tipo = new FormControl('');
   servicio = new FormControl('');
   cargo = new FormControl('');
   estado = new FormControl('');
 
-  // Filtro por escritura (buscador global)
-  filterControl = new FormControl('');
-
-  // Datos dummy para la tabla
   data: Declaracion[] = [
     {
       nro: '012345',
@@ -59,8 +59,9 @@ export class DeclaracionListComponent implements AfterViewInit {
 
   dataSource = new MatTableDataSource<Declaracion>(this.data);
 
-  // Columnas de la tabla, se agrega "acciones" para los botones por fila
+  // Añadimos la columna 'select' al principio
   displayedColumns: string[] = [
+    'select',
     'nro',
     'fechaRecepcion',
     'tipo',
@@ -70,19 +71,87 @@ export class DeclaracionListComponent implements AfterViewInit {
     'acciones'
   ];
 
+  // Para la selección múltiple
+  selection = new SelectionModel<Declaracion>(true, []);
+
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   ngAfterViewInit(): void {
     this.dataSource.paginator = this.paginator;
+
+    // Paginador en español
+    this.paginator._intl.itemsPerPageLabel = 'Elementos por página:';
+    this.paginator._intl.nextPageLabel = 'Siguiente página';
+    this.paginator._intl.previousPageLabel = 'Página anterior';
+    this.paginator._intl.firstPageLabel = 'Primera página';
+    this.paginator._intl.lastPageLabel = 'Última página';
   }
 
-  // Filtrado global por escritura
-  applyFilter() {
-    const filterValue = this.filterControl.value;
-    this.dataSource.filter = filterValue!.trim().toLowerCase();
+  // Colapsar/expander caja de filtros
+  toggleFiltros() {
+    this.showFilters = !this.showFilters;
   }
 
-  // Métodos de búsqueda por filtros (puedes personalizar la lógica)
+  // Metodos de selección multiple
+  isAllSelected() {
+    const numSelected = this.selection.selected.length;
+    const numRows = this.dataSource.data.length;
+    return numSelected === numRows;
+  }
+  isSomeSelected() {
+    const numSelected = this.selection.selected.length;
+    return numSelected > 0 && !this.isAllSelected();
+  }
+  masterToggle() {
+    this.isAllSelected()
+      ? this.selection.clear()
+      : this.dataSource.data.forEach(row => this.selection.select(row));
+  }
+  toggle(row: Declaracion) {
+    this.selection.toggle(row);
+  }
+
+  // Devuelve la clase/pill para el estado
+  getEstadoPillClass(estado: string): string {
+    switch (estado) {
+      case 'RECEPCIONADA':
+        return 'pill pill-success';
+      case 'ARCHIVADA':
+        return 'pill pill-secondary';
+      case 'RECIBIDA':
+        return 'pill pill-warning';
+      default:
+        return 'pill pill-default';
+    }
+  }
+
+  // Acciones
+  editar(element: Declaracion) {
+    console.log('Editar:', element);
+  }
+  bitacora(element: Declaracion) {
+    console.log('Bitácora:', element);
+  }
+  archivar(element: Declaracion) {
+    console.log('Archivar:', element);
+  }
+  eliminar(element: Declaracion) {
+    console.log('Eliminar:', element);
+  }
+
+  // Descarga masiva
+  descargarSeleccionados() {
+    const seleccionados = this.selection.selected;
+    if (seleccionados.length === 0) {
+      alert('No hay declaraciones seleccionadas.');
+      return;
+    }
+    // Lógica real de descarga
+    console.log('Descargando declaraciones:', seleccionados);
+    alert(`Se descargarán ${seleccionados.length} declaraciones...`);
+  }
+
+  // Filtros (Buscar/Limpiar)
   buscar() {
     console.log('Buscar con filtros:', {
       fechaDeclaracion: this.fechaDeclaracion.value,
@@ -91,7 +160,7 @@ export class DeclaracionListComponent implements AfterViewInit {
       cargo: this.cargo.value,
       estado: this.estado.value
     });
-    // Aquí podrías combinar los filtros con la data, por ejemplo
+    // Lógica real de filtrado
   }
 
   limpiar() {
@@ -100,16 +169,6 @@ export class DeclaracionListComponent implements AfterViewInit {
     this.servicio.setValue('');
     this.cargo.setValue('');
     this.estado.setValue('');
-  }
-
-  // Acciones para cada fila
-  editar(element: Declaracion) {
-    console.log('Editar:', element);
-  }
-  eliminar(element: Declaracion) {
-    console.log('Eliminar:', element);
-  }
-  archivar(element: Declaracion) {
-    console.log('Archivar:', element);
+    this.selection.clear();
   }
 }

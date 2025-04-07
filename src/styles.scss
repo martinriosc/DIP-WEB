@@ -29,3 +29,59 @@ $custom-theme: mat-light-theme((
 @include angular-material-theme($custom-theme);
 
 /* You can add global styles to this file, and also import other style files */
+
+/* Tarjeta contenedora principal */
+.tarjeta-declaracion {
+  margin: 1rem 0 !important;
+  border: 1px solid #e0e0e0 !important;
+  border-radius: 4px !important;
+}
+
+/* Encabezado con título y subtítulo */
+.encabezado {
+  background-color: #f3f3f3 !important;  /* color de fondo para destacar el encabezado */
+  padding: 1rem !important;
+}
+
+.titulo {
+  font-size: 1.25rem !important;
+  font-weight: bold !important;
+  margin-bottom: 0.25rem !important;
+}
+
+.subtitulo p {
+  font-size: 0.9rem !important;
+  color: #666666 !important;
+  margin: 0 !important;
+}
+
+/* Separador para dividir el encabezado del contenido */
+.separador {
+  margin: 0 !important;
+  border: none !important;
+  border-bottom: 1px solid #cccccc !important;
+}
+
+/* Contenido del formulario */
+.contenido-form {
+  padding: 1rem !important;
+}
+
+/* Clase general para las etiquetas */
+.etiqueta {
+  font-weight: 600 !important;
+  margin-bottom: 0 !important;
+}
+
+/* Ajusta la parte de las acciones del card */
+.acciones {
+  display: flex !important;
+  justify-content: flex-end !important;
+  padding: 1rem !important;
+  border-top: 1px solid #e0e0e0 !important;
+}
+
+.form-declaracion .mat-form-field {
+  margin-bottom: 0.5rem !important;
+}
+  

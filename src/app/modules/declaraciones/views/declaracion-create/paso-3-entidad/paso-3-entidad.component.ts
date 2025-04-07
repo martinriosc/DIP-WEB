@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { FormGroup, FormControl } from '@angular/forms';
+import { ValidadorDeclaracionService } from '../../../services/validador-declaracion.service';
 
 @Component({
   selector: 'app-paso-3-entidad',
@@ -17,10 +18,21 @@ export class Paso3EntidadComponent {
     fechaAsuncion: new FormControl(''),
     regionDesempeno: new FormControl(''),
     comunaDesempeno: new FormControl(''),
-    jefeServicio: new FormControl(false), // boolean
+    jefeServicio: new FormControl(false)
   });
 
+  constructor(private validadorDeclaracionService: ValidadorDeclaracionService) {}
+
   guardarEntidad() {
+    // Aquí podrías validar el formulario
+    // if (this.entidadForm.invalid) {
+    //   this.validadorDeclaracionService.setPasoCompleto('paso3', false);
+    //   return;
+    // }
+
+    // Marcamos el paso como completo
+    this.validadorDeclaracionService.setPasoCompleto('paso3', true);
+
     console.log('Entidad:', this.entidadForm.value);
     // Lógica real de guardado...
   }

@@ -1,216 +1,196 @@
-<mat-card>
-  <mat-card-title>Derechos o Acciones en entidades constituidas en Chile</mat-card-title>
-
-  <!-- Botón para abrir el diálogo y agregar un nuevo elemento -->
-  <div class="d-flex justify-content-end mb-2">
-    <button class="btn btn-primary" (click)="openDialog()">Agregar</button>
+<mat-card class="tarjeta-declaracion">
+  <!-- Encabezado con título y subtítulo -->
+  <div class="encabezado">
+    <h2 class="titulo m-0">Derechos / Acciones</h2>
+    <div class="subtitulo">
+      <p class="m-0">
+        Registre a continuación los derechos, acciones, participaciones o cuotas que posea.
+      </p>
+    </div>
   </div>
 
-  <!-- Tabla con la lista de derechos/acciones -->
-  <table class="table table-striped">
-    <thead>
-      <tr>
-        <th>Título</th>
-        <th>Cantidad/Porcentaje</th>
-        <th>Razón Social</th>
-        <th>RUT</th>
-        <th>Fecha Adquisición</th>
-        <th>Valor</th>
-        <th>Controlador?</th>
-        <th>Acciones</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let item of derechosAcciones; let i = index">
-        <td>{{ item.titulo }}</td>
-        <td>{{ item.tipoCantidadPorcentaje }}: {{ item.cantidadPorcentaje }}</td>
-        <td>{{ item.razonSocial }}</td>
-        <td>{{ item.rut }}</td>
-        <td>{{ item.fechaAdquisicion }}</td>
-        <td>{{ item.tipoValor }}: {{ item.valor }}</td>
-        <td>{{ item.controlador ? 'Sí' : 'No' }}</td>
-        <td>
-          <!-- Editar -->
-          <button
-            class="btn btn-link text-primary p-0 mr-2"
-            (click)="openDialog(item, i)"
-          >
+  <hr class="separador" />
+
+  <!-- Contenido principal -->
+  <div class="contenido-form">
+    <div class="row mb-3">
+      <div class="col-md-12 text-end">
+        <button mat-raised-button color="primary" (click)="openDialog()">
+          Agregar Derecho / Acción
+        </button>
+      </div>
+    </div>
+
+    <!-- Tabla de derechos/acciones -->
+    <table mat-table [dataSource]="derechosAcciones" class="w-100 mat-elevation-z8">
+      <!-- Título -->
+      <ng-container matColumnDef="titulo">
+        <th mat-header-cell *matHeaderCellDef>Título</th>
+        <td mat-cell *matCellDef="let d">{{ d.titulo }}</td>
+      </ng-container>
+
+      <!-- Tipo Cantidad/Porcentaje -->
+      <ng-container matColumnDef="tipoCantidadPorcentaje">
+        <th mat-header-cell *matHeaderCellDef>Tipo</th>
+        <td mat-cell *matCellDef="let d">{{ d.tipoCantidadPorcentaje }}</td>
+      </ng-container>
+
+      <!-- CantidadPorcentaje -->
+      <ng-container matColumnDef="cantidadPorcentaje">
+        <th mat-header-cell *matHeaderCellDef>Cantidad/Porcentaje</th>
+        <td mat-cell *matCellDef="let d">{{ d.cantidadPorcentaje }}</td>
+      </ng-container>
+
+      <!-- RazonSocial -->
+      <ng-container matColumnDef="razonSocial">
+        <th mat-header-cell *matHeaderCellDef>Razón Social</th>
+        <td mat-cell *matCellDef="let d">{{ d.razonSocial }}</td>
+      </ng-container>
+
+      <!-- RUT -->
+      <ng-container matColumnDef="rut">
+        <th mat-header-cell *matHeaderCellDef>RUT</th>
+        <td mat-cell *matCellDef="let d">{{ d.rut }}</td>
+      </ng-container>
+
+      <!-- Tipo Valor -->
+      <ng-container matColumnDef="tipoValor">
+        <th mat-header-cell *matHeaderCellDef>Tipo Valor</th>
+        <td mat-cell *matCellDef="let d">{{ d.tipoValor }}</td>
+      </ng-container>
+
+      <!-- Valor -->
+      <ng-container matColumnDef="valor">
+        <th mat-header-cell *matHeaderCellDef>Valor</th>
+        <td mat-cell *matCellDef="let d">{{ d.valor }}</td>
+      </ng-container>
+
+      <!-- Controlador -->
+      <ng-container matColumnDef="controlador">
+        <th mat-header-cell *matHeaderCellDef>Controlador</th>
+        <td mat-cell *matCellDef="let d">
+          {{ d.controlador ? 'Sí' : 'No' }}
+        </td>
+      </ng-container>
+
+      <!-- Acciones -->
+      <ng-container matColumnDef="acciones">
+        <th mat-header-cell *matHeaderCellDef>Acciones</th>
+        <td mat-cell *matCellDef="let d; let i = index">
+          <button mat-icon-button color="accent" (click)="openDialog(d, i)">
             <mat-icon>edit</mat-icon>
           </button>
-          <!-- Eliminar -->
-          <button
-            class="btn btn-link text-danger p-0"
-            (click)="deleteItem(i)"
-          >
+          <button mat-icon-button color="warn" (click)="deleteItem(i)">
             <mat-icon>delete</mat-icon>
           </button>
         </td>
+      </ng-container>
+
+      <tr mat-header-row 
+          *matHeaderRowDef="['titulo','tipoCantidadPorcentaje','cantidadPorcentaje','razonSocial','rut','tipoValor','valor','controlador','acciones']">
       </tr>
-    </tbody>
-  </table>
+      <tr mat-row 
+          *matRowDef="let row; columns: ['titulo','tipoCantidadPorcentaje','cantidadPorcentaje','razonSocial','rut','tipoValor','valor','controlador','acciones'];">
+      </tr>
+    </table>
+  </div>
 </mat-card>
 
-<!-- ================== DIALOG (mat-dialog) ================== -->
-<ng-template #dialogTemplate>
-  <!-- Header con color personalizado -->
-  <div class="dialog-header text-white">
-    <h2 mat-dialog-title class="m-0">
-      {{ isEditing ? 'Modificar Derecho o Acción' : 'Agregar Derecho o Acción' }}
-    </h2>
-  </div>
+<!-- MODAL -->
+<ng-template #dialogTemplate let-dialogRef>
+  <h2 mat-dialog-title>
+    {{ isEditing ? 'Editar Derecho / Acción' : 'Agregar Derecho / Acción' }}
+  </h2>
 
-  <!-- Contenido principal del diálogo -->
-  <div mat-dialog-content>
-    <form [formGroup]="formDerechoAccion" class="p-2">
-      <!-- TÍTULO (DERECHO O ACCIÓN) -->
-      <div class="row form-group">
-        <div class="col-md-4 d-flex align-items-center">
-          <label class="mb-0 font-weight-bold">
-            TÍTULO (DERECHO O ACCIÓN) (*) :
-          </label>
-        </div>
-        <div class="col-md-8">
-          <mat-form-field appearance="outline" class="w-100">
-            <input matInput formControlName="titulo" />
-          </mat-form-field>
-        </div>
-      </div>
+  <mat-dialog-content>
+    <form [formGroup]="formDerechoAccion">
+      <!-- Título -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Título</mat-label>
+        <input matInput formControlName="titulo" />
+      </mat-form-field>
 
-      <!-- CANTIDAD O PORCENTAJE + RADIO + CAMPO NUMÉRICO -->
-      <div class="row form-group">
-        <div class="col-md-4 d-flex align-items-center">
-          <label class="mb-0 font-weight-bold">
-            CANTIDAD O PORCENTAJE (*) :
-          </label>
-        </div>
-        <div class="col-md-8">
-          <!-- Radio para Cantidad / Porcentaje -->
-          <mat-radio-group formControlName="tipoCantidadPorcentaje" class="d-block mb-2">
-            <mat-radio-button class="mr-3" [value]="'Cantidad'">Cantidad</mat-radio-button>
-            <mat-radio-button [value]="'Porcentaje'">Porcentaje</mat-radio-button>
+      <!-- Tipo Cantidad/Porcentaje -->
+      <div class="row mb-3">
+        <div class="col-md-5 fw-bold etiqueta">¿Tipo de registro?</div>
+        <div class="col-md-7">
+          <mat-radio-group formControlName="tipoCantidadPorcentaje">
+            <mat-radio-button value="Cantidad" class="me-4">Cantidad</mat-radio-button>
+            <mat-radio-button value="Porcentaje">Porcentaje</mat-radio-button>
           </mat-radio-group>
-          <mat-form-field appearance="outline" class="w-100">
-            <mat-label>Cantidad / Porcentaje</mat-label>
-            <input matInput formControlName="cantidadPorcentaje" />
-            <mat-hint>Ingrese solo números, sin puntos ni comas. Ej: 123456</mat-hint>
-          </mat-form-field>
         </div>
       </div>
 
-      <!-- NOMBRE O RAZÓN SOCIAL DE LA EMPRESA -->
-      <div class="row form-group">
-        <div class="col-md-4 d-flex align-items-center">
-          <label class="mb-0 font-weight-bold">
-            NOMBRE O RAZÓN SOCIAL DE LA EMPRESA (*) :
-          </label>
-        </div>
-        <div class="col-md-8">
-          <mat-form-field appearance="outline" class="w-100">
-            <input matInput formControlName="razonSocial" />
-          </mat-form-field>
-        </div>
-      </div>
+      <!-- Cantidad/Porcentaje -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Cantidad o Porcentaje</mat-label>
+        <input matInput formControlName="cantidadPorcentaje" />
+      </mat-form-field>
+
+      <!-- Razón Social -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Razón Social</mat-label>
+        <input matInput formControlName="razonSocial" />
+      </mat-form-field>
 
       <!-- RUT -->
-      <div class="row form-group">
-        <div class="col-md-4 d-flex align-items-center">
-          <label class="mb-0 font-weight-bold">
-            RUT (*) :
-          </label>
-        </div>
-        <div class="col-md-8">
-          <mat-form-field appearance="outline" class="w-100">
-            <input matInput formControlName="rut" />
-          </mat-form-field>
-        </div>
-      </div>
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>RUT</mat-label>
+        <input matInput formControlName="rut" />
+      </mat-form-field>
 
-      <!-- GIRO REGISTRADO SII -->
-      <div class="row form-group">
-        <div class="col-md-4 d-flex align-items-center">
-          <label class="mb-0 font-weight-bold">
-            GIRO REGISTRADO SII (*) :
-          </label>
-        </div>
-        <div class="col-md-8">
-          <mat-form-field appearance="outline" class="w-100">
-            <input matInput formControlName="giro" />
-          </mat-form-field>
-        </div>
-      </div>
+      <!-- Giro -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Giro</mat-label>
+        <input matInput formControlName="giro" />
+      </mat-form-field>
 
-      <!-- FECHA ADQUISICIÓN -->
-      <div class="row form-group">
-        <div class="col-md-4 d-flex align-items-center">
-          <label class="mb-0 font-weight-bold">
-            FECHA ADQUISICIÓN (*) :
-          </label>
-        </div>
-        <div class="col-md-8">
-          <mat-form-field appearance="outline" class="w-100">
-            <input matInput formControlName="fechaAdquisicion" placeholder="DD/MM/AAAA" />
-          </mat-form-field>
-        </div>
-      </div>
+      <!-- Fecha Adquisición -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Fecha de Adquisición</mat-label>
+        <input matInput formControlName="fechaAdquisicion" placeholder="YYYY-MM-DD" />
+      </mat-form-field>
 
-      <!-- VALOR CORRIENTE O VALOR LIBRO -->
-      <div class="row form-group mb-5">
-        <div class="col-md-4 d-flex align-items-center">
-          <label class="mb-0 font-weight-bold">
-            VALOR CORRIENTE EN PLAZA O VALOR LIBRO (*) :
-          </label>
-        </div>
-        <div class="col-md-8">
-          <mat-radio-group formControlName="tipoValor" class="d-block mb-2">
-            <mat-radio-button class="mr-3" [value]="'Valor corriente'">
-              Valor corriente
-            </mat-radio-button>
-            <mat-radio-button [value]="'Valor libro'">
-              Valor libro
-            </mat-radio-button>
+      <!-- Tipo Valor -->
+      <div class="row mb-3">
+        <div class="col-md-5 fw-bold etiqueta">Tipo de Valor</div>
+        <div class="col-md-7">
+          <mat-radio-group formControlName="tipoValor">
+            <mat-radio-button value="Valor corriente" class="me-4">Valor corriente</mat-radio-button>
+            <mat-radio-button value="Valor libro">Valor libro</mat-radio-button>
           </mat-radio-group>
-          <mat-form-field appearance="outline" class="w-100">
-            <mat-label>Valor</mat-label>
-            <input matInput formControlName="valor" />
-            <mat-hint>
-              Ingrese número entero, no se permiten puntos ni comas Ej: 123456
-            </mat-hint>
-          </mat-form-field>
         </div>
       </div>
 
-      <!-- GRAVÁMENES -->
-      <div class="row form-group">
-        <div class="col-md-4 d-flex align-items-center">
-          <label class="mb-0 font-weight-bold">GRAVÁMENES (*) :</label>
-        </div>
-        <div class="col-md-8">
-          <mat-form-field appearance="outline" class="w-100">
-            <input matInput formControlName="gravamenes" />
-          </mat-form-field>
-        </div>
-      </div>
+      <!-- Valor Numérico -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Valor</mat-label>
+        <input matInput formControlName="valor" />
+      </mat-form-field>
 
-      <!-- CONTROLADOR -->
-      <div class="row form-group">
-        <div class="col-md-4 d-flex align-items-center">
-          <label class="mb-0 font-weight-bold">
-            ¿TIENE UD. LA CALIDAD DE CONTROLADOR... (*) :
-          </label>
-        </div>
-        <div class="col-md-8">
-          <mat-radio-group formControlName="controlador" class="d-block">
-            <mat-radio-button class="mr-4" [value]="true">Sí</mat-radio-button>
+      <!-- Gravámenes -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Gravámenes</mat-label>
+        <input matInput formControlName="gravamenes" />
+      </mat-form-field>
+
+      <!-- Controlador -->
+      <div class="row mb-3">
+        <div class="col-md-5 fw-bold etiqueta">¿Eres controlador?</div>
+        <div class="col-md-7">
+          <mat-radio-group formControlName="controlador">
+            <mat-radio-button [value]="true" class="me-4">Sí</mat-radio-button>
             <mat-radio-button [value]="false">No</mat-radio-button>
           </mat-radio-group>
         </div>
       </div>
     </form>
-  </div>
+  </mat-dialog-content>
 
-  <!-- Footer del diálogo -->
-  <div mat-dialog-actions class="d-flex justify-content-end p-2">
+  <mat-dialog-actions align="end">
     <button mat-button (click)="closeDialog()">Cancelar</button>
-    <button mat-button color="primary" (click)="saveDialog()">Guardar</button>
-  </div>
+    <button mat-raised-button color="primary" (click)="saveDialog()">
+      Guardar
+    </button>
+  </mat-dialog-actions>
 </ng-template>

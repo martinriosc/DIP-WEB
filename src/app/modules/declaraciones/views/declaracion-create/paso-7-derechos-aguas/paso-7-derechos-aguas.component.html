@@ -1,1 +1,110 @@
-<p>paso-7-derechos-aguas works!</p>
+<mat-card class="tarjeta-declaracion">
+  <!-- Encabezado -->
+  <div class="encabezado">
+    <h2 class="titulo m-0">Derechos de Aguas</h2>
+    <div class="subtitulo">
+      <p class="m-0">¿Posee derechos de aguas inscritos a su nombre?</p>
+    </div>
+  </div>
+
+  <hr class="separador" />
+
+  <div class="contenido-form">
+    <div class="row mb-3 align-items-center">
+      <div class="col-md-4 etiqueta fw-bold">
+        ¿Posee derechos de aguas inscritos a su nombre?
+      </div>
+      <div class="col-md-7 text-end">
+        <mat-radio-group [value]="tieneDerechosAguas" (change)="onTieneDerechosChange($event.value)">
+          <mat-radio-button value="si" class="me-4">Tiene</mat-radio-button>
+          <mat-radio-button value="no">No Tiene</mat-radio-button>
+        </mat-radio-group>
+      </div>
+    </div>
+
+    <!-- Si tiene, mostramos tabla y botón "Agregar" -->
+    <div *ngIf="tieneDerechosAguas === 'si'">
+      <div class="row mb-3">
+        <div class="col-md-12 text-end">
+          <button mat-raised-button color="primary" (click)="openAddModal()">
+            Agregar Derecho de Agua
+          </button>
+        </div>
+      </div>
+
+      <table mat-table [dataSource]="derechosAguasData" class="w-100 mat-elevation-z8">
+        <!-- Tipo Derecho -->
+        <ng-container matColumnDef="tipo">
+          <th mat-header-cell *matHeaderCellDef>Tipo Derecho</th>
+          <td mat-cell *matCellDef="let d">{{ d.tipo }}</td>
+        </ng-container>
+
+        <!-- Rol/Identificador -->
+        <ng-container matColumnDef="rol">
+          <th mat-header-cell *matHeaderCellDef>Rol / Identificador</th>
+          <td mat-cell *matCellDef="let d">{{ d.rol }}</td>
+        </ng-container>
+
+        <!-- Caudal -->
+        <ng-container matColumnDef="caudal">
+          <th mat-header-cell *matHeaderCellDef>Caudal (l/s)</th>
+          <td mat-cell *matCellDef="let d">{{ d.caudal }}</td>
+        </ng-container>
+
+        <!-- Acciones -->
+        <ng-container matColumnDef="acciones">
+          <th mat-header-cell *matHeaderCellDef>Acciones</th>
+          <td mat-cell *matCellDef="let d">
+            <button mat-icon-button color="accent" (click)="openEditModal(d)">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button color="warn" (click)="eliminarDerecho(d)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="['tipo','rol','caudal','acciones']"></tr>
+        <tr mat-row *matRowDef="let row; columns: ['tipo','rol','caudal','acciones'];"></tr>
+      </table>
+    </div>
+  </div>
+</mat-card>
+
+<!-- MODAL inline para Agregar/Editar Derecho de Agua -->
+<ng-template #derechosAguasModal let-dialogRef>
+  <h2 mat-dialog-title>
+    {{ editMode ? 'Editar Derecho de Agua' : 'Agregar Derecho de Agua' }}
+  </h2>
+
+  <mat-dialog-content>
+    <form [formGroup]="derechosAguasForm">
+      <!-- Tipo Derecho -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Tipo Derecho</mat-label>
+        <mat-select formControlName="tipo">
+          <mat-option value="APROVECHAMIENTO">Aprovechamiento</mat-option>
+          <mat-option value="CONSUNTIVO">Consuntivo</mat-option>
+          <mat-option value="NO_CONSUNTIVO">No Consuntivo</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <!-- Rol/Identificador -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Rol / Identificador</mat-label>
+        <input matInput formControlName="rol" />
+      </mat-form-field>
+
+      <!-- Caudal -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Caudal (l/s)</mat-label>
+        <input matInput type="number" formControlName="caudal" />
+      </mat-form-field>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="dialogRef.close()">Cancelar</button>
+    <button mat-raised-button color="primary" (click)="saveDerecho(dialogRef)">Guardar</button>
+  </mat-dialog-actions>
+</ng-template>

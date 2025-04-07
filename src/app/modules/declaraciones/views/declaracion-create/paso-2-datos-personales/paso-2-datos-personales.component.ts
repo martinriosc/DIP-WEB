@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
+import { ValidadorDeclaracionService } from '../../../services/validador-declaracion.service';
 
 @Component({
   selector: 'app-paso-2-datos-personales',
@@ -25,12 +26,21 @@ export class Paso2DatosPersonalesComponent {
     apellidoMaternoConyuge: new FormControl('')
   });
 
-  constructor() {}
+  constructor(private validadorDeclaracionService: ValidadorDeclaracionService) {}
 
   guardarDatosPersonales() {
-    if (this.datosPersonalesForm.valid) {
-      console.log('Datos Personales:', this.datosPersonalesForm.value);
-      // Lógica real de guardado...
+    // Validamos el formulario
+    if (this.datosPersonalesForm.invalid) {
+      // Marcamos el paso como incompleto
+      this.validadorDeclaracionService.setPasoCompleto('paso2', false);
+      // Aquí podrías mostrar mensajes o resaltar errores
+      return;
     }
+
+    // Marcamos el paso como completo
+    this.validadorDeclaracionService.setPasoCompleto('paso2', true);
+
+    console.log('Datos Personales:', this.datosPersonalesForm.value);
+    // Aquí tu lógica real de guardado...
   }
 }

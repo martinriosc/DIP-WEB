@@ -1,91 +1,148 @@
-<div class="p-3">
-  <h3>Datos de la Entidad</h3>
+<mat-card class="tarjeta-declaracion">
 
-  <form [formGroup]="entidadForm" (ngSubmit)="guardarEntidad()">
-    <div class="row mb-3">
-      <div class="col-md-4">
-        <mat-form-field appearance="fill" class="w-100">
-          <mat-label>Servicio / Entidad</mat-label>
-          <input matInput formControlName="servicio" placeholder="CONTRALORÍA GENERAL - TESTING CGR" />
-        </mat-form-field>
-      </div>
-      <div class="col-md-4">
-        <mat-form-field appearance="fill" class="w-100">
-          <mat-label>Cargo o Función</mat-label>
-          <input matInput formControlName="cargoFuncion" placeholder="JEFE DE UNIDAD" />
-        </mat-form-field>
-      </div>
-      <div class="col-md-4">
-        <mat-form-field appearance="fill" class="w-100">
-          <mat-label>Tipo Sujeto Obligado</mat-label>
-          <mat-select formControlName="tipoSujeto">
-            <mat-option value="1">1. Presidente de la República, Ministros de Estado...</mat-option>
-            <mat-option value="2">2. Intendentes, Gobernadores...</mat-option>
-            <mat-option value="3">3. Subsecretarios...</mat-option>
-          </mat-select>
-        </mat-form-field>
-      </div>
+  <!-- Encabezado (Título y Subtítulo) -->
+  <div class="encabezado">
+    <h2 class="titulo m-0">Datos de la Entidad</h2>
+    <div class="subtitulo">
+      <p class="m-0">Ingrese la información correspondiente a su entidad o servicio</p>
     </div>
+  </div>
 
-    <div class="row mb-3">
-      <div class="col-md-4">
-        <mat-form-field appearance="fill" class="w-100">
-          <mat-label>Subnumeral</mat-label>
-          <input matInput formControlName="subnumeral" placeholder="3. SUBSECRETARIOS" />
-        </mat-form-field>
+  <!-- Separador -->
+  <hr class="separador" />
+
+  <!-- Contenido del Formulario -->
+  <div class="contenido-form">
+    <form [formGroup]="entidadForm" (ngSubmit)="guardarEntidad()" class="form-declaracion">
+
+      <!-- Servicio / Entidad -->
+      <div class="row mb-3 align-items-center">
+        <div class="col-md-4 fw-bold etiqueta">Servicio / Entidad:</div>
+        <div class="col-md-8">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Servicio / Entidad</mat-label>
+            <input matInput formControlName="servicio" placeholder="CONTRALORÍA GENERAL - TESTING CGR" />
+          </mat-form-field>
+        </div>
       </div>
-      <div class="col-md-4">
-        <label class="d-block mb-1">Seleccione Grado o Renta Mensual</label>
-        <div>
+
+      <!-- Cargo o Función -->
+      <div class="row mb-3 align-items-center">
+        <div class="col-md-4 fw-bold etiqueta">Cargo o Función:</div>
+        <div class="col-md-8">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Cargo o Función</mat-label>
+            <input matInput formControlName="cargoFuncion" placeholder="JEFE DE UNIDAD" />
+          </mat-form-field>
+        </div>
+      </div>
+
+      <!-- Tipo Sujeto Obligado -->
+      <div class="row mb-3 align-items-center">
+        <div class="col-md-4 fw-bold etiqueta">Tipo Sujeto Obligado:</div>
+        <div class="col-md-8">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Tipo Sujeto Obligado</mat-label>
+            <mat-select formControlName="tipoSujeto">
+              <mat-option value="1">
+                1. Presidente de la República, Ministros de Estado...
+              </mat-option>
+              <mat-option value="2">
+                2. Intendentes, Gobernadores...
+              </mat-option>
+              <mat-option value="3">
+                3. Subsecretarios...
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <!-- Subnumeral -->
+      <div class="row mb-3 align-items-center">
+        <div class="col-md-4 fw-bold etiqueta">Subnumeral:</div>
+        <div class="col-md-8">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Subnumeral</mat-label>
+            <input matInput formControlName="subnumeral" placeholder="3. SUBSECRETARIOS" />
+          </mat-form-field>
+        </div>
+      </div>
+
+      <!-- Seleccione Grado o Renta Mensual -->
+      <div class="row mb-3 align-items-center">
+        <div class="col-md-4 fw-bold etiqueta">
+          Seleccione Grado o Renta Mensual:
+        </div>
+        <div class="col-md-8">
           <mat-radio-group>
-            <mat-radio-button value="grado" class="me-3">Grado</mat-radio-button>
+            <mat-radio-button value="grado" class="me-4">Grado</mat-radio-button>
             <mat-radio-button value="renta">Renta Mensual</mat-radio-button>
           </mat-radio-group>
+
+          <div class="mt-3 d-flex gap-2">
+            <mat-form-field appearance="outline" style="width: 100px;">
+              <mat-label>Grado</mat-label>
+              <input matInput formControlName="grado" placeholder="31°" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" style="width: 150px;">
+              <mat-label>Renta Mensual</mat-label>
+              <input matInput formControlName="rentaMensual" />
+            </mat-form-field>
+          </div>
         </div>
-        <div class="mt-2 d-flex gap-2">
-          <mat-form-field appearance="fill" style="width: 100px;">
-            <mat-label>Grado</mat-label>
-            <input matInput formControlName="grado" placeholder="31°" />
-          </mat-form-field>
+      </div>
 
-          <mat-form-field appearance="fill" style="width: 150px;">
-            <mat-label>Renta Mensual</mat-label>
-            <input matInput formControlName="rentaMensual" />
+      <!-- Fecha Asunción -->
+      <div class="row mb-3 align-items-center">
+        <div class="col-md-4 fw-bold etiqueta">Fecha Asunción:</div>
+        <div class="col-md-8">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Fecha Asunción</mat-label>
+            <input matInput formControlName="fechaAsuncion" placeholder="DD/MM/AAAA" />
           </mat-form-field>
         </div>
       </div>
-    </div>
 
-    <div class="row mb-3">
-      <div class="col-md-3">
-        <mat-form-field appearance="fill" class="w-100">
-          <mat-label>Fecha Asunción</mat-label>
-          <input matInput formControlName="fechaAsuncion" placeholder="DD/MM/AAAA" />
-        </mat-form-field>
+      <!-- Región de desempeño -->
+      <div class="row mb-3 align-items-center">
+        <div class="col-md-4 fw-bold etiqueta">Región de desempeño:</div>
+        <div class="col-md-8">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Región</mat-label>
+            <input matInput formControlName="regionDesempeno" placeholder="METROPOLITANA DE SANTIAGO" />
+          </mat-form-field>
+        </div>
       </div>
-      <div class="col-md-3">
-        <mat-form-field appearance="fill" class="w-100">
-          <mat-label>Región de desempeño</mat-label>
-          <input matInput formControlName="regionDesempeno" placeholder="METROPOLITANA DE SANTIAGO" />
-        </mat-form-field>
-      </div>
-      <div class="col-md-3">
-        <mat-form-field appearance="fill" class="w-100">
-          <mat-label>Comuna de desempeño</mat-label>
-          <input matInput formControlName="comunaDesempeno" placeholder="SANTIAGO" />
-        </mat-form-field>
-      </div>
-      <div class="col-md-3 d-flex align-items-center">
-        <mat-checkbox formControlName="jefeServicio">
-          ¿Es Jefe/a de Servicio?
-        </mat-checkbox>
-      </div>
-    </div>
 
-    <div class="text-end">
-      <button mat-raised-button color="primary" type="submit">
-        Guardar
-      </button>
-    </div>
-  </form>
-</div>
+      <!-- Comuna de desempeño -->
+      <div class="row mb-3 align-items-center">
+        <div class="col-md-4 fw-bold etiqueta">Comuna de desempeño:</div>
+        <div class="col-md-8">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Comuna de desempeño</mat-label>
+            <input matInput formControlName="comunaDesempeno" placeholder="SANTIAGO" />
+          </mat-form-field>
+        </div>
+      </div>
+
+      <!-- ¿Es Jefe/a de Servicio? -->
+      <div class="row mb-3 align-items-center">
+        <div class="col-md-4 fw-bold etiqueta">¿Es Jefe/a de Servicio?</div>
+        <div class="col-md-8">
+          <mat-checkbox formControlName="jefeServicio">
+            Esta casilla se marca si usted es Jefe/a de Servicio
+          </mat-checkbox>
+        </div>
+      </div>
+
+      <!-- Botón Guardar -->
+      <mat-card-actions class="acciones justify-content-end mt-3">
+        <button mat-raised-button color="primary" type="submit">
+          Guardar
+        </button>
+      </mat-card-actions>
+    </form>
+  </div>
+</mat-card>

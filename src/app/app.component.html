@@ -1,5 +1,5 @@
 <mat-sidenav-container class="app-sidenav-container">
-  <!-- Sidenav -->
+  <!-- SIDENAV -->
   <mat-sidenav
     #drawer
     class="app-sidenav"
@@ -18,13 +18,13 @@
         <mat-icon>close</mat-icon>
       </button>
 
-      <!-- LOGO -->
+      <!-- LOGO O TÍTULO DEL SISTEMA -->
       <div class="logo-section">
         <img
           src="assets/images/dip.png"
           alt="Logo"
           class="img-fluid"
-          style=" height: 100px; width: 260px;"
+          style="width: 200px; max-height: 70px;"
         />
       </div>
 
@@ -32,10 +32,12 @@
       <nav class="nav-menu">
         <a
         class="nav-menu-item"
-          mat-list-item
-          *ngFor="let item of menuItems"
-          [routerLink]="item.route"
-        >
+        mat-list-item
+        *ngFor="let item of menuItems"
+        [routerLink]="item.route"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+      >
           <mat-icon>{{ item.icon }}</mat-icon>
           <span>{{ item.title }}</span>
         </a>
@@ -43,27 +45,26 @@
 
       <!-- Footer pegado al fondo -->
       <div class="sidebar-footer">
-        <small>Contraloria General de la Republica - DIP</small>
+        <small>Contraloría General de la República - DIP</small>
       </div>
     </div>
   </mat-sidenav>
 
-  <!-- Contenido principal -->
+  <!-- CONTENIDO PRINCIPAL -->
   <mat-sidenav-content>
-    <!-- Header -->
+    <!-- HEADER -->
     <mat-toolbar color="primary" class="app-toolbar">
-      <!-- Botón para togglear sidenav en desktop y mobile -->
-      <button
-        mat-icon-button
-        (click)="toggleSidenav()"
-      >
+      <!-- Botón de toggle en mobile/desktop -->
+      <button mat-icon-button (click)="toggleSidenav()">
         <mat-icon>menu</mat-icon>
       </button>
 
-      <!-- Título -->
-      <!-- <span class="app-title">Mi Dashboard</span> -->
+      <!-- Título / Branding principal -->
+      <span class="app-title d-none d-sm-inline">
+        DIP - Declaraciones de Intereses y Patrimonio
+      </span>
 
-      <!-- Separador para empujar el menú de usuario a la derecha -->
+      <!-- Separador que empuja el menú de usuario a la derecha -->
       <span class="spacer"></span>
 
       <!-- Menú de usuario -->
@@ -72,7 +73,7 @@
         [matMenuTriggerFor]="userMenu"
         class="user-button"
       >
-      <span class="username">{{ currentUser.name || 'Martín Ríos' }}</span>
+        <span class="username">{{ currentUser.name || 'Usuario' }}</span>
         <img
           [src]="'assets/images/usuario.png'"
           class="avatar"
@@ -89,7 +90,7 @@
       </mat-menu>
     </mat-toolbar>
 
-    <!-- Contenedor para el contenido de la página -->
+    <!-- Contenedor principal del contenido de la página -->
     <div class="app-content">
       <router-outlet></router-outlet>
     </div>

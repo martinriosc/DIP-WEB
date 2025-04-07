@@ -1,58 +1,73 @@
-<!-- Mat Horizontal Stepper -->
-<mat-horizontal-stepper
-  #stepper
-  [linear]="true"
-  (selectionChange)="onSelectionChange($event)"
-  class="custom-horizontal-stepper"
->
-  <mat-step
-    *ngFor="let step of steps; let i = index"
-    [stepControl]="formGroups[i]"
-  >
-    <!-- Etiqueta del Paso (sin truncar) -->
-    <ng-template matStepLabel>
-      {{ step.label }}
-    </ng-template>
+<!-- declaracion-create.component.html -->
 
-        <!-- Ícono personalizado cuando el paso está en modo edición (no completado) -->
-        <ng-template matStepperIcon="edit">
-          <!-- Ícono de “lapiz” o lo que prefieras cuando NO está completado -->
-          <mat-icon>edit</mat-icon>
+<div class="container">
+  <!-- Contenedor horizontal para el stepper -->
+  <div #stepperContainer class="stepper-container">
+    <mat-horizontal-stepper [linear]="true" (selectionChange)="onSelectionChange($event)"
+      class="custom-horizontal-stepper">
+      <mat-step *ngFor="let step of steps; let i = index" [stepControl]="formGroups[i]"
+        [completed]="validador.isPasoCompleto(step.key)"
+        [hasError]="visitedSteps[i] && !validador.isPasoCompleto(step.key)">
+        <!-- TÍTULO DEL PASO -->
+        <ng-template matStepLabel>
+          {{ step.label }}
         </ng-template>
-    
-        <!-- Ícono personalizado cuando el paso está completado -->
+
+        <!-- ÍCONO “edit” → se muestra si NO está completed ni error -->
+        <ng-template matStepperIcon="edit" let-index="index">
+          <!-- Si NO ha sido visitado, muestra un candado gris (locked) -->
+          <ng-container *ngIf="!visitedSteps[index]; else isVisited">
+            <span class="icon-circle icon-lock">
+              <mat-icon>lock</mat-icon>
+            </span>
+          </ng-container>
+          <!-- Si está visitado pero NO completado => advertencia -->
+          <ng-template #isVisited>
+            <span class="icon-circle icon-warning">
+              <mat-icon>warning</mat-icon>
+            </span>
+          </ng-template>
+        </ng-template>
+
+        <!-- ÍCONO “done” → se muestra si [completed] = true (paso completo) -->
         <ng-template matStepperIcon="done">
-          <!-- Ícono de “check_circle” o similar cuando SÍ está completado -->
-          <mat-icon color="primary">check_circle</mat-icon>
+          <span class="icon-circle icon-check">
+            <mat-icon>check</mat-icon>
+          </span>
         </ng-template>
 
-    <!-- CONTENIDO del Paso -->
-    <form [formGroup]="formGroups[i]" class="step-content-area">
-      <!-- Aquí puedes invocar tu componente dinámico o HTML directamente -->
-      <ng-container *ngIf="step.component">
-        <ng-container *ngComponentOutlet="step.component"></ng-container>
-      </ng-container>
+        <!-- ÍCONO “error” → se muestra si [hasError] = true -->
+        <ng-template matStepperIcon="error">
+          <span class="icon-circle icon-warning">
+            <mat-icon>warning</mat-icon>
+          </span>
+        </ng-template>
 
-      <div class="buttons">
-        <button mat-button matStepperPrevious *ngIf="i > 0">Atrás</button>
-        <button
-          mat-button
-          matStepperNext
-          *ngIf="i < steps.length - 1"
-          [disabled]="formGroups[i].invalid"
-        >
-          Siguiente
-        </button>
-        <button
-          mat-button
-          color="primary"
-          (click)="submit()"
-          *ngIf="i === steps.length - 1"
-          [disabled]="formGroups[i].invalid"
-        >
-          Finalizar
-        </button>
-      </div>
-    </form>
-  </mat-step>
-</mat-horizontal-stepper>
+        <!-- CONTENIDO DEL PASO -->
+        <form [formGroup]="formGroups[i]" class="step-content-area">
+          <ng-container *ngIf="step.component">
+            <ng-container *ngComponentOutlet="step.component"></ng-container>
+          </ng-container>
+
+          <div class="buttons">
+            <button mat-button matStepperPrevious *ngIf="i > 0">
+              Atrás
+            </button>
+
+            <!-- Botón para ir al siguiente paso (salvo el último) -->
+            <button mat-button matStepperNext *ngIf="i < steps.length - 1" [disabled]="formGroups[i].invalid"
+              (click)="avanzarPaso(i)">
+              Siguiente
+            </button>
+
+            <!-- Último paso: botón para "Finalizar" -->
+            <button mat-button color="primary" *ngIf="i === steps.length - 1" [disabled]="formGroups[i].invalid"
+              (click)="avanzarPaso(i); submit();">
+              Finalizar
+            </button>
+          </div>
+        </form>
+      </mat-step>
+    </mat-horizontal-stepper>
+  </div>
+</div>
