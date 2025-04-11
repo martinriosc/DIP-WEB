@@ -1,0 +1,53 @@
+.container-fluid {
+  padding: 1rem;
+}
+
+/* Título */
+h2 {
+  font-weight: 600;
+}
+
+.mb-2 {
+  margin-bottom: 0.5rem !important;
+}
+.mb-3 {
+  margin-bottom: 1rem !important;
+}
+.me-2 {
+  margin-right: 0.5rem !important;
+}
+.py-3 {
+  padding: 1rem 0;
+}
+.text-center {
+  text-align: center;
+}
+
+/* Filas con Bootstrap row y col-md-X */
+.small-form-field {
+  font-size: 0.875rem;
+}
+
+/* Tabla */
+.small-table {
+  font-size: 0.875rem;
+  background-color: #fafafa;
+
+  mat-header-row {
+    background-color: #1976d2;
+    color: #fff;
+  }
+  mat-header-cell {
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  tr.mat-row:nth-child(odd) {
+    background-color: #f1f1f1;
+  }
+}
+
+/* Para separar ítems en la fila */
+.d-flex.gap-3 > * {
+  margin-right: 1rem;
+}

@@ -1,5 +1,21 @@
 @import 'node_modules/bootstrap-icons/font/bootstrap-icons.scss';
 
+/* ----------------------------------------
+   1) Variables DIP (extraídas de tu PDF)
+   ---------------------------------------- */
+
+/* Ajusta estos valores según el PDF real */
+$dip-primary: #cf5214;
+$dip-secondary: #6c757d;
+$dip-text-dark: #343a40;
+$dip-text-body: #495057;
+$dip-bg-light: #f8f9fa;
+$dip-bg-gray: #f0f0f0;
+
+/* ----------------------------------------
+   2) Estructura principal de la app
+   ---------------------------------------- */
+
 /* Ajustes básicos del container para que ocupe toda la vista */
 .app-sidenav-container {
   height: 100vh;
@@ -45,7 +61,7 @@
       display: flex;
       align-items: center;
       padding: 10px 20px;
-      color: #495057;
+      color: $dip-text-body; /* #495057 */
       text-decoration: none;
 
       mat-icon {
@@ -54,12 +70,12 @@
 
       &:hover {
         transition: all 0.2s ease-in-out;
-        background-color: #cf5214;
-        color: white;
+        background-color: $dip-primary; /* #cf5214 */
+        color: #fff;
       }
       &.active {
-        background-color: #6c757d;
-        color: white;
+        background-color: $dip-secondary; /* #6c757d */
+        color: #fff;
         font-weight: 500;
       }
     }
@@ -68,31 +84,29 @@
   .sidebar-footer {
     text-align: center;
     padding: 1rem;
-    background-color: #f0f0f0;
-    color: #6c757d;
+    background-color: $dip-bg-gray; /* #f0f0f0 */
+    color: $dip-secondary; /* #6c757d */
     font-size: 11px;
   }
 }
 
 /* HEADER (TOOLBAR) */
 .app-toolbar {
-  /* Color principal DIP:
-     Dependiendo de la marca puedes usar un color "light" y texto oscuro,
-     o un color "white" con matTheme. Aquí ejemplo con blanco y bordes. */
+  /* Fondo blanco con borde inferior gris */
   background-color: #fff !important;
   border-bottom: 1px solid #dee2e6;
-  color: #343a40; /* Texto oscuro */
+  color: $dip-text-dark; /* #343a40 */
   display: flex;
   align-items: center;
 
   button[mat-icon-button] {
-    color: #343a40; /* Ícono de menú oscuro */
+    color: $dip-text-dark; /* ícono de menú oscuro */
   }
 
   .app-title {
     margin-left: 1rem;
     font-weight: 500;
-    color: #343a40;
+    color: $dip-text-dark;
   }
 
   .spacer {
@@ -103,7 +117,7 @@
     display: flex;
     align-items: center;
     text-transform: none;
-    color: #343a40; /* Texto del botón de usuario */
+    color: $dip-text-dark;
 
     .avatar {
       width: 32px;
@@ -120,10 +134,59 @@
 /* CONTENIDO */
 .app-content {
   padding: 1rem;
-  background-color: #f8f9fa; /* Ejemplo de fondo gris claro */
+  background-color: $dip-bg-light; /* #f8f9fa */
 }
 
-/* RESPONSIVE */
+/* ----------------------------------------
+   3) Tablas con íconos: altura consistente
+   ---------------------------------------- */
+
+/* Ajusta la altura base de las filas de la tabla */
+.mat-row,
+.mat-header-row {
+  height: 48px; /* Ajusta según tu preferencia */
+}
+
+.mat-cell,
+.mat-header-cell {
+  padding: 0.75rem;
+  vertical-align: middle;
+}
+
+/* Para celdas que contengan acciones con íconos */
+.actions-cell {
+  align-items: center;
+  gap: 0.5rem;
+
+  button.mat-icon-button {
+    line-height: normal;
+    height: auto;
+  }
+}
+
+/* ----------------------------------------
+   4) Estilos globales de cabecera para modals
+   ---------------------------------------- */
+
+/* 
+   Usamos ::ng-deep para sobrescribir la cabecera
+   de los diálogos de Angular Material en TODA la app.
+*/
+::ng-deep .mat-mdc-dialog-container .mdc-dialog__title {
+  min-height: 80px;
+  display: flex;
+  align-items: center;
+  font-size: 24px !important;
+  font-weight: 600;
+  color: #fff !important;
+  background-color: $dip-primary; /* #cf5214, tu color DIP */
+  padding: 20px;
+  margin-bottom: 15px !important;
+}
+
+/* ----------------------------------------
+   5) Responsive
+   ---------------------------------------- */
 @media (max-width: 768px) {
   .app-sidenav {
     width: 250px;

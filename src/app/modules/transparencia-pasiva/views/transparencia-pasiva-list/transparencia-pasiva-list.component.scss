@@ -1,0 +1,54 @@
+.container-fluid {
+  padding: 1rem;
+}
+
+/* Título */
+h2 {
+  font-weight: 600;
+}
+
+/* Espaciado con margin-bottom */
+.mb-2 {
+  margin-bottom: 0.5rem !important;
+}
+.mb-3 {
+  margin-bottom: 1rem !important;
+}
+.me-2 {
+  margin-right: 0.5rem !important;
+}
+
+/* Pequeñas form fields */
+.small-form-field {
+  font-size: 0.875rem;
+}
+
+/* Tabla */
+.small-table {
+  font-size: 0.875rem;
+  background-color: #fafafa;
+
+  mat-header-row {
+    background-color: #1976d2;
+    color: #fff;
+  }
+  mat-header-cell {
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  tr.mat-row:nth-child(odd) {
+    background-color: #f1f1f1;
+  }
+}
+
+.float-end {
+  float: right;
+}
+
+.py-3 {
+  padding: 1rem 0;
+}
+.text-center {
+  text-align: center;
+}

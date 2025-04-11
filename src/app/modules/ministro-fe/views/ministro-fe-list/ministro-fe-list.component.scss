@@ -1,0 +1,60 @@
+.container-fluid {
+  padding: 1rem;
+}
+
+/* Título */
+h2 {
+  font-weight: 600;
+}
+
+/* Espaciados con .mb-2, .mb-3 (usando clases de Bootstrap o personal) */
+.mb-2 {
+  margin-bottom: 0.5rem !important;
+}
+.mb-3 {
+  margin-bottom: 1rem !important;
+}
+.mt-3 {
+  margin-top: 1rem !important;
+}
+
+/* Tabs (usando .nav-tabs de Bootstrap) */
+.nav-tabs .nav-link.active {
+  color: #495057;
+  background-color: #fff;
+  border-color: #dee2e6 #dee2e6 #fff;
+}
+
+/* Pequeño form field */
+.small-form-field {
+  font-size: 0.875rem;
+}
+
+/* Tabla */
+.small-table {
+  font-size: 0.875rem;
+  background-color: #fafafa;
+
+  /* Encabezado en azul Material */
+  mat-header-row {
+    background-color: #1976d2;
+    color: #fff;
+  }
+
+  mat-header-cell {
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  /* Filas alternadas */
+  tr.mat-row:nth-child(odd) {
+    background-color: #f1f1f1;
+  }
+}
+
+.gap-2 > * {
+  margin-left: 0.5rem;
+}
+.me-2 {
+  margin-right: 0.5rem !important;
+}

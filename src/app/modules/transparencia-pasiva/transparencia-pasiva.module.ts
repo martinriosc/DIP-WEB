@@ -6,9 +6,21 @@ import { MatCardModule } from '@angular/material/card';
 import { MatDialogModule } from '@angular/material/dialog';
 import { TransparenciaPasivaRoutingModule } from './transparencia-pasiva-routing.module';
 import { TransparenciaPasivaListComponent } from './views/transparencia-pasiva-list/transparencia-pasiva-list.component';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatRadioModule } from '@angular/material/radio';
+import { MatSelectModule } from '@angular/material/select';
+import { MatStepperModule } from '@angular/material/stepper';
+import { MatTableModule } from '@angular/material/table';
+import { MatTabsModule } from '@angular/material/tabs';
 @NgModule({
   declarations: [
-  
+
     TransparenciaPasivaListComponent
   ],
   imports: [
@@ -17,7 +29,22 @@ import { TransparenciaPasivaListComponent } from './views/transparencia-pasiva-l
     MatCardModule,
     MatButtonModule,
     MatDialogModule,
-    MatIconModule
+    MatIconModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    MatInputModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatCheckboxModule,
+    MatRadioModule,
+
+    FormsModule,
+    ReactiveFormsModule,
+    MatTableModule,
+
+    MatPaginatorModule,
+    MatTabsModule,
+    MatStepperModule,
 
   ]
 })

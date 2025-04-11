@@ -1,1 +1,277 @@
-<p>revisor-list works!</p>
+<div class="container-fluid">
+  <!-- Breadcrumb -->
+  <nav aria-label="breadcrumb" class="mb-2">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a routerLink="/">Inicio</a>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">
+        Revisores
+      </li>
+    </ol>
+  </nav>
+
+  <!-- Título del componente -->
+  <h2 class="component-title mb-3">Lista de Revisores</h2>
+
+  <!-- Botón para mostrar/ocultar filtros -->
+  <div class="filtros-header d-flex align-items-center mb-3">
+    <span class="me-2 fw-bold">Filtros avanzados</span>
+    <button class="btn btn-link btn-collapse" (click)="toggleFiltros()">
+      <mat-icon *ngIf="!showFilters">keyboard_arrow_down</mat-icon>
+      <mat-icon *ngIf="showFilters">keyboard_arrow_up</mat-icon>
+    </button>
+  </div>
+
+  <!-- Caja de filtros colapsable -->
+  <div class="filtros-caja" [class.collapsed]="!showFilters">
+    <div class="row g-2 mb-3">
+      <!-- Fecha Asignación -->
+      <div class="col-md-3">
+        <mat-form-field appearance="outline" class="small-form-field w-100">
+          <mat-label>Fecha Asignación</mat-label>
+          <input matInput [matDatepicker]="picker" [formControl]="fechaAsignacion">
+          <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-datepicker #picker></mat-datepicker>
+        </mat-form-field>
+      </div>
+
+      <!-- Cargo -->
+      <div class="col-md-3">
+        <mat-form-field appearance="outline" class="small-form-field w-100">
+          <mat-label>Cargo</mat-label>
+          <mat-select [formControl]="cargo">
+            <mat-option value="">TODOS</mat-option>
+            <mat-option value="Analista">Analista</mat-option>
+            <mat-option value="Supervisor">Supervisor</mat-option>
+            <mat-option value="Jefe de Unidad">Jefe de Unidad</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <!-- Estado -->
+      <div class="col-md-3">
+        <mat-form-field appearance="outline" class="small-form-field w-100">
+          <mat-label>Estado</mat-label>
+          <mat-select [formControl]="estado">
+            <mat-option value="">TODOS</mat-option>
+            <mat-option value="Activo">Activo</mat-option>
+            <mat-option value="Inactivo">Inactivo</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <!-- Fila de botones de filtros -->
+    <div class="row mb-3">
+      <div class="col-12 d-flex justify-content-end">
+        <button mat-raised-button color="primary" class="me-2" (click)="buscar()">
+          Buscar
+        </button>
+        <button mat-raised-button color="warn" (click)="limpiar()">
+          Limpiar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <br />
+
+  <!-- Barra de acciones: Descargar y Agregar Revisor -->
+  <div class="row align-items-center g-2 mb-3">
+    <!-- Botón Descargar Seleccionados -->
+    <div class="col-auto">
+      <button mat-raised-button color="accent" (click)="descargarSeleccionados()">
+        Descargar Seleccionados
+      </button>
+    </div>
+
+    <!-- Botón Agregar Revisor al final -->
+    <div class="col-auto ms-auto">
+      <button mat-raised-button color="primary">
+        Agregar Revisor
+      </button>
+    </div>
+  </div>
+
+  <!-- VISTA ESCRITORIO (tabla) - visible a partir de MD -->
+  <div class="d-none d-md-block">
+    <table mat-table [dataSource]="dataSource" class="small-table mat-elevation-z8 w-100">
+      <!-- Columna de selección -->
+      <ng-container matColumnDef="select">
+        <th mat-header-cell *matHeaderCellDef>
+          <mat-checkbox
+            (change)="masterToggle()"
+            [checked]="isAllSelected()"
+            [indeterminate]="isSomeSelected()"
+            color="primary"
+            matTooltip="Seleccionar todo"
+          >
+          </mat-checkbox>
+        </th>
+        <td mat-cell *matCellDef="let element">
+          <mat-checkbox
+            (click)="$event.stopPropagation()"
+            (change)="$event ? toggle(element) : null"
+            [checked]="selection.isSelected(element)"
+            color="primary"
+          >
+          </mat-checkbox>
+        </td>
+      </ng-container>
+
+      <!-- RUT -->
+      <ng-container matColumnDef="rut">
+        <th mat-header-cell *matHeaderCellDef> RUT </th>
+        <td mat-cell *matCellDef="let element">
+          {{ element.rut }}
+        </td>
+      </ng-container>
+
+      <!-- Nombre -->
+      <ng-container matColumnDef="nombreCompleto">
+        <th mat-header-cell *matHeaderCellDef> Nombre </th>
+        <td mat-cell *matCellDef="let element">
+          {{ element.nombreCompleto }}
+        </td>
+      </ng-container>
+
+      <!-- Fecha Asignación -->
+      <ng-container matColumnDef="fechaAsignacion">
+        <th mat-header-cell *matHeaderCellDef> Fecha Asignación </th>
+        <td mat-cell *matCellDef="let element">
+          {{ element.fechaAsignacion }}
+        </td>
+      </ng-container>
+
+      <!-- Cargo -->
+      <ng-container matColumnDef="cargo">
+        <th mat-header-cell *matHeaderCellDef> Cargo </th>
+        <td mat-cell *matCellDef="let element">
+          {{ element.cargo }}
+        </td>
+      </ng-container>
+
+      <!-- Estado -->
+      <ng-container matColumnDef="estado">
+        <th mat-header-cell *matHeaderCellDef> Estado </th>
+        <td mat-cell *matCellDef="let element">
+          <span [ngClass]="getEstadoPillClass(element.estado)" class="estado-pill">
+            {{ element.estado }}
+          </span>
+        </td>
+      </ng-container>
+
+      <!-- Acciones -->
+      <ng-container matColumnDef="acciones">
+        <th mat-header-cell *matHeaderCellDef> Acciones </th>
+        <td mat-cell *matCellDef="let element" class="actions-cell">
+          <button mat-icon-button color="primary" (click)="editar(element)" matTooltip="Editar">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button mat-icon-button color="accent" (click)="bitacora(element)" matTooltip="Bitácora">
+            <mat-icon>list</mat-icon>
+          </button>
+          <button mat-icon-button color="accent" (click)="archivar(element)" matTooltip="Archivar">
+            <mat-icon>archive</mat-icon>
+          </button>
+          <button mat-icon-button color="warn" (click)="eliminar(element)" matTooltip="Eliminar">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <!-- Cabecera y filas -->
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row        *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+  </div>
+
+  <!-- Paginador -->
+  <div class="row mt-2 align-items-center d-none d-md-flex">
+    <div class="col-auto">
+      <span class="me-2">
+        Total: {{ dataSource?.data!.length }} revisores
+      </span>
+    </div>
+    <div class="col-auto ms-auto">
+      <mat-paginator
+        [pageSizeOptions]="[5, 10, 20]"
+        showFirstLastButtons
+        [length]="dataSource?.data!.length"
+        aria-label="Paginador de Revisores"
+      >
+      </mat-paginator>
+    </div>
+  </div>
+
+  <!-- VISTA MOBILE: LISTA -->
+  <div class="d-block d-md-none">
+    <div class="list-group">
+      <div
+        class="list-group-item"
+        *ngFor="let element of dataSource.data"
+        (click)="toggle(element)"
+        [class.active]="selection.isSelected(element)"
+      >
+        <div class="d-flex w-100 justify-content-between">
+          <h5 class="mb-1">
+            {{ element.rut }}
+          </h5>
+          <!-- Checkbox para selección en mobile -->
+          <mat-checkbox
+            (click)="$event.stopPropagation()"
+            [checked]="selection.isSelected(element)"
+            color="primary"
+          >
+          </mat-checkbox>
+        </div>
+        <p class="mb-1">Nombre: {{ element.nombreCompleto }}</p>
+        <p class="mb-1">Fecha Asignación: {{ element.fechaAsignacion }}</p>
+        <p class="mb-1">Cargo: {{ element.cargo }}</p>
+        <p class="mb-1">
+          Estado:
+          <span [ngClass]="getEstadoPillClass(element.estado)" class="estado-pill">
+            {{ element.estado }}
+          </span>
+        </p>
+
+        <!-- Acciones en mobile -->
+        <div class="mt-2">
+          <button
+            mat-icon-button
+            color="primary"
+            (click)="editar(element); $event.stopPropagation()"
+            matTooltip="Editar"
+          >
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button
+            mat-icon-button
+            color="accent"
+            (click)="bitacora(element); $event.stopPropagation()"
+            matTooltip="Bitácora"
+          >
+            <mat-icon>list</mat-icon>
+          </button>
+          <button
+            mat-icon-button
+            color="accent"
+            (click)="archivar(element); $event.stopPropagation()"
+            matTooltip="Archivar"
+          >
+            <mat-icon>archive</mat-icon>
+          </button>
+          <button
+            mat-icon-button
+            color="warn"
+            (click)="eliminar(element); $event.stopPropagation()"
+            matTooltip="Eliminar"
+          >
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
