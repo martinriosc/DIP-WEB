@@ -1,104 +1,450 @@
-import { Component, ElementRef, QueryList, ViewChild, ViewChildren } from '@angular/core';
-import { FormGroup, FormBuilder, Validators } from '@angular/forms';
-import { Paso2DatosPersonalesComponent } from './paso-2-datos-personales/paso-2-datos-personales.component';
-import { Paso3EntidadComponent } from './paso-3-entidad/paso-3-entidad.component';
-import { Paso1DeclaracionComponent } from './paso-1-declaracion/paso-1-declaracion.component';
-import { Paso4TutelaComponent } from './paso-4-tutela/paso-4-tutela.component';
-import { Paso5ActividadesComponent } from './paso-5-actividades/paso-5-actividades.component';
-import { Paso6BienesInmueblesComponent } from './paso-6-bienes-inmuebles/paso-6-bienes-inmuebles.component';
-import { Paso7DerechosAguasComponent } from './paso-7-derechos-aguas/paso-7-derechos-aguas.component';
-import { Paso8BienesMueblesComponent } from './paso-8-bienes-muebles/paso-8-bienes-muebles.component';
-import { Paso9DerechosAccionesComponent } from './paso-9-derechos-acciones/paso-9-derechos-acciones.component';
-import { Paso10ValoresComponent } from './paso-10-valores/paso-10-valores.component';
-import { Paso11ValoresObligatoriosComponent } from './paso-11-valores-obligatorios/paso-11-valores-obligatorios.component';
-import { Paso12MandatoEspecialComponent } from './paso-12-mandato-especial/paso-12-mandato-especial.component';
-import { Paso13PasivosComponent } from './paso-13-pasivos/paso-13-pasivos.component';
-import { Paso14FuenteConflictoComponent } from './paso-14-fuente-conflicto/paso-14-fuente-conflicto.component';
-import { Paso15OtrosBienesComponent } from './paso-15-otros-bienes/paso-15-otros-bienes.component';
-import { Paso16AntecedentesComponent } from './paso-16-antecedentes/paso-16-antecedentes.component';
+import {
+  Component,
+  OnInit,
+  ViewChild,
+  ViewChildren,
+  ElementRef,
+  QueryList
+} from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { StepperSelectionEvent } from '@angular/cdk/stepper';
+
+// Importa los componentes que se usan en el stepsObj
+import { Paso1DeclaracionComponent } from './antecedentes-declarante/paso-1-declaracion/paso-1-declaracion.component';
+import { Paso2DatosPersonalesComponent } from './antecedentes-declarante/paso-2-datos-personales/paso-2-datos-personales.component';
+import { Paso3EntidadComponent } from './antecedentes-declarante/paso-3-entidad/paso-3-entidad.component';
+import { Paso4TutelaComponent } from './antecedentes-declarante/paso-4-tutela/paso-4-tutela.component';
+import { Paso5ActividadesComponent } from './intereses-y-patrimonios/paso-5-actividades/paso-5-actividades.component';
+import { Paso6BienesInmueblesComponent } from './intereses-y-patrimonios/paso-6-bienes-inmuebles/paso-6-bienes-inmuebles.component';
+import { Paso7DerechosAguasComponent } from './intereses-y-patrimonios/paso-7-derechos-aguas/paso-7-derechos-aguas.component';
+import { Paso8BienesMueblesComponent } from './intereses-y-patrimonios/paso-8-bienes-muebles/paso-8-bienes-muebles.component';
+import { Paso9DerechosAccionesComponent } from './intereses-y-patrimonios/paso-9-derechos-acciones/paso-9-derechos-acciones.component';
+import { Paso10ValoresComponent } from './intereses-y-patrimonios/paso-10-valores/paso-10-valores.component';
+import { Paso11ValoresObligatoriosComponent } from './intereses-y-patrimonios/paso-11-valores-obligatorios/paso-11-valores-obligatorios.component';
+import { Paso12MandatoEspecialComponent } from './intereses-y-patrimonios/paso-12-mandato-especial/paso-12-mandato-especial.component';
+import { Paso13PasivosComponent } from './intereses-y-patrimonios/paso-13-pasivos/paso-13-pasivos.component';
+import { Paso14FuenteConflictoComponent } from './intereses-y-patrimonios/paso-14-fuente-conflicto/paso-14-fuente-conflicto.component';
+import { Paso15OtrosBienesComponent } from './intereses-y-patrimonios/paso-15-otros-bienes/paso-15-otros-bienes.component';
+import { Paso16AntecedentesComponent } from './intereses-y-patrimonios/paso-16-antecedentes/paso-16-antecedentes.component';
+
+import { ValidadorDeclaracionService, StepData } from '../../services/validador-declaracion.service';
 import { MatStepHeader } from '@angular/material/stepper';
-import { ValidadorDeclaracionService } from '../../services/validador-declaracion.service';
 
 @Component({
   selector: 'app-declaracion-create',
-  standalone: false,
   templateUrl: './declaracion-create.component.html',
   styleUrls: ['./declaracion-create.component.scss']
 })
-export class DeclaracionCreateComponent {
+export class DeclaracionCreateComponent implements OnInit {
   @ViewChild('stepperContainer') stepperContainer!: ElementRef<HTMLDivElement>;
   @ViewChildren(MatStepHeader) stepHeaders!: QueryList<MatStepHeader>;
-  steps = [
-    { label: '1.1.- Datos de la Declaración', key: 'paso1', component: Paso1DeclaracionComponent },
-    { label: '1.2.- Datos Personales', key: 'paso2', component: Paso2DatosPersonalesComponent },
-    { label: '1.3.- Datos de la Entidad', key: 'paso3', component: Paso3EntidadComponent },
-    { label: '1.4.- Hijos bajo Patria Potestad',  key: 'paso4',component: Paso4TutelaComponent },
 
-    { label: '2.1.- Actividades', key: 'paso5', component: Paso5ActividadesComponent },
-    { label: '2.2.- Bienes Inmuebles', key: 'paso6', component: Paso6BienesInmueblesComponent },
-    { label: '2.3.- Derechos de Aprovechamiento de Aguas',  key: 'paso7',component: Paso7DerechosAguasComponent },
-    { label: '2.4.- Bienes Muebles Registrables', key: 'paso8', component: Paso8BienesMueblesComponent },
-    { label: '2.5.- Derechos o Acciones en Entidades',  key: 'paso9',component: Paso9DerechosAccionesComponent },
-    { label: '2.6.- Valores (Instrumentos Financieros Transables)',  key: 'paso10',component: Paso10ValoresComponent },
-    { label: '2.7.- Valores Obligatorios Adicionales', key: 'paso11', component: Paso11ValoresObligatoriosComponent },
-    { label: '2.8.- Mandato Especial de Administración de Valores',  key: 'paso12',component: Paso12MandatoEspecialComponent },
-    { label: '2.9.- Pasivos', key: 'paso13', component: Paso13PasivosComponent },
-    { label: '2.10.- Otra Fuente de Conflicto de Interés',  key: 'paso14',component: Paso14FuenteConflictoComponent },
-    { label: '2.11.- Otros Bienes Financieros y Físicos', key: 'paso15', component: Paso15OtrosBienesComponent },
-    { label: '2.12.- Antecedentes Adicionales',  key: 'paso16',component: Paso16AntecedentesComponent },
+  /** Este es el objeto con los pasos y subpasos que deseas administrar. */
+  stepsObj: StepData[] = [
+    {
+      label: 'Datos de la Declaración',
+      key: 'paso1',
+      completed: false,
+      enabled: true,
+      subSteps: [],
+      component: Paso1DeclaracionComponent
+    },
+    {
+      label: 'Datos Personales',
+      key: 'paso2',
+      completed: false,
+      enabled: true,
+      subSteps: [],
+      component: Paso2DatosPersonalesComponent
+    },
+    {
+      label: 'Datos de la Entidad',
+      key: 'paso3',
+      completed: false,
+      enabled: true,
+      subSteps: [],
+      component: Paso3EntidadComponent
+    },
+    {
+      label: 'Hijos bajo Patria Potestad',
+      key: 'paso4',
+      completed: false,
+      enabled: false,
+      subSteps: [],
+      component: Paso4TutelaComponent
+    },
+    {
+      label: 'Actividades',
+      key: 'paso5',
+      completed: false,
+      enabled: true,
+      subSteps: [
+        {
+          label: 'Actividades en que haya participado en los últimos 12 meses',
+          key: 'paso5-1',
+          completed: false,
+          enabled: true,
+          subSteps: []
+        },
+        {
+          label: 'Actividades que realiza o en que participa a la fecha de la Declaración',
+          key: 'paso5-2',
+          completed: false,
+          enabled: true,
+          subSteps: []
+        },
+        {
+          label: 'Actividades que realiza o participa el/la Cónyuge o Conviviente Civil',
+          key: 'paso5-3',
+          completed: false,
+          enabled: true,
+          subSteps: []
+        }
+      ],
+      component: Paso5ActividadesComponent
+    },
+    {
+      label: 'Bienes Inmuebles',
+      key: 'paso6',
+      completed: false,
+      enabled: true,
+      subSteps: [
+        {
+          label: 'Bien Inmueble Situado en Chile',
+          key: 'paso6-1',
+          completed: false,
+          enabled: true,
+          subSteps: []
+        },
+        {
+          label: 'Bien Inmueble Situado en el Extranjero',
+          key: 'paso6-2',
+          completed: false,
+          enabled: true,
+          subSteps: []
+        }
+      ],
+      component: Paso6BienesInmueblesComponent
+    },
+    {
+      label: 'Derechos de Aprovechamiento de Aguas',
+      key: 'paso7',
+      completed: false,
+      enabled: true,
+      subSteps: [
+        {
+          label: 'Derecho de Aprovechamiento de Aguas',
+          key: 'paso7-1',
+          completed: false,
+          enabled: true,
+          subSteps: []
+        },
+        {
+          label: 'Concesiones',
+          key: 'paso7-2',
+          completed: false,
+          enabled: true,
+          subSteps: []
+        }
+      ],
+      component: Paso7DerechosAguasComponent
+    },
+    {
+      label: 'Bienes Muebles Registrables',
+      key: 'paso8',
+      completed: false,
+      enabled: true,
+      subSteps: [
+        {
+          label: 'Vehículos Motorizados (Livianos y Pesados)',
+          key: 'paso8-1',
+          completed: false,
+          enabled: true,
+          subSteps: []
+        },
+        {
+          label: 'Aeronaves',
+          key: 'paso8-2',
+          completed: false,
+          enabled: true,
+          subSteps: []
+        },
+        {
+          label: 'Naves o Artefactos Navales',
+          key: 'paso8-3',
+          completed: false,
+          enabled: true,
+          subSteps: []
+        },
+        {
+          label: 'Otros Bienes Muebles registrables',
+          key: 'paso8-4',
+          completed: false,
+          enabled: true,
+          subSteps: []
+        }
+      ],
+      component: Paso8BienesMueblesComponent
+    },
+    {
+      label: 'Derechos o Acciones en Entidades',
+      key: 'paso9',
+      completed: false,
+      enabled: true,
+      subSteps: [
+        {
+          label: 'Derechos o acciones en entidades constituidas en Chile',
+          key: 'paso9-1',
+          completed: false,
+          enabled: true,
+          subSteps: []
+        },
+        {
+          label: 'Derechos o acciones en entidades constituidas en el Extranjero',
+          key: 'paso9-2',
+          completed: false,
+          enabled: true,
+          subSteps: []
+        }
+      ],
+      component: Paso9DerechosAccionesComponent
+    },
+    {
+      label: 'Valores (Instrumentos Financieros Transables)',
+      key: 'paso10',
+      completed: false,
+      enabled: true,
+      subSteps: [
+        {
+          label: 'Valores o Instrumentos transables en Chile',
+          key: 'paso10-1',
+          completed: false,
+          enabled: true,
+          subSteps: []
+        },
+        {
+          label: 'Valores o Instrumentos transables en el Extranjero',
+          key: 'paso10-2',
+          completed: false,
+          enabled: true,
+          subSteps: []
+        }
+      ],
+      component: Paso10ValoresComponent
+    },
+    {
+      label: 'Valores Obligatorios Adicionales',
+      key: 'paso11',
+      completed: false,
+      enabled: true,
+      subSteps: [
+        {
+          label: 'Cuentas y/o Libretas de Ahorro',
+          key: 'paso11-1',
+          completed: false,
+          enabled: true,
+          subSteps: []
+        },
+        {
+          label: 'Ahorro Previsional Voluntario',
+          key: 'paso11-2',
+          completed: false,
+          enabled: true,
+          subSteps: []
+        },
+        {
+          label: 'Depósito a Plazo',
+          key: 'paso11-3',
+          completed: false,
+          enabled: true,
+          subSteps: []
+        },
+        {
+          label: 'Seguros',
+          key: 'paso11-4',
+          completed: false,
+          enabled: true,
+          subSteps: []
+        }
+      ],
+      component: Paso11ValoresObligatoriosComponent
+    },
+    {
+      label: 'Mandato Especial de Administración de Valores',
+      key: 'paso12',
+      completed: false,
+      enabled: true,
+      subSteps: [],
+      component: Paso12MandatoEspecialComponent
+    },
+    {
+      label: 'Pasivos',
+      key: 'paso13',
+      completed: false,
+      enabled: true,
+      subSteps: [
+        {
+          label: 'Deuda por pensión de alimentos',
+          key: 'paso13-1',
+          completed: false,
+          enabled: true,
+          subSteps: []
+        },
+        {
+          label: 'Pasivos',
+          key: 'paso13-2',
+          completed: false,
+          enabled: true,
+          subSteps: []
+        },
+        {
+          label: 'Individualización de cada deuda mayor a 100 UTM',
+          key: 'paso13-3',
+          completed: false,
+          enabled: true,
+          subSteps: []
+        }
+      ],
+      component: Paso13PasivosComponent
+    },
+    {
+      label: 'Otra Fuente de Conflicto de Interés',
+      key: 'paso14',
+      completed: false,
+      enabled: true,
+      subSteps: [],
+      component: Paso14FuenteConflictoComponent
+    },
+    {
+      label: 'Otros Bienes Financieros y Físicos',
+      key: 'paso15',
+      completed: false,
+      enabled: true,
+      subSteps: [],
+      component: Paso15OtrosBienesComponent
+    },
+    {
+      label: 'Antecedentes Adicionales',
+      key: 'paso16',
+      completed: false,
+      enabled: true,
+      subSteps: [],
+      component: Paso16AntecedentesComponent
+    },
   ];
 
-  formGroups: FormGroup[];
+  /** Un FormGroup por cada paso de stepsObj (solo a modo de demo). */
+  formGroups: FormGroup[] = [];
 
-  visitedSteps: boolean[] = [];
+  /** Índice del step seleccionado en el stepper. */
+  currentStepIndex = 0;
 
-  constructor(private fb: FormBuilder, public validador: ValidadorDeclaracionService) {
-    // Generar un formGroup básico para cada paso
-    this.visitedSteps = Array(this.steps.length).fill(false);
-    this.visitedSteps[0] = true;
-    this.formGroups = this.steps.map(() =>
+  /** Simula si es nueva declaración. */
+  isNewDeclaration = true;
+
+  /** Último paso habilitado/guardado (si fuese edición). */
+  lastSavedStepIndex = 0;
+
+  /** Porcentaje global de completitud (pasos + subpasos). */
+  completionPercentage = 0;
+
+  constructor(
+    private fb: FormBuilder,
+    public validadorService: ValidadorDeclaracionService
+  ) {}
+
+  ngOnInit(): void {
+    // Cargamos stepsObj en el servicio
+    this.validadorService.setSteps(this.stepsObj);
+
+    // Inicializamos un FormGroup por cada “paso” principal.
+    this.formGroups = this.stepsObj.map(() =>
       this.fb.group({
-        input: [''], // Ajusta según las necesidades del paso
+        dummyInput: ['', Validators.required]
       })
     );
-  }
 
-  submit() {
-    // Se llamaría cuando pulses “Finalizar” en el último paso
-    // Verificamos si todos los pasos están completos
-    if (this.validador.estanTodosCompletos()) {
-
-      if (this.formGroups.every((fg) => fg.valid)) {
-        console.log('Formulario enviado con éxito', this.formGroups.map((fg) => fg.value));
-        this.validador.enviarDeclaracionFinal();
-
-      }
-      // Enviar la declaración
+    // Si es nueva => lastSavedStepIndex = 0. (O recuperas de base de datos si no)
+    if (this.isNewDeclaration) {
+      this.lastSavedStepIndex = 0;
     } else {
-      console.warn('Hay pasos incompletos:', this.validador.getAdvertencias());
+      this.lastSavedStepIndex = 5; // Ejemplo, habilitamos hasta paso5
     }
-  }
 
-  avanzarPaso(i: number): void {
-    // Chequea validez del form
-    const formValido = this.formGroups[i].valid;
-    // Marca en el servicio si este paso se completó
-    this.validador.setPasoCompleto(this.steps[i].key, formValido);
+    // Suscripción para recalcular porcentaje
+    this.validadorService.steps$.subscribe((updatedSteps) => {
+      this.completionPercentage = this.validadorService.getCompletionPercentage();
+    });
   }
 
   /**
-   * Centra el paso seleccionado en la vista horizontal del contenedor
-   * cada vez que cambiamos de step (selectionChange).
+   * Llamado cuando el usuario hace clic en “Guardar/Siguiente”.
+   * Marca el paso actual como completo o incompleto, según validez del form.
    */
-  onSelectionChange(event: StepperSelectionEvent) {
-    this.visitedSteps[event.selectedIndex] = true;
+  onClickGuardarPaso(i: number): void {
+    const currentForm = this.formGroups[i];
+    const stepKey = this.stepsObj[i].key;
 
-    // Pequeño timeout para asegurar que el render esté terminado
+    console.log('Guardando paso', i, stepKey);
+    console.log("curent form: ", currentForm);
+
+    if (currentForm.valid && !this.validadorService.isComplete(stepKey)) {
+      // Marcamos como completo
+      this.validadorService.markComplete(stepKey);
+      // Avanzamos al siguiente paso si no es el último
+      if (i < this.stepsObj.length - 1) {
+        this.lastSavedStepIndex = Math.max(this.lastSavedStepIndex, i + 1);
+        this.currentStepIndex = i + 1;
+      }
+    } else {
+      // Marcamos como incompleto
+      this.validadorService.markIncomplete(stepKey);
+    }
+  }
+
+  /**
+   * Al pulsar “Finalizar” en el último paso, si todo (pasos y subpasos) está completo => enviar.
+   */
+  onFinalizar(): void {
+    const i = this.stepsObj.length - 1;
+    const currentForm = this.formGroups[i];
+    const stepKey = this.stepsObj[i].key;
+
+    if (currentForm.valid) {
+      this.validadorService.markComplete(stepKey);
+    } else {
+      this.validadorService.markIncomplete(stepKey);
+    }
+
+    // Verificamos si todos los pasos+subpasos están completos
+    const finalPercentage = this.validadorService.getCompletionPercentage();
+    if (finalPercentage === 100) {
+      this.validadorService.enviarDeclaracionFinal();
+    } else {
+      console.warn(
+        'Aún hay pasos o subpasos incompletos. Porcentaje actual:',
+        finalPercentage
+      );
+    }
+  }
+
+  /**
+   * Controlar si el paso “i” está habilitado. 
+   * (Por ejemplo: i <= lastSavedStepIndex)
+   */
+  isStepEnabled(i: number): boolean {
+    return i <= this.lastSavedStepIndex;
+  }
+
+  /**
+   * Manejamos el evento de cambio de selección en el Stepper,
+   * actualizando currentStepIndex y centrando el ítem en scroll horizontal.
+   */
+  onSelectionChange(event: StepperSelectionEvent): void {
+    this.currentStepIndex = event.selectedIndex;
+
     setTimeout(() => {
-      const index = event.selectedIndex;
-      this.visitedSteps[index] = true;
-
+      const index = this.currentStepIndex;
       const stepHeader = this.stepHeaders.toArray()[index];
       if (!stepHeader) return;
 
@@ -109,12 +455,8 @@ export class DeclaracionCreateComponent {
       const containerScrollLeft = this.stepperContainer.nativeElement.scrollLeft;
       const stepHeaderCenter = stepHeaderRect.left + stepHeaderRect.width / 2;
       const containerCenter = containerRect.left + containerRect.width / 2;
-
-      // Calcula la diferencia para centrar el paso activo
       const offset = stepHeaderCenter - containerCenter;
       this.stepperContainer.nativeElement.scrollLeft = containerScrollLeft + offset;
     }, 0);
   }
-
-  
 }

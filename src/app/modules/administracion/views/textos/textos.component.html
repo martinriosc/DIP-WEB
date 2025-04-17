@@ -1,1 +1,73 @@
-<p>textos works!</p>
+<div class="container-fluid">
+  <h2 class="mb-3">Administración de Textos</h2>
+
+  <button mat-raised-button color="primary" (click)="crearTexto()">
+    <mat-icon>note_add</mat-icon>
+    Crear Texto
+  </button>
+
+  <table mat-table [dataSource]="dataSource" class="mat-elevation-z8 w-100 mt-3">
+    <!-- ID -->
+    <ng-container matColumnDef="id">
+      <th mat-header-cell *matHeaderCellDef>ID</th>
+      <td mat-cell *matCellDef="let element">{{ element.id }}</td>
+    </ng-container>
+
+    <!-- Titulo -->
+    <ng-container matColumnDef="titulo">
+      <th mat-header-cell *matHeaderCellDef>Título</th>
+      <td mat-cell *matCellDef="let element">{{ element.titulo }}</td>
+    </ng-container>
+
+    <!-- Seccion -->
+    <ng-container matColumnDef="seccion">
+      <th mat-header-cell *matHeaderCellDef>Sección</th>
+      <td mat-cell *matCellDef="let element">{{ element.seccion }}</td>
+    </ng-container>
+
+    <!-- Acciones -->
+    <ng-container matColumnDef="acciones">
+      <th mat-header-cell *matHeaderCellDef>Acciones</th>
+      <td mat-cell *matCellDef="let element" class="actions-cell">
+        <button mat-icon-button color="primary" (click)="editarTexto(element)" matTooltip="Editar">
+          <mat-icon>edit</mat-icon>
+        </button>
+        <button mat-icon-button color="warn" (click)="eliminarTexto(element)" matTooltip="Eliminar">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row        *matRowDef="let row; columns: displayedColumns;"></tr>
+  </table>
+</div>
+
+<!-- MODAL (ng-template) -->
+<ng-template #textoModal>
+  <h2 mat-dialog-title>
+    {{ editMode ? 'Editar Texto' : 'Crear Texto' }}
+  </h2>
+  <div mat-dialog-content>
+    <form [formGroup]="textoForm" class="form-texto-modal">
+      <mat-form-field appearance="outline" class="w-100">
+        <mat-label>Título</mat-label>
+        <input matInput formControlName="titulo" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="w-100">
+        <mat-label>Contenido</mat-label>
+        <textarea matInput formControlName="contenido" rows="5"></textarea>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="w-100">
+        <mat-label>Sección</mat-label>
+        <input matInput formControlName="seccion" />
+      </mat-form-field>
+    </form>
+  </div>
+  <div mat-dialog-actions>
+    <button mat-button (click)="cerrarModal()">Cancelar</button>
+    <button mat-raised-button color="primary" (click)="guardar()">Guardar</button>
+  </div>
+</ng-template>

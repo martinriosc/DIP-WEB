@@ -1,0 +1,60 @@
+.administracion-wrapper {
+  min-height: 100vh; 
+  display: flex;
+  flex-direction: column;
+}
+
+/* Barra principal (main-nav) */
+.main-nav {
+  background-color: #f1f1f1;
+  border-bottom: 1px solid #ccc;
+  ul {
+    display: flex;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    li {
+      a {
+        display: block;
+        padding: 1rem 1.5rem;
+        color: #495057;
+        text-decoration: none;
+      }
+      &.active a {
+        background-color: #cf5214;
+        color: #fff;
+      }
+    }
+  }
+}
+
+/* Barra secundaria (sub-nav) */
+.sub-nav {
+  background-color: #fafafa;
+  border-bottom: 1px solid #ddd;
+  ul {
+    display: flex;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    
+    li {
+      a {
+        display: block;
+        padding: 0.75rem 1.2rem;
+        color: #495057;
+        text-decoration: none;
+      }
+      a:hover {
+        background-color: #ededed;
+      }
+    }
+  }
+}
+
+/* Contenido principal */
+.admin-content {
+  flex: 1 1 auto;
+  padding: 1rem;
+}

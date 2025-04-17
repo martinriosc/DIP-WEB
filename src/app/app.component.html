@@ -1,44 +1,24 @@
 <mat-sidenav-container class="app-sidenav-container">
   <!-- SIDENAV -->
-  <mat-sidenav
-    #drawer
-    class="app-sidenav"
-    [mode]="isMobile ? 'over' : 'side'"
-    [opened]="isSidenavOpen"
-  >
+  <mat-sidenav #drawer class="app-sidenav" [mode]="isMobile ? 'over' : 'side'" [opened]="isSidenavOpen">
     <!-- Contenedor general del sidebar -->
     <div class="sidebar-content">
       <!-- Botón para cerrar en mobile (X) -->
-      <button
-        mat-icon-button
-        class="close-mobile d-md-none"
-        (click)="toggleSidenav()"
-        aria-label="Close"
-      >
+      <button mat-icon-button class="close-mobile d-md-none" (click)="toggleSidenav()" aria-label="Close">
         <mat-icon>close</mat-icon>
       </button>
 
       <!-- LOGO O TÍTULO DEL SISTEMA -->
       <div class="logo-section">
-        <img
-          src="assets/images/dip.png"
-          alt="Logo"
-          class="img-fluid"
-          style="width: 200px; max-height: 70px;"
-        />
+        
       </div>
 
       <!-- Menú de navegación -->
       <nav class="nav-menu">
-        <a
-        class="nav-menu-item"
-        mat-list-item
-        *ngFor="let item of menuItems"
-        [routerLink]="item.route"
-        routerLinkActive="active"
-        [routerLinkActiveOptions]="{ exact: true }"
-      >
-          <mat-icon>{{ item.icon }}</mat-icon>
+        <a class="nav-menu-item" mat-list-item *ngFor="let item of menuItems" [routerLink]="item.route"
+          routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+          <img style="width: 24px; margin-right: 10px;" [src]="getIcon(item)">
+
           <span>{{ item.title }}</span>
         </a>
       </nav>
@@ -59,26 +39,15 @@
         <mat-icon>menu</mat-icon>
       </button>
 
-      <!-- Título / Branding principal -->
-      <span class="app-title d-none d-sm-inline">
-        DIP - Declaraciones de Intereses y Patrimonio
-      </span>
+      <img src="assets/images/dip.png" alt="Logo" class="img-fluid" style="width: 200px; max-height: 70px;" />
 
       <!-- Separador que empuja el menú de usuario a la derecha -->
       <span class="spacer"></span>
 
       <!-- Menú de usuario -->
-      <button
-        mat-button
-        [matMenuTriggerFor]="userMenu"
-        class="user-button"
-      >
+      <button mat-button [matMenuTriggerFor]="userMenu" class="user-button">
         <span class="username">{{ currentUser.name || 'Usuario' }}</span>
-        <img
-          [src]="'assets/images/usuario.png'"
-          class="avatar"
-          alt="Avatar"
-        />
+        <img [src]="'assets/icons/icon-usuario.svg'" class="avatar" alt="Avatar" />
       </button>
       <mat-menu #userMenu="matMenu">
         <button mat-menu-item [routerLink]="['/perfil']">

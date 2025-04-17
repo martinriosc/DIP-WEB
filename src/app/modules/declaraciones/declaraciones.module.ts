@@ -17,25 +17,30 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { DeclaracionCreateComponent } from './views/declaracion-create/declaracion-create.component';
 import {MatTabsModule} from '@angular/material/tabs';
-import {MatStepperModule} from '@angular/material/stepper';
-import { Paso1DeclaracionComponent } from './views/declaracion-create/paso-1-declaracion/paso-1-declaracion.component';
-import { Paso2DatosPersonalesComponent } from './views/declaracion-create/paso-2-datos-personales/paso-2-datos-personales.component';
-import { Paso3EntidadComponent } from './views/declaracion-create/paso-3-entidad/paso-3-entidad.component';
-import { Paso4TutelaComponent } from './views/declaracion-create/paso-4-tutela/paso-4-tutela.component';
-import { Paso5ActividadesComponent } from './views/declaracion-create/paso-5-actividades/paso-5-actividades.component';
-import { Paso6BienesInmueblesComponent } from './views/declaracion-create/paso-6-bienes-inmuebles/paso-6-bienes-inmuebles.component';
-import { Paso7DerechosAguasComponent } from './views/declaracion-create/paso-7-derechos-aguas/paso-7-derechos-aguas.component';
-import { Paso8BienesMueblesComponent } from './views/declaracion-create/paso-8-bienes-muebles/paso-8-bienes-muebles.component';
-import { Paso9DerechosAccionesComponent } from './views/declaracion-create/paso-9-derechos-acciones/paso-9-derechos-acciones.component';
-import { Paso10ValoresComponent } from './views/declaracion-create/paso-10-valores/paso-10-valores.component';
-import { Paso11ValoresObligatoriosComponent } from './views/declaracion-create/paso-11-valores-obligatorios/paso-11-valores-obligatorios.component';
-import { Paso12MandatoEspecialComponent } from './views/declaracion-create/paso-12-mandato-especial/paso-12-mandato-especial.component';
-import { Paso13PasivosComponent } from './views/declaracion-create/paso-13-pasivos/paso-13-pasivos.component';
-import { Paso14FuenteConflictoComponent } from './views/declaracion-create/paso-14-fuente-conflicto/paso-14-fuente-conflicto.component';
-import { Paso15OtrosBienesComponent } from './views/declaracion-create/paso-15-otros-bienes/paso-15-otros-bienes.component';
-import { Paso16AntecedentesComponent } from './views/declaracion-create/paso-16-antecedentes/paso-16-antecedentes.component';
+import {MatStepHeader, MatStepperModule} from '@angular/material/stepper';
+import { Paso1DeclaracionComponent } from './views/declaracion-create/antecedentes-declarante/paso-1-declaracion/paso-1-declaracion.component';
+import { Paso2DatosPersonalesComponent } from './views/declaracion-create/antecedentes-declarante/paso-2-datos-personales/paso-2-datos-personales.component';
+import { Paso3EntidadComponent } from './views/declaracion-create/antecedentes-declarante/paso-3-entidad/paso-3-entidad.component';
+import { Paso4TutelaComponent } from './views/declaracion-create/antecedentes-declarante/paso-4-tutela/paso-4-tutela.component';
+import { Paso5ActividadesComponent } from './views/declaracion-create/intereses-y-patrimonios/paso-5-actividades/paso-5-actividades.component';
+import { Paso6BienesInmueblesComponent } from './views/declaracion-create/intereses-y-patrimonios/paso-6-bienes-inmuebles/paso-6-bienes-inmuebles.component';
+import { Paso7DerechosAguasComponent } from './views/declaracion-create/intereses-y-patrimonios/paso-7-derechos-aguas/paso-7-derechos-aguas.component';
+import { Paso8BienesMueblesComponent } from './views/declaracion-create/intereses-y-patrimonios/paso-8-bienes-muebles/paso-8-bienes-muebles.component';
+import { Paso9DerechosAccionesComponent } from './views/declaracion-create/intereses-y-patrimonios/paso-9-derechos-acciones/paso-9-derechos-acciones.component';
+import { Paso10ValoresComponent } from './views/declaracion-create/intereses-y-patrimonios/paso-10-valores/paso-10-valores.component';
+import { Paso11ValoresObligatoriosComponent } from './views/declaracion-create/intereses-y-patrimonios/paso-11-valores-obligatorios/paso-11-valores-obligatorios.component';
+import { Paso12MandatoEspecialComponent } from './views/declaracion-create/intereses-y-patrimonios/paso-12-mandato-especial/paso-12-mandato-especial.component';
+import { Paso13PasivosComponent } from './views/declaracion-create/intereses-y-patrimonios/paso-13-pasivos/paso-13-pasivos.component';
+import { Paso14FuenteConflictoComponent } from './views/declaracion-create/intereses-y-patrimonios/paso-14-fuente-conflicto/paso-14-fuente-conflicto.component';
+import { Paso15OtrosBienesComponent } from './views/declaracion-create/intereses-y-patrimonios/paso-15-otros-bienes/paso-15-otros-bienes.component';
+import { Paso16AntecedentesComponent } from './views/declaracion-create/intereses-y-patrimonios/paso-16-antecedentes/paso-16-antecedentes.component';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { Paso17ConfirmacionDatosComponent } from './views/declaracion-create/paso-17-confirmacion-datos/paso-17-confirmacion-datos.component';
+import { ConfirmacionDatosComponent } from './views/declaracion-create/confirmacion-datos/confirmacion-datos.component';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { SafeHtmlPipe } from './pipe/safe-html.pipe';
+import { AntecedentesDeclaranteComponent } from './views/declaracion-create/antecedentes-declarante/antecedentes-declarante.component';
+import { InteresesYPatrimoniosComponent } from './views/declaracion-create/intereses-y-patrimonios/intereses-y-patrimonios.component';
 @NgModule({
   declarations: [
     DeclaracionListComponent,
@@ -56,7 +61,10 @@ import { Paso17ConfirmacionDatosComponent } from './views/declaracion-create/pas
     Paso14FuenteConflictoComponent,
     Paso15OtrosBienesComponent,
     Paso16AntecedentesComponent,
-    Paso17ConfirmacionDatosComponent
+    ConfirmacionDatosComponent,
+    SafeHtmlPipe,
+    AntecedentesDeclaranteComponent,
+    InteresesYPatrimoniosComponent
   ],
   imports: [
     CommonModule,
@@ -77,7 +85,9 @@ import { Paso17ConfirmacionDatosComponent } from './views/declaracion-create/pas
     MatPaginatorModule    ,
     MatTabsModule,
     MatStepperModule,
-    MatDialogModule
+    MatDialogModule,
+    MatMenuModule,
+    MatTooltipModule,
   ]
 })
 export class DeclaracionesModule { }

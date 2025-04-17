@@ -1,4 +1,5 @@
 import { Component, HostListener, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-root',
@@ -19,16 +20,18 @@ export class AppComponent implements OnInit {
 
   // Ejemplo de menú
   menuItems = [
-    { title: 'Inicio', route: '/inicio', icon: 'dashboard' },
-    { title: 'Mis Declaraciones', route: '/declaraciones', icon: 'archive' },
-    { title: 'Revisor', route: '/revisor', icon: 'check2-square' },
-    { title: 'Ministro de Fe', route: '/ministro-fe', icon: 'person' },
-    { title: 'Administración', route: '/administracion', icon: 'inboxes' },
-    { title: 'Organismo Fiscalizador', route: '/organismo-fiscalizador', icon: 'bookmark-check' },
-    { title: 'Transparencia Pasiva', route: '/transparencia-pasiva', icon: 'book' },
+    { title: 'Inicio', route: '/inicio', icon: 'assets/icons/icon-menu-home.svg' },
+    { title: 'Mis Declaraciones', route: '/declaraciones', icon: 'assets/icons/icon-menu-mis_declaraciones.svg' },
+    { title: 'Revisor', route: '/revisor', icon: 'assets/icons/icon-menu-revisor.svg' },
+    { title: 'Ministro de Fe', route: '/ministro-fe', icon: 'assets/icons/icon-menu-ministro_fe.svg' },
+    { title: 'Administración', route: '/administracion', icon: 'assets/icons/icon-menu-administracion.svg' },
+    { title: 'Organismo Fiscalizador', route: '/organismo-fiscalizador', icon: 'assets/icons/icon-menu-organismo_fiscalizador.svg' },
+    { title: 'Transparencia Pasiva', route: '/transparencia-pasiva', icon: 'assets/icons/icon-menu-transparencia_pasiva.svg' },
 
     // ...
   ];
+
+  constructor(private router: Router) {}
 
   ngOnInit(): void {
     this.checkScreenSize();
@@ -52,6 +55,18 @@ export class AppComponent implements OnInit {
 
   toggleSidenav() {
     this.isSidenavOpen = !this.isSidenavOpen;
+  }
+
+  getIcon(item: any): string {
+    const currentUrl = this.router.url;
+    // Si la ruta actual coincide exactamente o empieza con la ruta del item, se considera activa.
+    if (currentUrl === item.route || currentUrl.startsWith(item.route + '/')) {
+      // Por ejemplo, si el icono es "assets/icons/icon-menu-home.svg"
+      // retorna "assets/icons/icon-menu-home_active.svg"
+      return item.icon.replace('.svg', '_active.svg');
+    } else {
+      return item.icon;
+    }
   }
 
   logout() {

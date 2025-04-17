@@ -1,73 +1,95 @@
-<!-- declaracion-create.component.html -->
-
 <div class="container">
-  <!-- Contenedor horizontal para el stepper -->
-  <div #stepperContainer class="stepper-container">
-    <mat-horizontal-stepper [linear]="true" (selectionChange)="onSelectionChange($event)"
-      class="custom-horizontal-stepper">
-      <mat-step *ngFor="let step of steps; let i = index" [stepControl]="formGroups[i]"
-        [completed]="validador.isPasoCompleto(step.key)"
-        [hasError]="visitedSteps[i] && !validador.isPasoCompleto(step.key)">
-        <!-- TÍTULO DEL PASO -->
-        <ng-template matStepLabel>
-          {{ step.label }}
-        </ng-template>
+  <h3 class="text-center">
+    Paso {{ currentStepIndex + 1 }}/{{ stepsObj.length }}
+    <span class="mx-2">| Avance Global: {{ completionPercentage }}%</span>
+  </h3>
 
-        <!-- ÍCONO “edit” → se muestra si NO está completed ni error -->
+  <div class="progress my-3">
+    <div
+      class="progress-bar"
+      role="progressbar"
+      [style.width]="completionPercentage + '%'"
+      [attr.aria-valuenow]="completionPercentage"
+      aria-valuemin="0"
+      aria-valuemax="100"
+    >
+      {{ completionPercentage }}%
+    </div>
+  </div>
+
+  <!-- Contenedor para el scroll horizontal del stepper -->
+  <div #stepperContainer class="stepper-container">
+    <mat-horizontal-stepper
+      (selectionChange)="onSelectionChange($event)"
+      [linear]="false"
+      class="custom-horizontal-stepper"
+    >
+      <mat-step
+        *ngFor="let step of stepsObj; let i = index"
+        [label]="step.label"
+        [completed]="validadorService.isComplete(step.key)"
+        [editable]="isStepEnabled(i)"
+        [stepControl]="formGroups[i]"
+      >
+        <!-- Íconos (edit/done/error) -->
         <ng-template matStepperIcon="edit" let-index="index">
-          <!-- Si NO ha sido visitado, muestra un candado gris (locked) -->
-          <ng-container *ngIf="!visitedSteps[index]; else isVisited">
-            <span class="icon-circle icon-lock">
-              <mat-icon>lock</mat-icon>
-            </span>
-          </ng-container>
-          <!-- Si está visitado pero NO completado => advertencia -->
-          <ng-template #isVisited>
+          <!-- Si no está completo, podría mostrar un ícono de advertencia -->
+          <ng-container *ngIf="!validadorService.isComplete(stepsObj[index].key)">
             <span class="icon-circle icon-warning">
               <mat-icon>warning</mat-icon>
             </span>
-          </ng-template>
+          </ng-container>
         </ng-template>
 
-        <!-- ÍCONO “done” → se muestra si [completed] = true (paso completo) -->
         <ng-template matStepperIcon="done">
           <span class="icon-circle icon-check">
             <mat-icon>check</mat-icon>
           </span>
         </ng-template>
 
-        <!-- ÍCONO “error” → se muestra si [hasError] = true -->
         <ng-template matStepperIcon="error">
           <span class="icon-circle icon-warning">
             <mat-icon>warning</mat-icon>
           </span>
         </ng-template>
 
-        <!-- CONTENIDO DEL PASO -->
-        <form [formGroup]="formGroups[i]" class="step-content-area">
-          <ng-container *ngIf="step.component">
-            <ng-container *ngComponentOutlet="step.component"></ng-container>
-          </ng-container>
+        <!-- CONTENIDO DEL PASO: inyectamos el componente del paso -->
+        <form [formGroup]="formGroups[i]" novalidate class="step-content-area">
+          <!-- 
+            Inyectar el componente real del paso. Este subcomponente 
+            puede tener su propia lógica/HTML. 
+            El ejemplo no transfiere el form al subcomponente, 
+            pero podrías hacerlo con Inputs/Outputs.
+          -->
+          <ng-container *ngComponentOutlet="step.component"></ng-container>
 
-          <div class="buttons">
-            <button mat-button matStepperPrevious *ngIf="i > 0">
-              Atrás
+          <!-- <div class="buttons mt-3">
+            <button
+              mat-button
+              color="primary"
+              *ngIf="i < stepsObj.length - 1"
+              (click)="onClickGuardarPaso(i)"
+            >
+              Guardar y Siguiente
             </button>
 
-            <!-- Botón para ir al siguiente paso (salvo el último) -->
-            <button mat-button matStepperNext *ngIf="i < steps.length - 1" [disabled]="formGroups[i].invalid"
-              (click)="avanzarPaso(i)">
-              Siguiente
-            </button>
-
-            <!-- Último paso: botón para "Finalizar" -->
-            <button mat-button color="primary" *ngIf="i === steps.length - 1" [disabled]="formGroups[i].invalid"
-              (click)="avanzarPaso(i); submit();">
+            <button
+              mat-button
+              color="accent"
+              *ngIf="i === stepsObj.length - 1"
+              (click)="onFinalizar()"
+            >
               Finalizar
             </button>
-          </div>
+          </div> -->
         </form>
       </mat-step>
     </mat-horizontal-stepper>
   </div>
+
+  <!-- Ejemplo de datos para debug -->
+  <!-- <div class="mt-4 p-2 border">
+    <h5>Estado actual de stepsObj:</h5>
+    <pre>{{ validadorService.getStepsSnapshot() | json }}</pre>
+  </div> -->
 </div>

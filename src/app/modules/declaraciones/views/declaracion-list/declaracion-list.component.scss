@@ -25,7 +25,7 @@
   border-radius: 4px;
   transition: max-height 0.3s ease, opacity 0.3s ease;
   overflow: hidden;
-  max-height: 999px; /* expandido */
+  max-height: 999px;
   opacity: 1;
 }
 .filtros-caja.collapsed {
@@ -39,12 +39,11 @@
   pointer-events: none;
 }
 
-/* Tabla */
+/* Tabla (desktop) */
 .small-table {
   font-size: 0.875rem;
   background-color: #fafafa;
 
-  /* Cabecera */
   mat-header-row {
     background-color: #1976d2;
     color: #fff;
@@ -52,20 +51,61 @@
   mat-header-cell {
     font-weight: 600;
   }
-
-  /* Filas alternadas */
-  mat-row:nth-child(odd) {
+  tr.mat-row:nth-child(odd) {
     background-color: #f1f1f1;
   }
 }
 
-/* Acciones en una sola fila */
 .actions-cell {
   align-items: center;
   gap: 0.5rem;
   white-space: nowrap;
 }
 
+/* Styles para mobile: List view */
+.list-group-item {
+  /* Evitar que al click se active la clase "active" por defecto del framework */
+  cursor: default;
+  /* Estilo por defecto de fondo */
+  background-color: #fff;
+  border: 1px solid #e0e0e0;
+  margin-bottom: 0.5rem;
+  padding: 0.5rem;
+
+  &.selected {
+    background-color: #f0f0f0; /* Gris claro para selección */
+  }
+}
+
+/* Primera fila: contiene checkbox y número a la izquierda, y menú a la derecha */
+.first-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.left-col {
+  display: flex;
+  align-items: center;
+}
+
+.ml-2 {
+  margin-left: 0.5rem;
+}
+
+/* Aseguramos que el menú desplegable muestre icono y texto en la misma línea */
+.mat-menu-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Detalles adicionales */
+.details {
+  margin-top: 0.5rem;
+}
+
+/* Paginador y espaciados adicionales */
 .row.mt-2.align-items-center {
   margin-top: 1rem !important;
 }
@@ -76,8 +116,8 @@
   margin-left: auto !important;
 }
 
-/* Pill de estado */
-.pill {
+/* Pills de estado */
+.estado-pill {
   display: inline-block;
   font-size: 0.75rem;
   font-weight: 600;
@@ -98,4 +138,38 @@
 }
 .pill-default {
   background-color: #999999;
+}
+/* Popover con matMenu */
+.mini-popover {
+  /* Personalizas la tarjeta del menú si deseas */
+  .popover-content {
+    padding: 100px !important;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    align-items: flex-start; /* Justifica en la izquierda */
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    .estado-pill {
+      /* Mismos estilos que en la tabla, ajustados al popover si requieres */
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #fff;
+      padding: 2px 10px;
+      border-radius: 999px;
+      text-transform: uppercase;
+    }
+  }
+}
+
+.accion-icon {
+  width: 24px;
+  height: 24px;
+  margin-right: 3px;
 }

@@ -2,77 +2,39 @@
   width: 100%;
 
   ::ng-deep .mat-horizontal-stepper-header-container {
-    /* Solo scroll horizontal */
-    overflow-x: auto;
-    overflow-y: visible; /* Permite que los íconos no se recorten verticalmente */
-  }
-
-
-  /* Reorganiza el header para mostrar el icono arriba y el título abajo */
-  ::ng-deep .mat-step-header {
-      /* Asegura suficiente altura */
-      min-height: 64px;
-      /* Si pones el ícono arriba y texto debajo, quizá necesites más altura. */
-      align-items: center; 
-      /* Evita recorte extra */
-      overflow: visible;
-
-    .mat-step-icon,
-    .mat-step-text-label {
-      display: block;
-    }
-    .mat-step-text-label {
-      margin-top: 0.25rem; /* pequeño espacio entre icono y texto */
-    }
-  }
-
-  /* Círculos de colores para los íconos */
-  .icon-circle {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    color: #fff; /* Texto/Icónico en color blanco */
-  }
-
-  .icon-check {
-    background-color: #4caf50; /* Verde */
-  }
-  .icon-warning {
-    background-color: #ffca28; /* Amarillo */
-  }
-
-  /* Opcional: si quisieras ícono de error en rojo, por ejemplo: */
-  /* .icon-error {
-    background-color: #f44336;
-  } */
-
-  /* La barra de steps con scroll horizontal, como antes */
-  ::ng-deep .mat-horizontal-stepper-header-container {
     overflow-x: auto;
     white-space: nowrap;
-
-    .mat-step-header {
-      flex: 0 0 auto;
-      min-width: 140px;
-      max-width: 300px;
-    }
   }
 
-  /* Contenedor del contenido de cada paso */
-  ::ng-deep .mat-horizontal-stepper-content-container {
-    width: 100%;
-    overflow-x: hidden;
-  }
-
-  .step-content-area {
-    width: 100%;
-    padding: 1rem 0;
+  ::ng-deep .mat-step-header {
+    min-width: 150px;
+    max-width: 300px;
   }
 }
 
-.buttons {
-  margin-top: 1rem;
+/* Íconos circulares con color */
+.icon-circle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  color: #fff;
+  margin-right: 0.25rem;
+}
+.icon-check {
+  background-color: #4caf50;
+}
+.icon-warning {
+  background-color: #ffc107;
+}
+
+.stepper-container {
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.step-content-area {
+  padding: 1rem 0;
 }

@@ -1,97 +1,181 @@
-// archivo: validador-declaracion.service.ts
-
 import { Injectable } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
 
+/**
+ * Interfaz para representar un “subpaso” o “paso”.
+ * Observa que subSteps también es un array de Steps, permitiendo recursión.
+ */
+export interface StepData {
+  label: string;
+  key: string;
+  completed: boolean;
+  enabled: boolean;
+  subSteps: StepData[];
+  // Opcional: apunta a un componente Angular
+  component?: any;
+}
+
+/**
+ * Servicio que administra la lógica de completitud/habilitación
+ * de un conjunto de pasos y subpasos, así como el cálculo de porcentaje.
+ */
 @Injectable({
   providedIn: 'root'
 })
 export class ValidadorDeclaracionService {
   /**
-   * Mapa con el estado de cada paso o sección.
-   * Por ejemplo: 'paso2', 'paso3', ... 'paso16'.
-   * true = completo; false = incompleto.
+   * BehaviorSubject con el array de steps completo.
+   * Cualquier componente suscrito (p.ej. el Stepper) puede reaccionar a cambios.
    */
-  private pasosCompletos: Record<string, boolean> = {
-    paso1: false,
-    paso2: false,
-    paso3: false,
-    paso4: false,
-    paso5: false,
-    paso6: false,
-    paso7: false,
-    paso8: false,
-    paso9: false,
-    paso10: false,
-    paso11: false,
-    paso12: false,
-    paso13: false,
-    paso14: false,
-    paso15: false,
-    paso16: false
-  };
+  private stepsSubject = new BehaviorSubject<StepData[]>([]);
+  steps$ = this.stepsSubject.asObservable();
+
+  constructor() {}
 
   /**
-   * Lista de advertencias generadas al validar la declaración.
+   * Carga un nuevo arreglo de pasos (y subpasos) en el servicio.
    */
-  private mensajesIncompletos: string[] = [];
-
-  constructor() {
-    // Por defecto, podrías cargar de un backend o storage
-    // para saber qué pasos ya estaban marcados como completos
+  setSteps(steps: StepData[]): void {
+    this.stepsSubject.next(steps);
   }
 
   /**
-   * Marca un paso como completo o incompleto.
-   * @param paso Ej: 'paso2', 'paso3'...
-   * @param completo Valor booleano
+   * Devuelve el snapshot actual del array de pasos.
    */
-  public setPasoCompleto(paso: string, completo: boolean): void {
-    if (this.pasosCompletos.hasOwnProperty(paso)) {
-      this.pasosCompletos[paso] = completo;
-    } else {
-      console.warn(`El paso '${paso}' no existe.`);
+  getStepsSnapshot(): StepData[] {
+    return this.stepsSubject.getValue();
+  }
+
+  /**
+   * Busca recursivamente un paso (o subpaso) por key.
+   */
+  private findStepRecursive(key: string, steps: StepData[]): StepData | undefined {
+    for (const step of steps) {
+      if (step.key === key) {
+        return step;
+      }
+      // Buscar en subSteps
+      if (step.subSteps && step.subSteps.length > 0) {
+        const found = this.findStepRecursive(key, step.subSteps);
+        if (found) {
+          return found;
+        }
+      }
+    }
+    return undefined;
+  }
+
+  /**
+   * Marca un paso (o subpaso) como completo.
+   */
+  markComplete(key: string): void {
+    const steps = this.getStepsSnapshot();
+    const found = this.findStepRecursive(key, steps);
+    if (found) {
+      found.completed = true;
+      // Podrías forzar enabled = true si lo deseas
+      this.stepsSubject.next(steps);
     }
   }
 
-  public isPasoCompleto(paso: string): boolean {
-    return !!this.pasosCompletos[paso];
+  /**
+   * Marca un paso (o subpaso) como incompleto.
+   */
+  markIncomplete(key: string): void {
+    const steps = this.getStepsSnapshot();
+    const found = this.findStepRecursive(key, steps);
+    if (found) {
+      found.completed = false;
+      this.stepsSubject.next(steps);
+    }
   }
 
   /**
-   * Retorna si todos los pasos requeridos están completos.
-   * Además, llena la lista de mensajes con los pasos faltantes.
-   * @returns true si no hay pasos incompletos
+   * Habilita un paso (o subpaso).
    */
-  public estanTodosCompletos(): boolean {
-    // Limpia la lista de advertencias
-    this.mensajesIncompletos = [];
+  enableStep(key: string): void {
+    const steps = this.getStepsSnapshot();
+    const found = this.findStepRecursive(key, steps);
+    if (found) {
+      found.enabled = true;
+      this.stepsSubject.next(steps);
+    }
+  }
 
-    // Revisa cada paso
-    Object.entries(this.pasosCompletos).forEach(([nombrePaso, completo]) => {
-      if (!completo) {
-        this.mensajesIncompletos.push(`El ${nombrePaso} no está completo o le falta información.`);
+  /**
+   * Deshabilita un paso (o subpaso).
+   */
+  disableStep(key: string): void {
+    const steps = this.getStepsSnapshot();
+    const found = this.findStepRecursive(key, steps);
+    if (found) {
+      found.enabled = false;
+      this.stepsSubject.next(steps);
+    }
+  }
+
+  /**
+   * Retorna si un paso (o subpaso) está completo.
+   */
+  isComplete(key: string): boolean {
+    const found = this.findStepRecursive(key, this.getStepsSnapshot());
+    return !!found?.completed;
+  }
+
+  /**
+   * Calcula el porcentaje de avance, contando **todos** los pasos y subpasos.
+   * (pasosCompletos / pasosTotales) * 100
+   */
+  getCompletionPercentage(): number {
+    const steps = this.getStepsSnapshot();
+    const total = this.countAllSteps(steps);
+    if (total === 0) {
+      return 0;
+    }
+    const completeCount = this.countCompletedSteps(steps);
+    return Math.round((completeCount / total) * 100);
+  }
+
+  /**
+   * Devuelve cuántos pasos+subpasos hay en total.
+   */
+  private countAllSteps(steps: StepData[]): number {
+    let count = 0;
+    for (const step of steps) {
+      count += 1;
+      if (step.subSteps && step.subSteps.length > 0) {
+        count += this.countAllSteps(step.subSteps);
       }
-    });
-
-    // Si no hay mensajes, es que todos están completos
-    return this.mensajesIncompletos.length === 0;
+    }
+    return count;
   }
 
   /**
-   * Retorna la lista de advertencias (pasos incompletos u otros).
+   * Devuelve cuántos pasos+subpasos están completados.
    */
-  public getAdvertencias(): string[] {
-    return this.mensajesIncompletos;
+  private countCompletedSteps(steps: StepData[]): number {
+    let count = 0;
+    for (const step of steps) {
+      if (step.completed) {
+        count += 1;
+      }
+      if (step.subSteps && step.subSteps.length > 0) {
+        count += this.countCompletedSteps(step.subSteps);
+      }
+    }
+    return count;
   }
 
   /**
-   * Lógica de ejemplo que simula el envío final de la declaración.
-   * En un caso real, aquí harías una petición HTTP al backend.
+   * Lógica simulada de “enviar declaración final”.
    */
-  public enviarDeclaracionFinal(): void {
-    // Ejemplo: Imprimir en consola
-    console.log('Enviando declaración al servidor...');
+  enviarDeclaracionFinal(): void {
+    const stepsData = this.getStepsSnapshot();
+    console.log('Enviando declaración al backend (futuro). Pasos:', stepsData);
+  }
 
-    // Lógica real: un HttpClient.post(...) con los datos recopilados de la declaración
+
+  setPasoCompleto(paso: string, completado: boolean) {
+    return;
   }
 }

@@ -61,7 +61,6 @@ export class DeclaracionListComponent implements AfterViewInit {
 
   // Añadimos la columna 'select' al principio
   displayedColumns: string[] = [
-    'select',
     'nro',
     'fechaRecepcion',
     'tipo',
@@ -107,6 +106,7 @@ export class DeclaracionListComponent implements AfterViewInit {
       ? this.selection.clear()
       : this.dataSource.data.forEach(row => this.selection.select(row));
   }
+  
   toggle(row: Declaracion) {
     this.selection.toggle(row);
   }

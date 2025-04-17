@@ -1,0 +1,213 @@
+<div class="container-fluid p-3">
+  <div class="row">
+    <div class="col">
+      <p><strong>DECLARANTE: </strong> CHRISTIAN ALEJANDRO CONTARDO SALINAS </p>
+    </div>
+    <div class="col text-end">
+      <button class="btn btn-primary">Declaración Patrimonio Persona Relacionada
+      </button>
+    </div>
+  </div>
+</div>
+<mat-card class="tarjeta-declaracion">
+  <!-- Encabezado con título y subtítulo -->
+  <div class="encabezado">
+    <h2 class="titulo m-0">Derechos / Acciones</h2>
+    <div class="subtitulo">
+      <p class="m-0">
+        Registre a continuación los derechos, acciones, participaciones o cuotas que posea.
+      </p>
+    </div>
+  </div>
+
+  <hr class="separador" />
+
+  <!-- Contenido principal -->
+  <div class="contenido-form">
+    <div class="row mb-3">
+      <div class="col-md-12 text-end">
+        <button mat-raised-button color="primary" (click)="openDialog()">
+          Agregar Derecho / Acción
+        </button>
+      </div>
+    </div>
+
+    <!-- Tabla de derechos/acciones -->
+    <table mat-table [dataSource]="derechosAcciones" class="w-100 mat-elevation-z8">
+      <!-- Título -->
+      <ng-container matColumnDef="titulo">
+        <th mat-header-cell *matHeaderCellDef>Título</th>
+        <td mat-cell *matCellDef="let d">{{ d.titulo }}</td>
+      </ng-container>
+
+      <!-- Tipo Cantidad/Porcentaje -->
+      <ng-container matColumnDef="tipoCantidadPorcentaje">
+        <th mat-header-cell *matHeaderCellDef>Tipo</th>
+        <td mat-cell *matCellDef="let d">{{ d.tipoCantidadPorcentaje }}</td>
+      </ng-container>
+
+      <!-- CantidadPorcentaje -->
+      <ng-container matColumnDef="cantidadPorcentaje">
+        <th mat-header-cell *matHeaderCellDef>Cantidad/Porcentaje</th>
+        <td mat-cell *matCellDef="let d">{{ d.cantidadPorcentaje }}</td>
+      </ng-container>
+
+      <!-- RazonSocial -->
+      <ng-container matColumnDef="razonSocial">
+        <th mat-header-cell *matHeaderCellDef>Razón Social</th>
+        <td mat-cell *matCellDef="let d">{{ d.razonSocial }}</td>
+      </ng-container>
+
+      <!-- RUT -->
+      <ng-container matColumnDef="rut">
+        <th mat-header-cell *matHeaderCellDef>RUT</th>
+        <td mat-cell *matCellDef="let d">{{ d.rut }}</td>
+      </ng-container>
+
+      <!-- Tipo Valor -->
+      <ng-container matColumnDef="tipoValor">
+        <th mat-header-cell *matHeaderCellDef>Tipo Valor</th>
+        <td mat-cell *matCellDef="let d">{{ d.tipoValor }}</td>
+      </ng-container>
+
+      <!-- Valor -->
+      <ng-container matColumnDef="valor">
+        <th mat-header-cell *matHeaderCellDef>Valor</th>
+        <td mat-cell *matCellDef="let d">{{ d.valor }}</td>
+      </ng-container>
+
+      <!-- Controlador -->
+      <ng-container matColumnDef="controlador">
+        <th mat-header-cell *matHeaderCellDef>Controlador</th>
+        <td mat-cell *matCellDef="let d">
+          {{ d.controlador ? 'Sí' : 'No' }}
+        </td>
+      </ng-container>
+
+      <!-- Acciones -->
+      <ng-container matColumnDef="acciones">
+        <th mat-header-cell *matHeaderCellDef>Acciones</th>
+        <td mat-cell *matCellDef="let d; let i = index">
+          <button mat-icon-button color="accent" (click)="openDialog(d, i)">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button mat-icon-button color="warn" (click)="deleteItem(i)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row 
+          *matHeaderRowDef="['titulo','tipoCantidadPorcentaje','cantidadPorcentaje','razonSocial','rut','tipoValor','valor','controlador','acciones']">
+      </tr>
+      <tr mat-row 
+          *matRowDef="let row; columns: ['titulo','tipoCantidadPorcentaje','cantidadPorcentaje','razonSocial','rut','tipoValor','valor','controlador','acciones'];">
+      </tr>
+    </table>
+  </div>
+        <!-- Botón Guardar -->
+        <mat-card-actions class="acciones justify-content-end mt-3">
+          <button mat-raised-button color="primary" type="submit" (click)="onSubmit()">
+            Guardar/Siguiente
+          </button>
+        </mat-card-actions>
+</mat-card>
+
+<!-- MODAL -->
+<ng-template #dialogTemplate let-dialogRef>
+  <h2 mat-dialog-title>
+    {{ isEditing ? 'Editar Derecho / Acción' : 'Agregar Derecho / Acción' }}
+  </h2>
+
+  <mat-dialog-content>
+    <form [formGroup]="formDerechoAccion">
+      <!-- Título -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Título</mat-label>
+        <input matInput formControlName="titulo" />
+      </mat-form-field>
+
+      <!-- Tipo Cantidad/Porcentaje -->
+      <div class="row mb-3">
+        <div class="col-md-5 fw-bold etiqueta">¿Tipo de registro?</div>
+        <div class="col-md-7">
+          <mat-radio-group formControlName="tipoCantidadPorcentaje">
+            <mat-radio-button value="Cantidad" class="me-4">Cantidad</mat-radio-button>
+            <mat-radio-button value="Porcentaje">Porcentaje</mat-radio-button>
+          </mat-radio-group>
+        </div>
+      </div>
+
+      <!-- Cantidad/Porcentaje -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Cantidad o Porcentaje</mat-label>
+        <input matInput formControlName="cantidadPorcentaje" />
+      </mat-form-field>
+
+      <!-- Razón Social -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Razón Social</mat-label>
+        <input matInput formControlName="razonSocial" />
+      </mat-form-field>
+
+      <!-- RUT -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>RUT</mat-label>
+        <input matInput formControlName="rut" />
+      </mat-form-field>
+
+      <!-- Giro -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Giro</mat-label>
+        <input matInput formControlName="giro" />
+      </mat-form-field>
+
+      <!-- Fecha Adquisición -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Fecha de Adquisición</mat-label>
+        <input matInput formControlName="fechaAdquisicion" placeholder="YYYY-MM-DD" />
+      </mat-form-field>
+
+      <!-- Tipo Valor -->
+      <div class="row mb-3">
+        <div class="col-md-5 fw-bold etiqueta">Tipo de Valor</div>
+        <div class="col-md-7">
+          <mat-radio-group formControlName="tipoValor">
+            <mat-radio-button value="Valor corriente" class="me-4">Valor corriente</mat-radio-button>
+            <mat-radio-button value="Valor libro">Valor libro</mat-radio-button>
+          </mat-radio-group>
+        </div>
+      </div>
+
+      <!-- Valor Numérico -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Valor</mat-label>
+        <input matInput formControlName="valor" />
+      </mat-form-field>
+
+      <!-- Gravámenes -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Gravámenes</mat-label>
+        <input matInput formControlName="gravamenes" />
+      </mat-form-field>
+
+      <!-- Controlador -->
+      <div class="row mb-3">
+        <div class="col-md-5 fw-bold etiqueta">¿Eres controlador?</div>
+        <div class="col-md-7">
+          <mat-radio-group formControlName="controlador">
+            <mat-radio-button [value]="true" class="me-4">Sí</mat-radio-button>
+            <mat-radio-button [value]="false">No</mat-radio-button>
+          </mat-radio-group>
+        </div>
+      </div>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="closeDialog()">Cancelar</button>
+    <button mat-raised-button color="primary" (click)="saveDialog()">
+      Guardar
+    </button>
+  </mat-dialog-actions>
+</ng-template>

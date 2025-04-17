@@ -70,12 +70,12 @@ $dip-bg-gray: #f0f0f0;
 
       &:hover {
         transition: all 0.2s ease-in-out;
-        background-color: $dip-primary; /* #cf5214 */
-        color: #fff;
+        background-color: #d5d5d5; /* #cf5214 */
+        color: $dip-text-body;
       }
       &.active {
-        background-color: $dip-secondary; /* #6c757d */
-        color: #fff;
+        background-color: #dddddd; /* #6c757d */
+        color: #ff2c00;
         font-weight: 500;
       }
     }
@@ -179,7 +179,7 @@ $dip-bg-gray: #f0f0f0;
   font-size: 24px !important;
   font-weight: 600;
   color: #fff !important;
-  background-color: $dip-primary; /* #cf5214, tu color DIP */
+  background-color: #3f51b5; /* #cf5214, tu color DIP */
   padding: 20px;
   margin-bottom: 15px !important;
 }
