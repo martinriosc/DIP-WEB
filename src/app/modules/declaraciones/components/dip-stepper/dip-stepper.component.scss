@@ -65,7 +65,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 8px;
+  margin:0px;
 }
 
 .step-info span {
@@ -79,13 +79,6 @@
   width: 80% !important;
 }
 
-.decl-progress-bar .mat-progress-bar-fill::after {
-  background-color: #1976d2 !important; /* azul declarante */
-}
-.int-progress-bar .mat-progress-bar-fill::after {
-  background-color: #d32f2f !important; /* rojo intereses */
-}
-
 .stepper-wrapper {
   overflow-x: auto;
   scroll-snap-type: x mandatory;
@@ -97,14 +90,14 @@
 }
 
 .stepper-decl {
-  border: 2px solid #004084a1;
-  border-radius: 10px 10px 0px 0px;
+  border: 1px solid #004084a1;
+  // border-radius: 10px 10px 0px 0px;
   scrollbar-color: #004084a1 #f5f5f5;
 }
 
 .stepper-int {
-  border: 2px solid #ff5d17d3;
-  border-radius: 10px 10px 0px 0px;
+  border: 1px solid #ff5d17d3;
+  // border-radius: 0px;
   scrollbar-color: #ff5d17d3 #f5f5f5;
 }
 
@@ -123,19 +116,10 @@ mat-tab-group {
 }
 
 
-/* O apuntando a la pista */
- :host ::ng-deep .mdc-linear-progress__bar .mdc-linear-progress__primary-bar {
-     height: 20px !important;
-}
-
-/* O apuntando a la pista */
-:host ::ng-deep .mdc-linear-progress__buffer{
-    height: 20px !important;
-}
 
 .stepper-declarante {
-  border: 1px solid gray;
-  border-radius: 8px;
+  border: 1px solid #ff5d17d3;
+  border-radius: 2px 2px 0px 0px;
 }
 .modal-backdrop {
   position: fixed;

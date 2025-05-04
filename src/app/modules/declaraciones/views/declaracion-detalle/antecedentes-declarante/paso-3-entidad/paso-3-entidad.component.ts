@@ -75,45 +75,73 @@ export class Paso3EntidadComponent implements OnInit, AfterViewInit {
       comunaDesempeno: new FormControl(''),
       paisDesempeno: new FormControl(''),
       ciudadDesempeno: new FormControl(''),
-      jefeServicio: new FormControl(false),
+      jefeServicio: new FormControl('false'),
+      remuneracionTipo: new FormControl('grado'),
+      tipoMoneda: new FormControl('', [Validators.required]),
       datosParientes: new FormControl(false)
     });
-this.loadDatosEntidad();
+    this.loadDatosEntidad();
     this.loadTipoSujetos();
     this.loadProfesiones();
     this.loadCargos();
     this.loadGrados();
-    // this.loadSujetoObligados();
     this.loadMonedas();
     this.loadRegiones();
     this.loadPaises();
+  }
 
-
+  ngAfterViewInit(): void {
     this.loadDatosLaborales();
 
   }
 
-  loadDatosLaborales(){
-        //1319527
+
+
+  loadDatosLaborales() {
+    //1319527
 
     this._datosLaborales.getDatosLaborales(1319527).subscribe({
       next: (response) => {
+        console.log(response)
         this.entidadForm.patchValue({
           servicio: response.data.ServPublicoId,
           cargoFuncion: response.data.cargo,
           tipoSujeto: response.data.sujetoObligado,
           subnumeral: response.data.subNumeral,
-          grado: response.data.grado,
+          grado: response.data.ServGradoId,
           rentaMensual: response.data.rentaMensual,
-          fechaAsuncion: response.data.fechaAsuncion ? new Date(response.data.fechaAsuncion) : null,
           lugarDesempeno: response.data.rbLugarDesempeno ? 'chile' : 'extranjero',
           regionDesempeno: response.data.regionId,
           comunaDesempeno: response.data.comunaId,
           paisDesempeno: response.data.paisDesempeno,
           ciudadDesempeno: response.data.ciudadDesempeno,
           jefeServicio: response.data.jefeServicio,
-          datosParientes: response.data.rbAplicaParientes
+          remuneracionTipo: response.data.remuneracionTipo,
+          tipoMoneda: response.data.monedaId,
+          datosParientes: response.data.rbAplicaParientes ? 'true' : 'false'
         });
+
+
+        // El formato de la fecha de mas abajo llega como DD/MM/YYYY pero necesito convertirlo a YYYY/MM/DD
+        const date = new Date(response.data.fechaAsuncion);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const formattedDate = `${year}-${month}-${day}`;
+
+        this.entidadForm.patchValue({
+          fechaAsuncion: formattedDate
+        })
+
+        this.onChangeServicio({ value: response.data.ServPublicoId })
+        this.onChangeRegion()
+        this.entidadForm.patchValue({
+          subnumeral: response.data.subNumeral
+        })
+
+
+        this.onChangeTipoSujeto({ value: response.data.sujetoObligado })
+        this.onChangeSubnumeral({ value: response.data.subNumeral })
       },
       error: (error) => {
         console.error('Error al cargar subnumerales:', error);
@@ -121,7 +149,7 @@ this.loadDatosEntidad();
     })
   }
 
-  loadDatosEntidad(){
+  loadDatosEntidad() {
     this._declaracion.obtenerServicios(this.declaranteRut, this.declaranteRol).subscribe({
       next: (response) => {
         this.servicios = response.data;
@@ -134,7 +162,7 @@ this.loadDatosEntidad();
 
   loadTipoSujetos() {
     this._servicio.listarSujetosByServicio(this.servicioId).subscribe({
-      next: (response:any) => {
+      next: (response: any) => {
         this.tipoSujetos = response.data;
       },
       error: (error) => {
@@ -145,13 +173,14 @@ this.loadDatosEntidad();
 
   onChangeServicio(event: any) {
     this.servicioId = event.value;
-    this.loadCargos();
-    this.loadGrados();
+    this.loadCargos()
+
     this.loadTipoSujetos();
   }
+
   loadProfesiones() {
     this._profesion.listar().subscribe({
-      next: (response:any) => {
+      next: (response: any) => {
         this.profesiones = response;
       },
       error: (error) => {
@@ -162,7 +191,8 @@ this.loadDatosEntidad();
 
   loadCargos() {
     this._admin.listarCargos(this.servicioId).subscribe({
-      next: (response:any) => {
+      next: (response: any) => {
+        console.log(response)
         this.cargos = response.data;
       },
       error: (error) => {
@@ -173,7 +203,7 @@ this.loadDatosEntidad();
 
   loadGrados() {
     this._admin.listGrados(this.servicioId).subscribe({
-      next: (response:any) => {
+      next: (response: any) => {
         this.grados = response.data;
       },
       error: (error) => {
@@ -184,7 +214,8 @@ this.loadDatosEntidad();
 
   loadRegiones() {
     this._localidad.getRegiones().subscribe({
-      next: (response:any) => {
+      next: (response: any) => {
+        console.log(response)
         this.regiones = response;
       },
       error: (error) => {
@@ -194,7 +225,7 @@ this.loadDatosEntidad();
   }
 
   onChangeRegion() {
-    this._localidad.getComunasPorRegion(this.entidadForm.value.region).subscribe({
+    this._localidad.getComunasPorRegion(this.entidadForm.value.regionDesempeno).subscribe({
       next: (response: any) => {
         this.comunas = response;
 
@@ -208,7 +239,7 @@ this.loadDatosEntidad();
 
   loadComunas() {
     this._localidad.getComunasPorRegion(this.entidadForm.value.regionDesempeno).subscribe({
-      next: (response:any) => {
+      next: (response: any) => {
         this.comunas = response;
       },
       error: (error) => {
@@ -227,7 +258,7 @@ this.loadDatosEntidad();
 
   loadPaises() {
     this._localidad.getPaisesExtranjeros().subscribe({
-      next: (response:any) => {
+      next: (response: any) => {
         this.paises = response;
       },
       error: (error) => {
@@ -240,7 +271,7 @@ this.loadDatosEntidad();
 
   loadPersonasRelacionadas() {
     this._parentesco.listarParientes(this.declaracionId).subscribe({
-      next: (response:any) => {
+      next: (response: any) => {
         this.parentescos = response;
       },
       error: (error) => {
@@ -261,6 +292,11 @@ this.loadDatosEntidad();
   //   })
   // }
 
+  onChangeRemuneracion(event: any) {
+    console.log(event);
+    this.entidadForm.controls['remuneracionTipo'].setValue(event);
+  }
+
   onChangeTipoSujeto(event: any) {
 
     this.loadSubnumerales(event.value);
@@ -268,8 +304,8 @@ this.loadDatosEntidad();
 
   loadSubnumerales(sujetoObligadoId: number) {
     this._subnumeral.getBySujetoObligado(sujetoObligadoId).subscribe({
-      next: (response:any) => {
-        if(response.data){
+      next: (response: any) => {
+        if (response.data) {
           this.subnumerales = response.data;
         }
       },
@@ -285,7 +321,7 @@ this.loadDatosEntidad();
 
   loadMonedas() {
     this._tipoMoneda.listar().subscribe({
-      next: (response:any) => {
+      next: (response: any) => {
         this.monedas = response;
       },
       error: (error) => {
@@ -294,18 +330,18 @@ this.loadDatosEntidad();
     })
   }
 
-  ngAfterViewInit() {
-    // Marca complete/incomplete según el estado del formulario
-    this.entidadForm.statusChanges.subscribe(status => {
-      if (status === 'VALID') {
-        this.validador.markComplete('paso3');
-        this.stepperState.markStepCompleted(['declarante', 'paso3']);
-      } else {
-        this.validador.markIncomplete('paso3');
-        this.stepperState.markStepIncomplete(['declarante', 'paso3']);
-      }
-    });
-  }
+  // ngAfterViewInit() {
+  //   // Marca complete/incomplete según el estado del formulario
+  //   this.entidadForm.statusChanges.subscribe(status => {
+  //     if (status === 'VALID') {
+  //       this.validador.markComplete('paso3');
+  //       this.stepperState.markStepCompleted(['declarante', 'paso3']);
+  //     } else {
+  //       this.validador.markIncomplete('paso3');
+  //       this.stepperState.markStepIncomplete(['declarante', 'paso3']);
+  //     }
+  //   });
+  // }
 
   /** Guardar + avanzar */
   onSubmit(): void {

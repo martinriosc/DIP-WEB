@@ -13,6 +13,7 @@ import { StepperStatusService } from 'src/app/modules/declaraciones/services/ste
 import { AguasService } from 'src/app/modules/declaraciones/services/aguas.service';
 import { LocalidadService } from 'src/app/modules/declaraciones/services/localidad.service';
 import { ComunService } from 'src/app/modules/declaraciones/services/comun.service';
+import { DeclaracionHelperService } from 'src/app/modules/declaraciones/services/declaracion-helper.service';
 
 interface DerechoAgua {
   tipo: string;   // APROVECHAMIENTO, etc.
@@ -60,7 +61,8 @@ export class Paso7DerechosAguasComponent implements OnInit, AfterViewInit {
     private stepperState: StepperStatusService,
     private _aguas: AguasService,
     private _localidad: LocalidadService,
-    private _comun: ComunService
+    private _comun: ComunService,
+    private _declaracionHelper: DeclaracionHelperService
   ) { }
 
   ngOnInit(): void {
@@ -78,12 +80,24 @@ export class Paso7DerechosAguasComponent implements OnInit, AfterViewInit {
   }
 
 
+  ngAfterViewInit(): void {
+    this.loadRegistro();
+  }
+
+  
+  loadRegistro(){
+    this._declaracionHelper.declaracionesFlag$.subscribe(data => {
+      console.log(data)
+      this.tieneDerechosAguas = data.aguas ? 'si' : 'no';
+      this.tieneConcesiones = data.concesiones ? 'si' : 'no';
+    })
+  }
+
   loadAguas() {
     this._aguas.listar('aprovechamiento', this.declaranteId).subscribe({
       next: (response: any) => {
         console.log(response)
         if (response.length > 0) {
-          this.tieneDerechosAguas = 'si';
           this.derechosAguasAprovechamiento = response;
         }
       },
@@ -97,7 +111,6 @@ export class Paso7DerechosAguasComponent implements OnInit, AfterViewInit {
         console.log(response)
 
         if (response.length > 0) {
-          this.tieneConcesiones = 'si';
           this.derechosAguasConcesion = response;
 
         }
@@ -192,10 +205,6 @@ export class Paso7DerechosAguasComponent implements OnInit, AfterViewInit {
     })
   }
 
-
-  ngAfterViewInit(): void {
-    // No necesitamos suscribir statusChanges aquí; validamos manualmente en onSubmit()
-  }
 
   /** Guardar + avanzar */
   onSubmit(): void {

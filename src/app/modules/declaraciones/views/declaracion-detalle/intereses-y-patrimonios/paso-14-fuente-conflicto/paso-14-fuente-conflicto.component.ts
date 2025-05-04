@@ -14,6 +14,7 @@ import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { ValidadorDeclaracionService } from '../../../../services/validador-declaracion.service';
 import { StepperStatusService }        from 'src/app/modules/declaraciones/services/stepper-status.service';
 import { OtraFuenteService } from 'src/app/modules/declaraciones/services/otra-fuente.service';
+import { DeclaracionHelperService } from 'src/app/modules/declaraciones/services/declaracion-helper.service';
 
 interface FuenteConflicto {
   descripcion:   string;
@@ -52,7 +53,8 @@ export class Paso14FuenteConflictoComponent implements OnInit {
     private dialog: MatDialog,
     private validador: ValidadorDeclaracionService,
     private stepperState: StepperStatusService,
-    private _otraFuente: OtraFuenteService
+    private _otraFuente: OtraFuenteService,
+    private _declaracionHelper: DeclaracionHelperService
   ) {}
 
 
@@ -67,6 +69,18 @@ export class Paso14FuenteConflictoComponent implements OnInit {
 
 
     this.loadOtrasFuentes();
+  }
+
+  ngAfterViewInit(): void {
+    this.loadRegistro();
+  }
+
+  
+  loadRegistro(){
+    this._declaracionHelper.declaracionesFlag$.subscribe(data => {
+      console.log(data)
+      this.tieneFuenteConflicto = data.otraFuente ? 'si' : 'no';
+    })
   }
 
 

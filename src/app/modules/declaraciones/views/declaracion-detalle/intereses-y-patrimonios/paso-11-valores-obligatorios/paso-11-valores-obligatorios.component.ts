@@ -17,6 +17,7 @@ import { ValoresObligatoriosService } from 'src/app/modules/declaraciones/servic
 import { LocalidadService } from 'src/app/modules/declaraciones/services/localidad.service';
 import { MonedaService } from 'src/app/modules/declaraciones/services/moneda.service';
 import { InmuebleService } from 'src/app/modules/declaraciones/services/inmueble.service';
+import { DeclaracionHelperService } from 'src/app/modules/declaraciones/services/declaracion-helper.service';
 
 interface ValorObligatorio {
   tipoDocumento: string;
@@ -70,7 +71,8 @@ export class Paso11ValoresObligatoriosComponent implements OnInit {
     private _valoresObligatorios: ValoresObligatoriosService,
     private _localidad: LocalidadService,
     private _moneda: MonedaService,
-    private _inmueble: InmuebleService
+    private _inmueble: InmuebleService,
+    private _declaracionHelper: DeclaracionHelperService
   ) {}
 
   ngOnInit(): void {
@@ -87,12 +89,26 @@ export class Paso11ValoresObligatoriosComponent implements OnInit {
     
   }
 
+  ngAfterViewInit(): void {
+    this.loadRegistro();
+  }
+
+  
+  loadRegistro(){
+    this._declaracionHelper.declaracionesFlag$.subscribe(data => {
+      console.log(data)
+      this.tieneCuentasLibretas = data.cuentas ? 'si' : 'no';
+      this.tieneAhorrosPrevisionales = data.ahorros ? 'si' : 'no';
+      this.tieneDepositosPlazo = data.depositos ? 'si' : 'no';
+      this.tieneSeguros = data.seguros ? 'si' : 'no';
+    })
+  }
+
 
   loadValores(){
     this._valoresObligatorios.listar(this.declaranteId, 1).subscribe({
       next: (res: any) => {
         console.log(res)
-        if(res.length > 0) this.tieneCuentasLibretas = 'si';
         this.cuentasLibretas = res;
       },
       error: (err) => {
@@ -103,7 +119,6 @@ export class Paso11ValoresObligatoriosComponent implements OnInit {
     this._valoresObligatorios.listar(this.declaranteId, 2).subscribe({
       next: (res: any) => {
         console.log(res)
-        if(res.length > 0) this.tieneAhorrosPrevisionales = 'si';
         this.ahorrosPrevisionales = res;
       },
       error: (err) => {
@@ -114,7 +129,6 @@ export class Paso11ValoresObligatoriosComponent implements OnInit {
     this._valoresObligatorios.listar(this.declaranteId, 3).subscribe({
       next: (res: any) => {
         console.log(res)
-        if(res.length > 0) this.tieneDepositosPlazo = 'si';
         this.depositosPlazo = res;
       },
       error: (err) => {
@@ -125,7 +139,6 @@ export class Paso11ValoresObligatoriosComponent implements OnInit {
     this._valoresObligatorios.listar(this.declaranteId, 4).subscribe({
       next: (res: any) => {
         console.log(res)
-        if(res.length > 0) this.tieneSeguros = 'si';
         this.seguros = res;
       },
       error: (err) => {

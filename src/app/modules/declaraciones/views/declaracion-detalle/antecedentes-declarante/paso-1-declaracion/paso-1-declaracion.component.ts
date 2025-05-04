@@ -55,7 +55,6 @@ export class Paso1DeclaracionComponent implements OnInit {
   ngAfterViewInit(): void {
     this.formDeclaracion.statusChanges.subscribe(status => {
       if (status === 'VALID') {
-        // marca como completo en datos y UI
         this.validador.markComplete('paso1');
         this.stepperState.markStepCompleted(['declarante', 'paso1']);
       } else {
@@ -64,6 +63,8 @@ export class Paso1DeclaracionComponent implements OnInit {
       }
     });
   }
+
+
 
   loadDeclaracion() {
 

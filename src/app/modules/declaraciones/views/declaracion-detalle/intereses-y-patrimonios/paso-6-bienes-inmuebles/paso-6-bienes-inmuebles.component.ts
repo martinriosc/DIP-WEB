@@ -16,6 +16,9 @@ import { InmuebleService } from 'src/app/modules/declaraciones/services/inmueble
 import { LocalidadService } from 'src/app/modules/declaraciones/services/localidad.service';
 import { MonedaService } from 'src/app/modules/declaraciones/services/moneda.service';
 import { MatStepper } from '@angular/material/stepper';
+import { Declaracion } from 'src/app/shared/models/AllModels';
+import { DeclaracionService } from 'src/app/modules/declaraciones/services/declaracion.service';
+import { DeclaracionHelperService } from 'src/app/modules/declaraciones/services/declaracion-helper.service';
 
 interface BienChile {
   region: string;
@@ -81,6 +84,7 @@ export class Paso6BienesInmueblesComponent implements OnInit, AfterViewInit {
     private _inmueble: InmuebleService,
     private _localidad: LocalidadService,
     private _moneda: MonedaService,
+    private _declaracionHelper: DeclaracionHelperService,
     @Optional() @SkipSelf() private stepper?: MatStepper
   ) {
  
@@ -99,16 +103,27 @@ export class Paso6BienesInmueblesComponent implements OnInit, AfterViewInit {
     this.loadMonedas();
   }
 
+  ngAfterViewInit(): void {
+    this.loadRegistro();
+  }
+
+  
+  loadRegistro(){
+    this._declaracionHelper.declaracionesFlag$.subscribe(data => {
+      console.log(data)
+      this.tieneExtranjero = data.bienesInmueblesExtranjero ? 'si' : 'no';
+      this.tieneChile = data.bienesInmuebles ? 'si' : 'no';
+    })
+  }
+
+
 
   loadBienesInmuebles() {
     this._inmueble.listarBienesInmuebles(this.declaranteId).subscribe({
       next: (res:any) => {
         console.log(res);
-        if(res.length > 0){
-          this.tieneChile = 'si';
           this.bienesChile = res;
-
-        }
+        
       },
       error: (err) => {
         console.log(err);
@@ -201,8 +216,7 @@ export class Paso6BienesInmueblesComponent implements OnInit, AfterViewInit {
     })
   }
 
-  ngAfterViewInit(): void {
-  }
+
 
   onSubmit(): void {
  

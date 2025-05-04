@@ -88,11 +88,12 @@ export class Paso4TutelaComponent {
 
 
 
-  buildForm(item?: Tutela) {
+  buildForm(item?: any) {
+    console.log(item)
     this.tutelaForm = this.fb.group({
-      run: [item?.run || ''],
+      run: [item?.rut || ''],
       tipoRelacion: [item?.tipoRelacion || 'PATRIA POTESTAD'],
-      nombres: [item?.nombres || ''],
+      nombres: [item?.nombre || ''],
       apellidoPaterno: [item?.apellidoPaterno || ''],
       apellidoMaterno: [item?.apellidoMaterno || '']
     });

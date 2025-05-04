@@ -17,6 +17,7 @@ import { ComunidadValoresService } from 'src/app/modules/declaraciones/services/
 import { MonedaService } from 'src/app/modules/declaraciones/services/moneda.service';
 import { InmuebleService } from 'src/app/modules/declaraciones/services/inmueble.service';
 import { LocalidadService } from 'src/app/modules/declaraciones/services/localidad.service';
+import { DeclaracionHelperService } from 'src/app/modules/declaraciones/services/declaracion-helper.service';
 
 interface ValorItem {
   tipoValor:        string;
@@ -62,7 +63,8 @@ export class Paso10ValoresComponent implements OnInit {
     private _comunidad: ComunidadValoresService,
     private _moneda : MonedaService,
     private _inmueble: InmuebleService,
-    private _localidad: LocalidadService
+    private _localidad: LocalidadService,
+    private _declaracionHelper: DeclaracionHelperService
   ) {}
 
   ngOnInit(): void {
@@ -78,11 +80,25 @@ export class Paso10ValoresComponent implements OnInit {
     this.loadTitulos();
   }
 
+
+  ngAfterViewInit(): void {
+    this.loadRegistro();
+  }
+
+  
+  loadRegistro(){
+    this._declaracionHelper.declaracionesFlag$.subscribe(data => {
+      console.log(data)
+      this.tieneValoresChile = data.instrumento ? 'si' : 'no';
+      this.tieneValoresExtranjero = data.instrumentoExtranjero ? 'si' : 'no';
+    })
+  }
+
+
   loadValores(){
     this._comunidad.listar(3,this.declaranteId,false).subscribe({
       next: (res: any) => {
         console.log(res)
-        if(res.length > 0) this.tieneValoresChile = 'si';
         this.valoresChile = res;
       },
       error: (err) => {
@@ -93,7 +109,6 @@ export class Paso10ValoresComponent implements OnInit {
     this._comunidad.listar(3,this.declaranteId,true).subscribe({
       next: (res: any) => {
         console.log(res)
-        if(res.length > 0) this.tieneValoresExtranjero = 'si';
         this.valoresExtranjero = res;
       },
       error: (err) => {

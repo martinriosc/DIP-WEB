@@ -18,6 +18,7 @@ import { ValidadorDeclaracionService } from '../../../../services/validador-decl
 import { StepperStatusService }        from 'src/app/modules/declaraciones/services/stepper-status.service';
 import { OtrosBienesService } from 'src/app/modules/declaraciones/services/otros-bienes.service';
 import { ComunService } from 'src/app/modules/declaraciones/services/comun.service';
+import { DeclaracionHelperService } from 'src/app/modules/declaraciones/services/declaracion-helper.service';
 
 interface OtroBien {
   descripcion:   string;
@@ -59,7 +60,8 @@ export class Paso15OtrosBienesComponent implements OnInit {
     private validador: ValidadorDeclaracionService,
     private stepperState: StepperStatusService,
     private _otrosBienes: OtrosBienesService,
-    private _comun: ComunService
+    private _comun: ComunService,
+    private _declaracionHelper: DeclaracionHelperService
   ) {}
 
   ngOnInit(): void {
@@ -73,6 +75,18 @@ export class Paso15OtrosBienesComponent implements OnInit {
 
     this.loadOtrosBienes();
     this.loadTipoBien();
+  }
+
+  ngAfterViewInit(): void {
+    this.loadRegistro();
+  }
+
+  
+  loadRegistro(){
+    this._declaracionHelper.declaracionesFlag$.subscribe(data => {
+      console.log(data)
+      this.tieneOtrosBienes = data.otrosBienes ? 'si' : 'no';
+    })
   }
 
   loadOtrosBienes(){

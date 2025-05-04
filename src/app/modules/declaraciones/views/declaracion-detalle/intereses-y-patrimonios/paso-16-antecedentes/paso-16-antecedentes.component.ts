@@ -18,6 +18,7 @@ import { ValidadorDeclaracionService } from '../../../../services/validador-decl
 import { StepperStatusService }        from 'src/app/modules/declaraciones/services/stepper-status.service';
 import { OtrosAntecedentesService } from 'src/app/modules/declaraciones/services/otros-antecedentes.service';
 import { DeclaracionService } from 'src/app/modules/declaraciones/services/declaracion.service';
+import { DeclaracionHelperService } from 'src/app/modules/declaraciones/services/declaracion-helper.service';
 
 interface Antecedente {
   tipo:             string;  // PENAL, ADMINISTRATIVO, etc.
@@ -58,7 +59,8 @@ export class Paso16AntecedentesComponent implements OnInit {
     private validador: ValidadorDeclaracionService,
     private stepperState: StepperStatusService,
     private _otrosAntecedentes: OtrosAntecedentesService,
-    private _declaracion: DeclaracionService
+    private _declaracion: DeclaracionService,
+    private _declaracionHelper: DeclaracionHelperService
   ) {}
 
   ngOnInit(): void {
@@ -73,6 +75,19 @@ export class Paso16AntecedentesComponent implements OnInit {
     );
 
     this.loadOtrosAntecedentes();
+  }
+
+
+  ngAfterViewInit(): void {
+    this.loadRegistro();
+  }
+
+  
+  loadRegistro(){
+    this._declaracionHelper.declaracionesFlag$.subscribe(data => {
+      console.log(data)
+      this.tieneAntecedentes = data.otrosAntecedentes ? 'si' : 'no';
+    })
   }
   
   loadOtrosAntecedentes() {

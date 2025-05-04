@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, map, Subject } from 'rxjs';
 import { StepData } from './validador-declaracion.service';
+import { DeclaracionService } from './declaracion.service';
 
 
 /* ╔═ Interfaces de Dominio ────────────────────────────────────── */
@@ -267,7 +268,10 @@ export class DeclaracionHelperService {
   private stepsSubject = new BehaviorSubject<StepData[]>([]);
   steps$ = this.stepsSubject.asObservable();
 
-  constructor() { }
+
+  private declaracionesFlagSubject = new BehaviorSubject<any>(null);
+  declaracionesFlag$ = this.declaracionesFlagSubject.asObservable();
+
 
   setDeclaracionId(value: number) {
     this.activeDeclaracionSubject.next(value);
@@ -285,30 +289,83 @@ export class DeclaracionHelperService {
     return this.activeDeclaranteSubject.value;
   }
 
+  setDeclaracionesFlagSubject(value: any) {
+    this.declaracionesFlagSubject.next(value);
+  }
+
+  get declaracionesFlag(): any {
+    return this.declaracionesFlagSubject.value;
+  }
+
+  constructor(
+    private _declaracion: DeclaracionService
+  ) {
+    this.getDeclaracionesFlag(2882000)
+   }
+
+
+  ngOnInit(): void {
+    // this.getDeclaracionesFlag(1319527)
+  }
+  getDeclaracionesFlag(declaranteId: number) {
+    this._declaracion.obtenerRegistro(declaranteId).subscribe({
+      next: (res) => {
+        this.setDeclaracionesFlagSubject(res)
+
+      //   {
+      //     "id": 1319488,
+      //     "actividadesIndividuales": false,
+      //     "actividadesDependientes": false,
+      //     "bienesInmuebles": true,
+      //     "bienesInmueblesExtranjero": false,
+      //     "aguas": false,
+      //     "concesiones": false,
+      //     "vehiculos": true,
+      //     "aeronaves": true,
+      //     "naves": false,
+      //     "bienMueble": false,
+      //     "sociedades": true,
+      //     "sociedadesExtranjero": false,
+      //     "instrumento": false,
+      //     "instrumentoExtranjero": false,
+      //     "contratos": false,
+      //     "pasivos": false,
+      //     "otraFuente": false,
+      //     "otrosBienes": false,
+      //     "otrosAntecedentes": false
+      // }
+
+      },
+      error: (err) => {
+        console.log(err);
+      }
+    })
+  }
+
   /* ───── Fuente de verdad ───── */
   private readonly _state$ = new BehaviorSubject<FormState>(structured(initialState));
-  readonly state$          = this._state$.asObservable();
+  readonly state$ = this._state$.asObservable();
 
   /* ───── Eventos (“siguiente paso”) ───── */
   private readonly nextStepSubject = new Subject<void>();
-  readonly nextStep$               = this.nextStepSubject.asObservable();
+  readonly nextStep$ = this.nextStepSubject.asObservable();
   nextStep(): void { this.nextStepSubject.next(); }
 
   /* ───── Bloque activo: decl | int ───── */
   private readonly blockSubject = new BehaviorSubject<'decl' | 'int'>('decl');
-  readonly block$               = this.blockSubject.asObservable();
+  readonly block$ = this.blockSubject.asObservable();
   setActiveBlock(b: 'decl' | 'int'): void { this.blockSubject.next(b); }
 
   /* ───── SELECTORES ───── */
   declaranteSteps$ = this.state$.pipe(map(s => s.declarante));
-  interesesSteps$  = this.state$.pipe(
+  interesesSteps$ = this.state$.pipe(
     map(s => s.declaraciones.find(d => d.id === s.activeDeclaracionId)?.intereses ?? [])
   );
-  activeId$        = this.state$.pipe(map(s => s.activeDeclaracionId));
-  declaraciones$   = this.state$.pipe(map(s => s.declaraciones));
+  activeId$ = this.state$.pipe(map(s => s.activeDeclaracionId));
+  declaraciones$ = this.state$.pipe(map(s => s.declaraciones));
 
   /** Progreso global (0‑1) */
-  globalProgress$  = this.state$.pipe(map(st => {
+  globalProgress$ = this.state$.pipe(map(st => {
     const all = [
       ...flatten(st.declarante),
       ...st.declaraciones.flatMap(d => flatten(d.intereses))
@@ -321,7 +378,7 @@ export class DeclaracionHelperService {
     return en.length ? en.filter(p => p.completed).length / en.length : 0;
   }));
   /** Progreso intereses (declaración activa) */
-  intProgress$  = this.state$.pipe(map(st => {
+  intProgress$ = this.state$.pipe(map(st => {
     const d = st.declaraciones.find(x => x.id === st.activeDeclaracionId);
     if (!d) { return 0; }
     const en = d.intereses.filter(p => p.enabled);
@@ -422,8 +479,8 @@ export class DeclaracionHelperService {
   /** Devuelve TRUE si el paso (o subpaso) está completo */
   isComplete(key: string): boolean {
     const st = this._state$.value;
-    return !!findStep(st.declarante, key) ?.completed ||
-           !!st.declaraciones.find(d => findStep(d.intereses, key)?.completed);
+    return !!findStep(st.declarante, key)?.completed ||
+      !!st.declaraciones.find(d => findStep(d.intereses, key)?.completed);
   }
 
   /** Porcentaje global 0‑100 (método sincrónico) */

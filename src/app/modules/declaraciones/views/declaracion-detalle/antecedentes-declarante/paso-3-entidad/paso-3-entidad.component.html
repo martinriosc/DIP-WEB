@@ -38,7 +38,11 @@
         <div class="col-md-2">
           <mat-form-field appearance="outline" class="w-100">
             <mat-label>Fecha de Asunción en el cargo</mat-label>
-            <input matInput type="date" formControlName="fechaAsuncion" placeholder="DD/MM/AAAA" />
+
+            <!-- Agrega un elemento datepicker de angular material -->
+
+            
+            <input matInput type="date" formControlName="fechaAsuncion" />
           </mat-form-field>
         </div>
       </div>
@@ -86,31 +90,35 @@
         <div class="col-md-12 mt-4 pt-3 pb-3 text-center border">
           <strong> Seleccione Grado o Renta Mensual:
           </strong> <br>
-          <mat-radio-group>
+          <mat-radio-group formControlName="remuneracionTipo" (change)="onChangeRemuneracion($event.value)">
             <mat-radio-button value="grado" class="me-4">Grado</mat-radio-button>
             <mat-radio-button value="renta">Renta Mensual</mat-radio-button>
           </mat-radio-group>
 
-          <div class="row mt-3 text-center" *ngIf="entidadForm.value.grado === 'grado'">
+          <div class="row mt-3 text-center" *ngIf="entidadForm.value.remuneracionTipo === 'grado'">
+            <div class="col-md-3"></div>
             <div class="col-md-6">
               <mat-form-field appearance="outline" class="w-100">
                 <mat-label>Grado</mat-label>
-                <input matInput formControlName="grado" placeholder="31°" class="w-100" />
+                <mat-select formControlName="grado">
+                  <mat-option *ngFor="let g of grados" [value]="g.id"> {{ g.nombre }} </mat-option>
+                </mat-select>
               </mat-form-field>
             </div>
           </div>
 
-          <div class="row" *ngIf="entidadForm.value.grado === 'renta'">
-            <div class="col-md-9">
+          <div class="row mt-3" *ngIf="entidadForm.value.remuneracionTipo === 'renta'">
+            <div class="col-md-2"></div>
+            <div class="col-md-6">
               <mat-form-field appearance="outline" class="w-100">
                 <mat-label>Renta Mensual</mat-label>
                 <input matInput formControlName="rentaMensual" class="w-100" />
               </mat-form-field>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
               <mat-form-field appearance="outline" class="w-100">
                 <mat-label>Moneda</mat-label>
-                <mat-select formControlName="moneda">
+                <mat-select formControlName="tipoMoneda">
                   <mat-option *ngFor="let m of monedas" [value]="m.id"> {{ m.nombre }} </mat-option>
                 </mat-select>
               </mat-form-field>
@@ -139,8 +147,7 @@
           <mat-form-field appearance="outline" class="w-100">
             <mat-label>Región</mat-label>
             <mat-select formControlName="regionDesempeno">
-              <mat-option>
-              </mat-option>
+              <mat-option *ngFor="let r of regiones" [value]="r.id"> {{ r.nombre }} </mat-option>
             </mat-select>
           </mat-form-field>
         </div>
@@ -149,8 +156,7 @@
           <mat-form-field appearance="outline" class="w-100">
             <mat-label>Comuna de desempeño</mat-label>
             <mat-select formControlName="comunaDesempeno">
-              <mat-option>
-              </mat-option>
+              <mat-option *ngFor="let c of comunas" [value]="c.id"> {{ c.nombre }} </mat-option>
             </mat-select>
           </mat-form-field>
         </div>

@@ -16,6 +16,7 @@ import { ValidadorDeclaracionService } from '../../../../services/validador-decl
 import { StepperStatusService }        from 'src/app/modules/declaraciones/services/stepper-status.service';
 import { PasivosService } from 'src/app/modules/declaraciones/services/pasivos.service';
 import { PensionesService } from 'src/app/modules/declaraciones/services/pensiones.service';
+import { DeclaracionHelperService } from 'src/app/modules/declaraciones/services/declaracion-helper.service';
 
 interface PasivoItem {
   tipoPasivo:        string;
@@ -63,7 +64,8 @@ export class Paso13PasivosComponent implements OnInit {
     private stepperState: StepperStatusService,
     private _pasivos: PasivosService,
     private _pensiones: PensionesService,
-    private _servicioPublico: ServicioService
+    private _servicioPublico: ServicioService,
+    private _declaracionHelper: DeclaracionHelperService
   ) {}
 
   ngOnInit(): void {
@@ -75,6 +77,20 @@ export class Paso13PasivosComponent implements OnInit {
     this.loadDeudas();
     this.loadDeudasMayor100UTM();
     this.loadTipoObligacion();
+  }
+
+
+  ngAfterViewInit(): void {
+    this.loadRegistro();
+  }
+
+  
+  loadRegistro(){
+    this._declaracionHelper.declaracionesFlag$.subscribe(data => {
+      console.log(data)
+      this.tienePasivos = data.pasivos ? 'si' : 'no';
+      this.tieneDeudaPension = data.pensiones ? 'si' : 'no';
+    })
   }
 
   loadDeudas(){

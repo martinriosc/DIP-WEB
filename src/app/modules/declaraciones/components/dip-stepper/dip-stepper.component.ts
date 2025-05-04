@@ -151,10 +151,6 @@ export class DipStepperComponent {
     this.dialog.open(this.declaracionModal, { width: '850px' });
   }
 
-
-
-
-
   openDeclarantesModal(): void {
     this.showDeclarantesModal = true;
   }

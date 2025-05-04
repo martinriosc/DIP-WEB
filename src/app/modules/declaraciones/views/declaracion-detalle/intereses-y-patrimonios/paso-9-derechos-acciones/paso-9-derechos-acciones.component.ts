@@ -16,6 +16,7 @@ import { StepperStatusService }        from 'src/app/modules/declaraciones/servi
 import { ComunidadValoresService } from 'src/app/modules/declaraciones/services/comunidad-valores.service';
 import { InmuebleService } from 'src/app/modules/declaraciones/services/inmueble.service';
 import { LocalidadService } from 'src/app/modules/declaraciones/services/localidad.service';
+import { DeclaracionHelperService } from 'src/app/modules/declaraciones/services/declaracion-helper.service';
 
 export interface DerechoAccion {
   titulo: string;
@@ -67,7 +68,8 @@ export class Paso9DerechosAccionesComponent implements OnInit {
     private stepperState: StepperStatusService,
     private _comunidad: ComunidadValoresService,
     private _inmueble: InmuebleService,
-    private _localidad: LocalidadService
+    private _localidad: LocalidadService,
+    private _declaracionHelper: DeclaracionHelperService
   ) {}
 
   ngOnInit(): void {
@@ -80,6 +82,20 @@ export class Paso9DerechosAccionesComponent implements OnInit {
     this.loadDerechosOAcciones();
     this.loadTitulos();
     this.loadPaises();
+  }
+
+
+  ngAfterViewInit(): void {
+    this.loadRegistro();
+  }
+
+  
+  loadRegistro(){
+    this._declaracionHelper.declaracionesFlag$.subscribe(data => {
+      console.log(data)
+      this.tieneDerechosChile = data.sociedades ? 'si' : 'no';
+      this.tieneDerechosExtranjero = data.sociedadesExtranjero ? 'si' : 'no';
+    })
   }
 
   loadDerechosOAcciones(){

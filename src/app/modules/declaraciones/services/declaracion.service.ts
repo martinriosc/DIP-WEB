@@ -180,8 +180,8 @@ export class DeclaracionService {
   /**
    * Obtiene el bloque de tabla (wrapper)
    */
-  obtenerRegistro(): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/pr/service/registro/obtener`, { withCredentials: true });
+  obtenerRegistro(declaranteId: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/pr/service/registro/obtener?declaranteId=${declaranteId}`, { withCredentials: true });
   }
 
   /**

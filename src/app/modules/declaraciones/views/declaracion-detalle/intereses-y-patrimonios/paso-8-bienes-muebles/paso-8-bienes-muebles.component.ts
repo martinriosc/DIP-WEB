@@ -11,6 +11,7 @@ import { ValidadorDeclaracionService } from '../../../../services/validador-decl
 import { StepperStatusService } from 'src/app/modules/declaraciones/services/stepper-status.service';
 import { BienMuebleService } from 'src/app/modules/declaraciones/services/bien-mueble.service';
 import { InmuebleService } from 'src/app/modules/declaraciones/services/inmueble.service';
+import { DeclaracionHelperService } from 'src/app/modules/declaraciones/services/declaracion-helper.service';
 
 // ===== Interfaces =====
 interface Vehiculo {
@@ -104,7 +105,8 @@ export class Paso8BienesMueblesComponent implements OnInit {
     private stepperState: StepperStatusService,
     private validador: ValidadorDeclaracionService,
     private _bienMueble: BienMuebleService,
-    private _inmueble: InmuebleService
+    private _inmueble: InmuebleService,
+    private _declaracionHelper: DeclaracionHelperService
   ) { }
 
   ngOnInit(): void {
@@ -120,6 +122,22 @@ export class Paso8BienesMueblesComponent implements OnInit {
     this.loadTiposVehiculos(1);
     this.loadMarcasVehiculos(1);
     this.loadDesgravamen('desgravamen');
+  }
+
+
+  ngAfterViewInit(): void {
+    this.loadRegistro();
+  }
+
+  
+  loadRegistro(){
+    this._declaracionHelper.declaracionesFlag$.subscribe(data => {
+      console.log(data)
+      this.tieneVehiculos = data.vehiculos ? 'si' : 'no';
+      this.tieneAeronaves = data.aeronaves ? 'si' : 'no';
+      this.tieneNaves = data.naves ? 'si' : 'no';
+      this.tieneOtrosBienes = data.otrosBienes ? 'si' : 'no';
+    })
   }
 
   loadBienes() {

@@ -2,22 +2,23 @@
   <div class="row">
     <div class="col">
       <div class="dual-container">
-        <mat-tab-group (selectedTabChange)="onTabChange($event)"
-        [(selectedIndex)]="selectedTabIndex">
+        <mat-tab-group (selectedTabChange)="onTabChange($event)" [(selectedIndex)]="selectedTabIndex">
           <mat-tab label="Antecedentes del Declarante">
             <div class="stepper-section">
-              <div class="step-info">
 
-                <span class="progress-bar-dip m-3">
+              <div class="step-info row g-2 p-3 pb-4 align-items-center bg-white" style="border: 1px solid #004084a1; border-radius: 2px 2px 0px 0px">
+                <span class="progress-bar-dip col-12 col-md-2">
                   Paso {{ declIndex + 1 }} de {{ declSteps.length }}
-                  ({{ ((declProgress$ | async)??0) * 100 | number:'1.0-0' }}%)
+                  ({{ ((declProgress$ | async) ?? 0) * 100 | number:'1.0-0' }}%)
                 </span>
 
-                <mat-progress-bar class="decl-progress-bar" [value]="((declProgress$ | async) ??0)* 100"
-                  mode="determinate">
-                </mat-progress-bar>
-
+                <div class="progress decl-progress-bar col-12 col-md-10">
+                  <div class="progress-bar bg-primary progress-bar-striped progress-bar-animated" role="progressbar"
+                    [style.width.%]="((declProgress$ | async) ?? 0) * 100" aria-valuemin="0" aria-valuemax="100">
+                  </div>
+                </div>
               </div>
+
 
 
               <div cdkScrollable #declContainer class="stepper-wrapper stepper-decl">
@@ -50,23 +51,28 @@
 
               <div class="container-fluid stepper-declarante">
                 <div class="row">
-                  <div class="col mt-3">
+                  <div class="col p-3">
                     <h4 class="float-start">Declarante:</h4>
 
                     <button class="btn btn-primary float-end" (click)="openAddModal()">Cambiar persona a
                       declarar</button>
                   </div>
                 </div>
-                <hr>
                 <div class="row">
-                  <div class="step-info">
-                    <span class="progress-bar-dip m-3">
-                      Paso {{ intIndex + 1 }} de {{ intSteps.length }}
-                      ({{ ((intProgress$ | async) ?? 0) * 100 | number:'1.0-0' }}%)
-                    </span>
-                    <mat-progress-bar class="int-progress-bar" [value]="((intProgress$ | async)??0) * 100"
-                      mode="determinate">
-                    </mat-progress-bar>
+                    <div class="step-info row p-3 pb-4 g-2 align-items-center bg-white" style="border-top: 1px solid #ff5d17d3;">
+                      <!-- Texto “Paso …” -->
+                      <span class="progress-bar-dip m-0 col-12 col-md-2">
+                        Paso {{ intIndex + 1 }} de {{ intSteps.length }}
+                        ({{ ((intProgress$ | async) ?? 0) * 100 | number:'1.0-0' }}%)
+                      </span>
+
+                      <!-- Barra -->
+                      <div class="progress int-progress-bar col-12 col-md-10">
+                        <div class="progress-bar bg-primary progress-bar-striped progress-bar-animated"
+                          role="progressbar" [style.width.%]="((intProgress$ | async) ?? 0) * 100" aria-valuemin="0"
+                          aria-valuemax="100">
+                        </div>
+                      </div>
                   </div>
                 </div>
 
@@ -117,7 +123,7 @@
     </div>
   </div>
 
- 
+
 </div>
 
 
@@ -145,4 +151,3 @@
     <button mat-button (click)="dialogRef.close()" mat-dialog-close>Cancelar</button>
   </mat-dialog-actions>
 </ng-template>
-

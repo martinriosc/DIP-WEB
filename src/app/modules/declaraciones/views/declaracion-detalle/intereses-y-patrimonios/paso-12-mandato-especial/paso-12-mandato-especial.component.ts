@@ -14,6 +14,7 @@ import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { ValidadorDeclaracionService } from '../../../../services/validador-declaracion.service';
 import { StepperStatusService } from 'src/app/modules/declaraciones/services/stepper-status.service';
 import { ContratoService } from 'src/app/modules/declaraciones/services/contrato.service';
+import { DeclaracionHelperService } from 'src/app/modules/declaraciones/services/declaracion-helper.service';
 
 interface MandatoEspecial {
   tipoMandato: string;
@@ -50,7 +51,8 @@ export class Paso12MandatoEspecialComponent implements OnInit {
     private dialog: MatDialog,
     private validador: ValidadorDeclaracionService,
     private stepperState: StepperStatusService,
-    private _contratos: ContratoService
+    private _contratos: ContratoService,
+    private _declaracionHelper: DeclaracionHelperService
   ) { }
 
   ngOnInit(): void {
@@ -61,11 +63,22 @@ export class Paso12MandatoEspecialComponent implements OnInit {
     this.loadContratos()
   }
 
+  ngAfterViewInit(): void {
+    this.loadRegistro();
+  }
+
+  
+  loadRegistro(){
+    this._declaracionHelper.declaracionesFlag$.subscribe(data => {
+      console.log(data)
+      this.tieneMandato = data.contratos ? 'si' : 'no';
+    })
+  }
+
   loadContratos() {
     this._contratos.listar(this.declaranteId).subscribe({
       next: (res: any) => {
         console.log(res)
-        if(res.length > 0) this.tieneMandato = 'si';
         this.contratos = res;
       },
       error: (err) => {
