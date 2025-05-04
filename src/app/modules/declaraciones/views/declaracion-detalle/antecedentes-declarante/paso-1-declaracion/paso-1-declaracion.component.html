@@ -1,0 +1,107 @@
+<mat-card class="tarjeta-declaracion">
+
+  <div class="encabezado">
+    <h2 class="titulo m-0">Datos de la Declaración</h2>
+    <div class="subtitulo">
+      <p class="m-0">Por favor completa todos los campos requeridos</p>
+    </div>
+  </div>
+
+  <hr class="separador" />
+
+  <div class="contenido-form">
+    <form [formGroup]="formDeclaracion" class="form-declaracion">
+      <div class="row mb-3 align-items-center">
+        <div class="col-md-9">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Seleccione el Tipo</mat-label>
+            <mat-select formControlName="tipo">
+              <mat-option *ngFor="let t of tipos" [value]="t.id">
+                {{ t.nombre }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="col-md-3">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Seleccione el Período</mat-label>
+            <mat-select formControlName="periodo">
+              <mat-option *ngFor="let p of periodos" [value]="p">
+                {{ p }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
+
+
+      <div class="row mb-3 align-items-center text-center">
+        <mat-label><strong>Lugar donde se realiza:</strong></mat-label>
+        <div class="col-md-12">
+          <mat-radio-group formControlName="lugar" (change)="onChangeNacionalidad($event)">
+            <mat-radio-button class="me-3" value="Chile">Chile</mat-radio-button>
+            <mat-radio-button value="Extranjero">Extranjero</mat-radio-button>
+          </mat-radio-group>
+        </div>
+      </div>
+
+      <div class="container-fluid" *ngIf="formDeclaracion.value.lugar === 'Chile'">
+        <div class="row mb-3 align-items-center">
+          <div class="col-md-6">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Seleccione la Región</mat-label>
+              <mat-select formControlName="region" (selectionChange)="onChangeRegion()">
+                <mat-option *ngFor="let r of regiones" [value]="r.id">
+                  {{ r.nombre }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="col-md-6">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Seleccione la Comuna</mat-label>
+              <mat-select formControlName="comuna">
+                <mat-option *ngFor="let c of comunas" [value]="c.id">
+                  {{ c.nombre }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
+      </div>
+
+      <div class="container-fluid" *ngIf="formDeclaracion.value.lugar === 'Extranjero'">
+        <div class="row mb-3 align-items-center">
+          <div class="col-md-6">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Seleccione el Pais</mat-label>
+              <mat-select formControlName="pais">
+                <mat-option *ngFor="let p of paises" [value]="p.id">
+                  {{ p.nombre }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="col-md-6">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Ingrese la Ciudad</mat-label>
+              <input matInput formControlName="ciudad" />
+
+            </mat-form-field>
+          </div>
+        </div>
+      </div>
+
+
+    </form>
+  </div>
+
+  <mat-card-actions class="acciones">
+    <button mat-raised-button color="primary" (click)="onSubmit()">
+      Guardar / Siguiente
+    </button>
+  </mat-card-actions>
+</mat-card>

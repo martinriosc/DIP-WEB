@@ -1,0 +1,9 @@
+{
+    "/pr": {
+      "target": "http://localhost:8080/patrimonio.web",
+      "secure": false,
+      "changeOrigin": true,
+      "logLevel": "debug"
+    }
+  }
+  

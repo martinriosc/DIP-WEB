@@ -1,0 +1,585 @@
+
+<mat-card class="tarjeta-declaracion">
+
+  <!-- Encabezado -->
+  <div class="encabezado">
+    <h2 class="titulo m-0">Declaración de Bienes Muebles Registrados</h2>
+    <div class="subtitulo">
+      <p class="m-0">
+        Registre a continuación los bienes muebles que estén inscritos a su nombre
+        en el registro correspondiente. Se consideran vehículos motorizados
+        (livianos o pesados), aeronaves, naves o artefactos navales y otros
+        bienes muebles registrados.
+      </p>
+    </div>
+  </div>
+
+  <!-- Separador -->
+  <hr class="separador" />
+
+  <!-- Contenido principal -->
+  <div class="contenido-form">
+
+    <div class="border p-3 mb-3">
+
+    <!-- 1) Vehículos Motorizados (Liviano o Pesado) -->
+    <div class="row mb-3 align-items-center">
+      <div class="col-md-4 etiqueta fw-bold">¿Posee vehículos motorizados (livianos o pesados)?</div>
+      <div class="col-md-7 text-end">
+        <mat-radio-group [value]="tieneVehiculos" (change)="onTieneVehiculosChange($event.value)">
+          <mat-radio-button value="si" class="me-4">Sí</mat-radio-button>
+          <mat-radio-button value="no">No</mat-radio-button>
+        </mat-radio-group>
+      </div>
+    </div>
+
+    <div *ngIf="tieneVehiculos === 'si'">
+      <div class="row mb-3">
+        <div class="col-md-12 text-end">
+          <button mat-raised-button color="primary" (click)="openAddVehiculoModal()">
+            Agregar Vehículo
+          </button>
+        </div>
+      </div>
+
+      <table mat-table [dataSource]="vehiculosLivianos" class="w-100 mat-elevation-z8">
+
+        <!-- Tipo -->
+        <ng-container matColumnDef="tipo">
+          <th mat-header-cell *matHeaderCellDef>Tipo</th>
+          <td mat-cell *matCellDef="let v"> {{ v.tipoMotorizado }} </td>
+        </ng-container>
+
+        <!-- Marca -->
+        <ng-container matColumnDef="marca">
+          <th mat-header-cell *matHeaderCellDef>Marca</th>
+          <td mat-cell *matCellDef="let v"> {{ v.marca }} </td>
+        </ng-container>
+
+        <!-- Modelo -->
+        <ng-container matColumnDef="modelo">
+          <th mat-header-cell *matHeaderCellDef>Modelo</th>
+          <td mat-cell *matCellDef="let v"> {{ v.modelo }} </td>
+        </ng-container>
+
+        <!-- Año -->
+        <ng-container matColumnDef="anio">
+          <th mat-header-cell *matHeaderCellDef>Año</th>
+          <td mat-cell *matCellDef="let v"> {{ v.anio }} </td>
+        </ng-container>
+
+        <!-- Patente -->
+        <ng-container matColumnDef="patente">
+          <th mat-header-cell *matHeaderCellDef>Patente</th>
+          <td mat-cell *matCellDef="let v"> {{ v.patente }} </td>
+        </ng-container>
+
+        <!-- Nro Inscripción -->
+        <ng-container matColumnDef="nroInscripcion">
+          <th mat-header-cell *matHeaderCellDef>Nro Inscripción</th>
+          <td mat-cell *matCellDef="let v"> {{ v.numeroInscripcion }} </td>
+        </ng-container>
+
+        <!-- Ano Inscripción -->
+        <ng-container matColumnDef="anoInscripcion">
+          <th mat-header-cell *matHeaderCellDef>Año Inscripción</th>
+          <td mat-cell *matCellDef="let v"> {{ v.anioInscripcion }} </td>
+        </ng-container>
+
+        <!-- Avaluo Fiscal -->
+        <ng-container matColumnDef="avaluoFiscal">
+          <th mat-header-cell *matHeaderCellDef>Avaluo Fiscal</th>
+          <td mat-cell *matCellDef="let v"> {{ v.avaluoFiscal }} </td>
+        </ng-container>
+
+        <!-- Estado -->
+        <ng-container matColumnDef="estado">
+          <th mat-header-cell *matHeaderCellDef>Estado</th>
+          <td mat-cell *matCellDef="let v"> {{ v.porcentaje == 100 ? 'Completo' : 'Incompleto' }} </td>
+        </ng-container>
+
+        <!-- Acciones -->
+        <ng-container matColumnDef="accionesVeh">
+          <th mat-header-cell *matHeaderCellDef>Acciones</th>
+          <td mat-cell *matCellDef="let v">
+            <button mat-icon-button color="accent" (click)="openEditVehiculoModal(v)">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button color="warn" (click)="eliminarVehiculo(v)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="['tipo','marca','modelo','anio','patente', 'nroInscripcion','anoInscripcion','avaluoFiscal','estado','accionesVeh']"></tr>
+        <tr mat-row *matRowDef="let row; columns: ['tipo','marca','modelo','anio','patente', 'nroInscripcion','anoInscripcion','avaluoFiscal','estado','accionesVeh'];"></tr>
+      </table>
+    </div>
+
+  </div>
+  <div class="border p-3 mb-3">
+
+    <!-- 2) Aeronaves -->
+    <div class="mt-4"></div>
+    <div class="row mb-3 align-items-center">
+      <div class="col-md-4 etiqueta fw-bold">¿Posee aeronaves?</div>
+      <div class="col-md-7 text-end">
+        <mat-radio-group [value]="tieneAeronaves" (change)="onTieneAeronavesChange($event.value)">
+          <mat-radio-button value="si" class="me-4">Sí</mat-radio-button>
+          <mat-radio-button value="no">No</mat-radio-button>
+        </mat-radio-group>
+      </div>
+    </div>
+
+    <div *ngIf="tieneAeronaves === 'si'">
+      <div class="row mb-3">
+        <div class="col-md-12 text-end">
+          <button mat-raised-button color="primary" (click)="openAddAeronaveModal()">
+            Agregar Aeronave
+          </button>
+        </div>
+      </div>
+
+      <table mat-table [dataSource]="aeronaves" class="w-100 mat-elevation-z8">
+        <!-- Tipo (avión, helicóptero, etc.) -->
+        <ng-container matColumnDef="tipo">
+          <th mat-header-cell *matHeaderCellDef>Tipo</th>
+          <td mat-cell *matCellDef="let a"> {{ a.tipoMotorizado }} </td>
+        </ng-container>
+
+        <!-- Nombre -->
+        <ng-container matColumnDef="nombre">
+          <th mat-header-cell *matHeaderCellDef>Nombre</th>
+          <td mat-cell *matCellDef="let a"> {{ a.nombre }} </td>
+        </ng-container>
+
+        <!-- Matricula -->
+        <ng-container matColumnDef="matricula">
+          <th mat-header-cell *matHeaderCellDef>Matricula</th>
+          <td mat-cell *matCellDef="let a"> {{ a.matricula }} </td>
+        </ng-container>
+
+        <!-- Marca -->
+        <ng-container matColumnDef="marca">
+          <th mat-header-cell *matHeaderCellDef>Marca</th>
+          <td mat-cell *matCellDef="let a"> {{ a.marca }} </td>
+        </ng-container>
+
+        <!-- Modelo -->
+        <ng-container matColumnDef="modelo">
+          <th mat-header-cell *matHeaderCellDef>Modelo</th>
+          <td mat-cell *matCellDef="let a"> {{ a.modelo }} </td>
+        </ng-container>
+
+        <!-- Año de Fabricacion -->
+        <ng-container matColumnDef="anoFabricacion">
+          <th mat-header-cell *matHeaderCellDef>Año de Fabricacion</th>
+          <td mat-cell *matCellDef="let a"> {{ a.anioFabricacion }} </td>
+        </ng-container>
+
+        <!-- Nro Inscripcion -->        
+        <ng-container matColumnDef="nroInscripcion">
+          <th mat-header-cell *matHeaderCellDef>Nro Inscripción</th>
+          <td mat-cell *matCellDef="let a"> {{ a.numeroInscripcion }} </td>
+        </ng-container>
+
+        <!-- Tasacion -->        
+        <ng-container matColumnDef="tasacion">
+          <th mat-header-cell *matHeaderCellDef>Tasación</th>
+          <td mat-cell *matCellDef="let a"> {{ a.tasacion }} </td>
+        </ng-container>
+
+        <!-- Gravamenes -->        
+        <ng-container matColumnDef="gravamenes">
+          <th mat-header-cell *matHeaderCellDef>Gravamenes</th>
+          <td mat-cell *matCellDef="let a"> {{ a.gravamenes }} </td>
+        </ng-container>
+
+        <!-- Estado -->        
+        <ng-container matColumnDef="estado">
+          <th mat-header-cell *matHeaderCellDef>Estado</th>
+          <td mat-cell *matCellDef="let a"> {{ a.porcentaje == 100 ? 'Completo' : 'Incompleto' }} </td>
+        </ng-container>
+
+        <!-- Acciones -->
+        <ng-container matColumnDef="accionesAero">
+          <th mat-header-cell *matHeaderCellDef>Acciones</th>
+          <td mat-cell *matCellDef="let a">
+            <button mat-icon-button color="accent" (click)="openEditAeronaveModal(a)">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button color="warn" (click)="eliminarAeronave(a)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="['tipo','nombre','matricula','marca','modelo','anoFabricacion','nroInscripcion', 'tasacion','gravamenes','estado','accionesAero']"></tr>
+        <tr mat-row *matRowDef="let row; columns: ['tipo','nombre','matricula','marca','modelo','anoFabricacion','nroInscripcion', 'tasacion','gravamenes','estado','accionesAero'];"></tr>
+      </table>
+    </div>
+
+  </div>
+  <div class="border p-3 mb-3">
+
+    <!-- 3) Naves o artefactos navales -->
+    <div class="mt-4"></div>
+    <div class="row mb-3 align-items-center">
+      <div class="col-md-4 etiqueta fw-bold">¿Posee naves o artefactos navales?</div>
+      <div class="col-md-7 text-end">
+        <mat-radio-group [value]="tieneNaves" (change)="onTieneNavesChange($event.value)">
+          <mat-radio-button value="si" class="me-4">Sí</mat-radio-button>
+          <mat-radio-button value="no">No</mat-radio-button>
+        </mat-radio-group>
+      </div>
+    </div>
+
+    <div *ngIf="tieneNaves === 'si'">
+      <div class="row mb-3">
+        <div class="col-md-12 text-end">
+          <button mat-raised-button color="primary" (click)="openAddNaveModal()">
+            Agregar Nave
+          </button>
+        </div>
+      </div>
+
+      <table mat-table [dataSource]="naves" class="w-100 mat-elevation-z8">
+
+        <!-- Tipo -->
+        <ng-container matColumnDef="tipo">
+          <th mat-header-cell *matHeaderCellDef>Tipo</th>
+          <td mat-cell *matCellDef="let n"> {{ n.tipoMotorizado }} </td>
+        </ng-container>
+
+        <!-- Nombre -->
+        <ng-container matColumnDef="nombre">
+          <th mat-header-cell *matHeaderCellDef>Nombre</th>
+          <td mat-cell *matCellDef="let n"> {{ n.nombre }} </td>
+        </ng-container>
+
+        <!-- Matricula -->
+        <ng-container matColumnDef="matricula">
+          <th mat-header-cell *matHeaderCellDef>Matricula</th>
+          <td mat-cell *matCellDef="let n"> {{ n.matricula }} </td>
+        </ng-container>
+
+        <!-- Ano Fabricacion -->        
+        <ng-container matColumnDef="anoFabricacion">
+          <th mat-header-cell *matHeaderCellDef>Ano Fabricacion</th>
+          <td mat-cell *matCellDef="let n"> {{ n.anioFabricacion }} </td>
+        </ng-container>
+
+        <!-- Nro Inscripcion -->        
+        <ng-container matColumnDef="nroInscripcion">
+          <th mat-header-cell *matHeaderCellDef>Nro Inscripción</th>          
+          <td mat-cell *matCellDef="let n"> {{ n.numeroInscripcion }} </td>
+        </ng-container>
+
+        <!-- Tasación -->        
+        <ng-container matColumnDef="tasacion">
+          <th mat-header-cell *matHeaderCellDef>Tasación</th>
+          <td mat-cell *matCellDef="let n"> {{ n.tasacion }} </td>
+        </ng-container>
+
+        <!-- Gravamenes -->        
+        <ng-container matColumnDef="gravamenes">
+          <th mat-header-cell *matHeaderCellDef>Gravamenes</th>
+          <td mat-cell *matCellDef="let n"> {{ n.gravamenes }} </td>
+        </ng-container>
+
+        <!-- Estado -->        
+        <ng-container matColumnDef="estado">
+          <th mat-header-cell *matHeaderCellDef>Estado</th>
+          <td mat-cell *matCellDef="let n"> {{ n.porcentaje == 100 ? 'Completo' : 'Incompleto' }} </td>
+        </ng-container>
+
+        <!-- Acciones -->
+        <ng-container matColumnDef="accionesNave">
+          <th mat-header-cell *matHeaderCellDef>Acciones</th>
+          <td mat-cell *matCellDef="let n">
+            <button mat-icon-button color="accent" (click)="openEditNaveModal(n)">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button color="warn" (click)="eliminarNave(n)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="['tipo','nombre','matricula','anoFabricacion','nroInscripcion', 'tasacion','gravamenes','estado','accionesNave']"></tr>
+        <tr mat-row *matRowDef="let row; columns: ['tipo','nombre','matricula','anoFabricacion','nroInscripcion', 'tasacion','gravamenes','estado','accionesNave'];"></tr>
+      </table>
+    </div>
+
+  </div>
+  <div class="border p-3 mb-3">
+
+    <!-- 4) Otros bienes muebles registrados -->
+    <div class="mt-4"></div>
+    <div class="row mb-3 align-items-center">
+      <div class="col-md-4 etiqueta fw-bold">¿Posee otros bienes muebles registrados?</div>
+      <div class="col-md-7 text-end">
+        <mat-radio-group [value]="tieneOtrosBienes" (change)="onTieneOtrosBienesChange($event.value)">
+          <mat-radio-button value="si" class="me-4">Sí</mat-radio-button>
+          <mat-radio-button value="no">No</mat-radio-button>
+        </mat-radio-group>
+      </div>
+    </div>
+
+    <div *ngIf="tieneOtrosBienes === 'si'">
+      <div class="row mb-3">
+        <div class="col-md-12 text-end">
+          <button mat-raised-button color="primary" (click)="openAddOtroBienModal()">
+            Agregar Bien Registrado
+          </button>
+        </div>
+      </div>
+
+      <table mat-table [dataSource]="otrosBienes" class="w-100 mat-elevation-z8">
+
+        <!-- Descripción -->
+        <ng-container matColumnDef="descripcion">
+          <th mat-header-cell *matHeaderCellDef>Descripción</th>
+          <td mat-cell *matCellDef="let o"> {{ o.descripcion }} </td>
+        </ng-container>
+
+        <!-- Nro Inscripcion -->        
+        <ng-container matColumnDef="nroInscripcion">
+          <th mat-header-cell *matHeaderCellDef>Nro Inscripción</th>          
+          <td mat-cell *matCellDef="let o"> {{ o.numeroInscripcion }} </td>
+        </ng-container>
+
+        <!-- Ano Inscripcion -->        
+        <ng-container matColumnDef="anoInscripcion">
+          <th mat-header-cell *matHeaderCellDef>Ano Inscripción</th>          
+          <td mat-cell *matCellDef="let o"> {{ o.anioInscripcion }} </td>
+        </ng-container>
+
+        <!-- Valor Comercial -->        
+        <ng-container matColumnDef="valorComercial">
+          <th mat-header-cell *matHeaderCellDef>Valor Comercial</th>          
+          <td mat-cell *matCellDef="let o"> {{ o.valorComercial }} </td>
+        </ng-container>
+
+        <!-- Tipo Registro -->        
+        <ng-container matColumnDef="tipoRegistro">
+          <th mat-header-cell *matHeaderCellDef>Tipo Registro</th>          
+          <td mat-cell *matCellDef="let o"> {{ o.tipoRegistro }} </td>
+        </ng-container>
+
+        <!-- Estado -->        
+        <ng-container matColumnDef="estado">
+          <th mat-header-cell *matHeaderCellDef>Estado</th>          
+          <td mat-cell *matCellDef="let o"> {{ o.porcentaje == 100 ? 'Completo' : 'Incompleto' }} </td>
+        </ng-container>
+
+        <!-- Acciones -->
+        <ng-container matColumnDef="accionesOtro">
+          <th mat-header-cell *matHeaderCellDef>Acciones</th>
+          <td mat-cell *matCellDef="let o">
+            <button mat-icon-button color="accent" (click)="openEditOtroBienModal(o)">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button color="warn" (click)="eliminarOtroBien(o)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="['descripcion','nroInscripcion','anoInscripcion','valorComercial','tipoRegistro','estado','accionesOtro']"></tr>
+        <tr mat-row *matRowDef="let row; columns: ['descripcion','nroInscripcion','anoInscripcion','valorComercial','tipoRegistro','estado','accionesOtro'];"></tr>
+      </table>
+    </div>
+  </div>
+  </div>
+        <!-- Botón Guardar -->
+        <mat-card-actions class="acciones justify-content-end mt-3">
+          <button mat-raised-button color="primary" type="submit" (click)="onSubmit()">
+            Guardar/Siguiente
+          </button>
+        </mat-card-actions>
+</mat-card>
+
+<!-- ========================= MODALS ========================= -->
+
+<!-- MODAL: Vehículo -->
+<ng-template #vehiculoModal let-dialogRef>
+  <h2 mat-dialog-title>
+    {{ editVehiculo ? 'Editar Vehículo' : 'Agregar Vehículo' }}
+  </h2>
+
+  <mat-dialog-content>
+    <form [formGroup]="vehiculoForm">
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Tipo</mat-label>
+        <mat-select formControlName="tipo">
+          <mat-option value="Liviano">Liviano</mat-option>
+          <mat-option value="Pesado">Pesado</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Marca</mat-label>
+        <input matInput formControlName="marca" />
+      </mat-form-field>
+
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Modelo</mat-label>
+        <input matInput formControlName="modelo" />
+      </mat-form-field>
+
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Año</mat-label>
+        <input matInput type="number" formControlName="anio" />
+      </mat-form-field>
+
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Patente</mat-label>
+        <input matInput formControlName="patente" />
+      </mat-form-field>
+
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Valor Aproximado</mat-label>
+        <input matInput type="number" formControlName="valor" />
+      </mat-form-field>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="dialogRef.close()">Cancelar</button>
+    <button mat-raised-button color="primary" (click)="saveVehiculo(dialogRef)">
+      Guardar
+    </button>
+  </mat-dialog-actions>
+</ng-template>
+
+<!-- MODAL: Aeronave -->
+<ng-template #aeronaveModal let-dialogRef>
+  <h2 mat-dialog-title>
+    {{ editAeronave ? 'Editar Aeronave' : 'Agregar Aeronave' }}
+  </h2>
+
+  <mat-dialog-content>
+    <form [formGroup]="aeronaveForm">
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Tipo</mat-label>
+        <mat-select formControlName="tipo">
+          <mat-option value="Avión">Avión</mat-option>
+          <mat-option value="Helicóptero">Helicóptero</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Marca</mat-label>
+        <input matInput formControlName="marca" />
+      </mat-form-field>
+
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Modelo</mat-label>
+        <input matInput formControlName="modelo" />
+      </mat-form-field>
+
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Año</mat-label>
+        <input matInput type="number" formControlName="anio" />
+      </mat-form-field>
+
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Matrícula</mat-label>
+        <input matInput formControlName="matricula" />
+      </mat-form-field>
+
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Valor Aproximado</mat-label>
+        <input matInput type="number" formControlName="valor" />
+      </mat-form-field>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="dialogRef.close()">Cancelar</button>
+    <button mat-raised-button color="primary" (click)="saveAeronave(dialogRef)">
+      Guardar
+    </button>
+  </mat-dialog-actions>
+</ng-template>
+
+<!-- MODAL: Nave -->
+<ng-template #naveModal let-dialogRef>
+  <h2 mat-dialog-title>
+    {{ editNave ? 'Editar Nave' : 'Agregar Nave' }}
+  </h2>
+
+  <mat-dialog-content>
+    <form [formGroup]="naveForm">
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Tipo</mat-label>
+        <mat-select formControlName="tipo">
+          <mat-option value="Lancha">Lancha</mat-option>
+          <mat-option value="Yate">Yate</mat-option>
+          <mat-option value="Otro">Otro</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Registro</mat-label>
+        <input matInput formControlName="registro" />
+      </mat-form-field>
+
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Año</mat-label>
+        <input matInput type="number" formControlName="anio" />
+      </mat-form-field>
+
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Valor Aproximado</mat-label>
+        <input matInput type="number" formControlName="valor" />
+      </mat-form-field>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="dialogRef.close()">Cancelar</button>
+    <button mat-raised-button color="primary" (click)="saveNave(dialogRef)">
+      Guardar
+    </button>
+  </mat-dialog-actions>
+</ng-template>
+
+<!-- MODAL: Otro Bien -->
+<ng-template #otroBienModal let-dialogRef>
+  <h2 mat-dialog-title>
+    {{ editOtroBien ? 'Editar Bien Registrado' : 'Agregar Bien Registrado' }}
+  </h2>
+
+  <mat-dialog-content>
+    <form [formGroup]="otroBienForm">
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Tipo</mat-label>
+        <mat-select formControlName="tipo">
+          <mat-option value="Maquinaria">Maquinaria</mat-option>
+          <mat-option value="Remolque">Remolque</mat-option>
+          <mat-option value="Casa Rodante">Casa Rodante</mat-option>
+          <mat-option value="Otro">Otro</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Descripción</mat-label>
+        <input matInput formControlName="descripcion" />
+      </mat-form-field>
+
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Valor Aproximado</mat-label>
+        <input matInput type="number" formControlName="valor" />
+      </mat-form-field>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="dialogRef.close()">Cancelar</button>
+    <button mat-raised-button color="primary" (click)="saveOtroBien(dialogRef)">
+      Guardar
+    </button>
+  </mat-dialog-actions>
+</ng-template>

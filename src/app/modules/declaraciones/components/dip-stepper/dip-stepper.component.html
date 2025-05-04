@@ -1,0 +1,148 @@
+<div class="container-fluid">
+  <div class="row">
+    <div class="col">
+      <div class="dual-container">
+        <mat-tab-group (selectedTabChange)="onTabChange($event)"
+        [(selectedIndex)]="selectedTabIndex">
+          <mat-tab label="Antecedentes del Declarante">
+            <div class="stepper-section">
+              <div class="step-info">
+
+                <span class="progress-bar-dip m-3">
+                  Paso {{ declIndex + 1 }} de {{ declSteps.length }}
+                  ({{ ((declProgress$ | async)??0) * 100 | number:'1.0-0' }}%)
+                </span>
+
+                <mat-progress-bar class="decl-progress-bar" [value]="((declProgress$ | async) ??0)* 100"
+                  mode="determinate">
+                </mat-progress-bar>
+
+              </div>
+
+
+              <div cdkScrollable #declContainer class="stepper-wrapper stepper-decl">
+                <mat-horizontal-stepper #declStepper class="custom-stepper header-only" [disableRipple]="true"
+                  [selectedIndex]="declIndex" (selectionChange)="handleDeclChange($event)">
+
+                  <ng-template matStepperIcon="done">
+                    <mat-icon class="done">check_circle</mat-icon>
+                  </ng-template>
+
+                  <ng-template matStepperIcon="number" let-index="index">
+                    <mat-icon *ngIf="getDeclStatus(index) === 'incomplete'" class="warning-icon">warning</mat-icon>
+                    <span *ngIf="getDeclStatus(index) !== 'incomplete'" class="step-number">{{ index + 1 }}</span>
+                  </ng-template>
+
+                  <ng-container *ngFor="let s of declSteps; let i = index">
+                    <mat-step [completed]="s.status === 'completed'" style="padding: 0px;">
+                      <ng-template matStepLabel>{{ s.label }}</ng-template>
+                    </mat-step>
+                  </ng-container>
+                </mat-horizontal-stepper>
+              </div>
+            </div>
+          </mat-tab>
+
+
+          <mat-tab label="Intereses y Patrimonios">
+            <div class="stepper-section">
+
+
+              <div class="container-fluid stepper-declarante">
+                <div class="row">
+                  <div class="col mt-3">
+                    <h4 class="float-start">Declarante:</h4>
+
+                    <button class="btn btn-primary float-end" (click)="openAddModal()">Cambiar persona a
+                      declarar</button>
+                  </div>
+                </div>
+                <hr>
+                <div class="row">
+                  <div class="step-info">
+                    <span class="progress-bar-dip m-3">
+                      Paso {{ intIndex + 1 }} de {{ intSteps.length }}
+                      ({{ ((intProgress$ | async) ?? 0) * 100 | number:'1.0-0' }}%)
+                    </span>
+                    <mat-progress-bar class="int-progress-bar" [value]="((intProgress$ | async)??0) * 100"
+                      mode="determinate">
+                    </mat-progress-bar>
+                  </div>
+                </div>
+
+              </div>
+
+
+
+
+              <div cdkScrollable #intContainer class="stepper-wrapper stepper-int">
+                <mat-horizontal-stepper #intStepper class="custom-stepper header-only" [disableRipple]="true"
+                  [selectedIndex]="intIndex" (selectionChange)="handleIntChange($event)">
+
+                  <ng-template matStepperIcon="done">
+                    <mat-icon class="done">check_circle</mat-icon>
+                  </ng-template>
+
+                  <ng-template matStepperIcon="number" let-index="index">
+                    <mat-icon *ngIf="getIntStatus(index) === 'incomplete'" class="warning-icon">warning</mat-icon>
+                    <span *ngIf="getIntStatus(index) !== 'incomplete'" class="step-number">{{ index + 1 }}</span>
+                  </ng-template>
+
+                  <ng-container *ngFor="let s of intSteps; let i = index">
+                    <mat-step [completed]="s.status === 'completed'">
+                      <ng-template matStepLabel>{{ s.label }}</ng-template>
+                    </mat-step>
+                  </ng-container>
+                </mat-horizontal-stepper>
+              </div>
+            </div>
+          </mat-tab>
+
+          <mat-tab label="Confirmación de Datos">
+            <app-confirmacion-datos></app-confirmacion-datos>
+          </mat-tab>
+        </mat-tab-group>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="row" *ngIf="selectedTabIndex !== 2">
+    <div class="col">
+      <div class="step-content">
+        <ng-container *ngIf="activeComponent as cmp">
+          <ng-container *ngComponentOutlet="cmp"></ng-container>
+        </ng-container>
+      </div>
+    </div>
+  </div>
+
+ 
+</div>
+
+
+<ng-template #declaracionModal let-dialogRef>
+  <h2 mat-dialog-title>Selecciona un declarante o persona relacionada</h2>
+  <br>
+  <mat-dialog-content>
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col">
+          <mat-form-field class="w-100">
+            <mat-label>Seleccionar Declarante</mat-label>
+            <mat-select (selectionChange)="selectDeclarante($event.value)">
+              <mat-option *ngFor="let decl of declaraciones$ | async" [value]="decl.id">
+                {{ decl.declara }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="dialogRef.close()" mat-dialog-close>Cancelar</button>
+  </mat-dialog-actions>
+</ng-template>
+

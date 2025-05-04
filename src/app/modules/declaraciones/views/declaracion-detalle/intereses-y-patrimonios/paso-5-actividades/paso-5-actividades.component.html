@@ -1,0 +1,334 @@
+
+<mat-card class="tarjeta-declaracion">
+
+  <!-- Encabezado con título y subtítulo -->
+  <div class="encabezado">
+    <h2 class="titulo m-0">Declaración de Actividades</h2>
+    <div class="subtitulo">
+      <p class="m-0">Actividades profesionales, laborales, económicas, gremiales o de beneficiencia, sean o no remuneradas, que realice o en que participe</p>
+    </div>
+  </div>
+
+  <!-- Separador -->
+  <hr class="separador" />
+
+
+
+  <div class="contenido-form">
+
+
+    <div class="border p-3 mb-3">
+
+    <div class="row mb-3 align-items-center">
+      <div class="col-md-4 etiqueta fw-bold">Actividades en que haya participado en los últimos 12 meses</div>
+      <div class="col-md-7 text-end">
+        <mat-radio-group [value]="actividadesUltimos12Meses" (change)="onTieneActividad12MesesChange($event.value)">
+          <mat-radio-button value="si" class="me-4">Tiene</mat-radio-button>
+          <mat-radio-button value="no">No Tiene</mat-radio-button>
+        </mat-radio-group>
+      </div>
+    </div>
+
+    <div *ngIf="actividadesUltimos12Meses === 'si'">
+      <div class="row mb-3">
+        <div class="col-md-12 text-end">
+          <button mat-raised-button color="primary" (click)="openAddModal()">Declarar</button>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-12">
+          <table mat-table [dataSource]="actividades12Meses" class="w-100 mat-elevation-z8">
+
+            <!-- Tipo Actividad -->
+            <ng-container matColumnDef="tipoActividad">
+              <th mat-header-cell *matHeaderCellDef> Tipo de Actividad </th>
+              <td mat-cell *matCellDef="let act">{{ act.tipoActividad }}</td>
+            </ng-container>
+
+            <!-- Rubro/Área -->
+            <ng-container matColumnDef="rubroArea">
+              <th mat-header-cell *matHeaderCellDef>Rubro, Área o Tipo de Actividad</th>
+              <td mat-cell *matCellDef="let act">{{ act.rubro }}</td>
+            </ng-container>
+
+            <!-- Naturaleza del vínculo -->
+            <ng-container matColumnDef="vinculo">
+              <th mat-header-cell *matHeaderCellDef>Naturaleza del vínculo</th>
+              <td mat-cell *matCellDef="let act">{{ act.vinculo }}</td>
+            </ng-container>
+
+            <!-- Objeto Entidad -->
+            <ng-container matColumnDef="objetoEntidad">
+              <th mat-header-cell *matHeaderCellDef>Objeto Entidad</th>
+              <td mat-cell *matCellDef="let act">{{ act.objetoEntidad }}</td>
+            </ng-container>
+
+            <!-- Data Sensible -->
+            <ng-container matColumnDef="dataSensible">
+              <th mat-header-cell *matHeaderCellDef>Data Sensible</th>
+              <td mat-cell *matCellDef="let act">{{act.rbDatoSensible ? 'Dato Sensible' : 'No' }}
+              </td>
+            </ng-container>
+
+            <!-- Estado -->
+            <ng-container matColumnDef="estado">
+              <th mat-header-cell *matHeaderCellDef>Estado</th>
+              <td mat-cell *matCellDef="let act">{{ act.estado || 'completo' }}
+              </td>
+            </ng-container>
+
+            <!-- Acciones -->
+            <ng-container matColumnDef="acciones">
+              <th mat-header-cell *matHeaderCellDef>Acciones</th>
+              <td mat-cell *matCellDef="let act">
+                <button mat-icon-button color="accent" (click)="openEditModal(act)">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button color="warn" (click)="eliminarActividad(act)">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumnActividad12Meses"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumnActividad12Meses;"></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="border p-3 mb-3">
+
+    <div class="row mb-3 align-items-center">
+      <div class="col-md-4 etiqueta fw-bold">Actividades que realiza o en que participa a la fecha de la Declaración</div>
+      <div class="col-md-7 text-end">
+        <mat-radio-group [value]="actividadesQueRealiza" (change)="onTieneActividadRealizaChange($event.value)">
+          <mat-radio-button value="si" class="me-4">Tiene</mat-radio-button>
+          <mat-radio-button value="no">No Tiene</mat-radio-button>
+        </mat-radio-group>
+      </div>
+    </div>
+
+    <div *ngIf="actividadesQueRealiza === 'si'">
+      <div class="row mb-3">
+        <div class="col-md-12 text-end">
+          <button mat-raised-button color="primary" (click)="openAddModal()">Declarar</button>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-12">
+          <table mat-table [dataSource]="actividadesRealiza" class="w-100 mat-elevation-z8">
+
+            <!-- Tipo Actividad -->
+            <ng-container matColumnDef="tipoActividad">
+              <th mat-header-cell *matHeaderCellDef> Tipo de Actividad </th>
+              <td mat-cell *matCellDef="let act">{{ act.tipoActividad }}</td>
+            </ng-container>
+
+            <!-- Rubro/Área -->
+            <ng-container matColumnDef="rubroArea">
+              <th mat-header-cell *matHeaderCellDef>Rubro, Área o Tipo de Actividad</th>
+              <td mat-cell *matCellDef="let act">{{ act.rubroArea }}</td>
+            </ng-container>
+
+            <!-- Naturaleza del vínculo -->
+            <ng-container matColumnDef="vinculo">
+              <th mat-header-cell *matHeaderCellDef>Naturaleza del vínculo</th>
+              <td mat-cell *matCellDef="let act">{{ act.vinculo }}</td>
+            </ng-container>
+
+            <!-- Objeto Entidad -->
+            <ng-container matColumnDef="objetoVinculo">
+              <th mat-header-cell *matHeaderCellDef>Objeto Vinculo</th>
+              <td mat-cell *matCellDef="let act">{{ act.objetoVinculo }}</td>
+            </ng-container>
+
+            <!-- Fecha Inicio -->
+            <ng-container matColumnDef="fechaInicio">
+              <th mat-header-cell *matHeaderCellDef>Fecha Inicio</th>
+              <td mat-cell *matCellDef="let act">{{ act.fechaInicio }}</td>
+            </ng-container>
+
+            <!-- Beneficiario -->
+            <ng-container matColumnDef="beneficiario">
+              <th mat-header-cell *matHeaderCellDef>Beneficiario</th>
+              <td mat-cell *matCellDef="let act">{{ act.beneficiario }}</td>
+            </ng-container>
+
+            <!-- Data Sensible -->
+            <ng-container matColumnDef="dataSensible">
+              <th mat-header-cell *matHeaderCellDef>Data Sensible</th>
+              <td mat-cell *matCellDef="let act">{{act.dataSensible}}
+              </td>
+            </ng-container>
+
+            <!-- Estado -->
+            <ng-container matColumnDef="estado">
+              <th mat-header-cell *matHeaderCellDef>Estado</th>
+              <td mat-cell *matCellDef="let act">{{ act.estado }}
+              </td>
+            </ng-container>
+
+            <!-- Acciones -->
+            <ng-container matColumnDef="acciones">
+              <th mat-header-cell *matHeaderCellDef>Acciones</th>
+              <td mat-cell *matCellDef="let act">
+                <button mat-icon-button color="accent" (click)="openEditModal(act)">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button color="warn" (click)="eliminarActividad(act)">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumnsActividadesRealiza"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumnsActividadesRealiza;"></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="border p-3 mb-3" *ngIf="flagConyuge">
+
+    <div class="row mb-3 align-items-center" *ngIf="flagConyuge">
+      <div class="col-md-4 etiqueta fw-bold">Actividades que realiza o participa el/la Cónyuge o Conviviente Civil a la fecha de la Declaración</div>
+      <div class="col-md-7 text-end">
+        <mat-radio-group [value]="actividadesConyuge" (change)="onTieneActividadConyugeChange($event.value)">
+          <mat-radio-button value="si" class="me-4">Tiene</mat-radio-button>
+          <mat-radio-button value="no">No Tiene</mat-radio-button>
+        </mat-radio-group>
+      </div>
+    </div>
+
+    <div *ngIf="actividadesConyuge === 'si' && flagConyuge">
+      <div class="row mb-3">
+        <div class="col-md-12 text-end">
+          <button mat-raised-button color="primary" (click)="openAddModal()">Declarar</button>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-12">
+          <table mat-table [dataSource]="actividadesConyugeData" class="w-100 mat-elevation-z8">
+
+            <!-- Tipo Actividad -->
+            <ng-container matColumnDef="tipoActividad">
+              <th mat-header-cell *matHeaderCellDef> Tipo de Actividad </th>
+              <td mat-cell *matCellDef="let act">{{ act.tipoActividad }}</td>
+            </ng-container>
+
+            <!-- Rubro/Área -->
+            <ng-container matColumnDef="rubroArea">
+              <th mat-header-cell *matHeaderCellDef>Rubro, Área o Tipo de Actividad</th>
+              <td mat-cell *matCellDef="let act">{{ act.rubroArea }}</td>
+            </ng-container>
+
+                        <!-- Fecha Inicio -->
+                        <ng-container matColumnDef="fechaInicio">
+                          <th mat-header-cell *matHeaderCellDef>Fecha Inicio</th>
+                          <td mat-cell *matCellDef="let act">{{ act.fechaInicio }}</td>
+                        </ng-container>
+            
+
+            <!-- Clasificación -->
+            <ng-container matColumnDef="clasificacion">
+              <th mat-header-cell *matHeaderCellDef>Clasificación</th>
+              <td mat-cell *matCellDef="let act">{{ act.clasificacion }}</td>
+            </ng-container>
+
+            <!-- Beneficiario -->
+            <ng-container matColumnDef="beneficiario">
+              <th mat-header-cell *matHeaderCellDef>Beneficiario</th>
+              <td mat-cell *matCellDef="let act">{{ act.beneficiario }}</td>
+            </ng-container>
+
+            <!-- Rut Beneficiario -->
+            <ng-container matColumnDef="rutBeneficiario">
+              <th mat-header-cell *matHeaderCellDef>Rut Beneficiario</th>
+              <td mat-cell *matCellDef="let act">{{ act.rutBeneficiario }}</td>
+            </ng-container>
+
+
+            <!-- Data Sensible -->
+            <ng-container matColumnDef="dataSensible">
+              <th mat-header-cell *matHeaderCellDef>Data Sensible</th>
+              <td mat-cell *matCellDef="let act">{{act.dataSensible}}
+              </td>
+            </ng-container>
+
+            <!-- Estado -->
+            <ng-container matColumnDef="estado">
+              <th mat-header-cell *matHeaderCellDef>Estado</th>
+              <td mat-cell *matCellDef="let act">{{ act.estado }}
+              </td>
+            </ng-container>
+
+            <!-- Acciones -->
+            <ng-container matColumnDef="acciones">
+              <th mat-header-cell *matHeaderCellDef>Acciones</th>
+              <td mat-cell *matCellDef="let act">
+                <button mat-icon-button color="accent" (click)="openEditModal(act)">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button color="warn" (click)="eliminarActividad(act)">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumnsActividadesConyuge"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumnsActividadesConyuge;"></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  </div>
+
+  <!-- Botón Guardar -->
+  <mat-card-actions class="acciones justify-content-end mt-3">
+    <button mat-raised-button color="primary" type="submit" (click)="onSubmit()">
+      Guardar/Siguiente
+    </button>
+  </mat-card-actions>
+</mat-card>
+
+<!-- Modal inline para Agregar/Editar Actividad -->
+<ng-template #actividadModal let-dialogRef>
+  <h2 mat-dialog-title>{{ editMode ? 'Editar Actividad' : 'Agregar Actividad' }}</h2>
+
+  <mat-dialog-content>
+    <form [formGroup]="actividadForm">
+      <!-- Tipo Actividad -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Tipo de Actividad</mat-label>
+        <mat-select formControlName="tipoActividad">
+          <mat-option value="ECONOMICA">Económica</mat-option>
+          <mat-option value="GREMIAL">Gremial</mat-option>
+          <mat-option value="BENEFICENCIA">Beneficencia</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <!-- Rubro/Área -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Rubro, Área o Tipo de Actividad</mat-label>
+        <input matInput formControlName="rubroArea" />
+      </mat-form-field>
+
+      <!-- Naturaleza del vínculo -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Naturaleza del vínculo</mat-label>
+        <input matInput formControlName="vinculo" />
+      </mat-form-field>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="dialogRef.close()">Cancelar</button>
+    <button mat-raised-button color="primary" (click)="saveActividad(dialogRef)">Guardar</button>
+  </mat-dialog-actions>
+</ng-template>

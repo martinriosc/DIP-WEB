@@ -1,0 +1,422 @@
+<mat-card class="tarjeta-declaracion">
+  <div class="encabezado">
+    <h2 class="titulo m-0">Valores Obligatorios Adicionales</h2>
+    <div class="subtitulo">
+      <p class="m-0">¿Posee valores obligatorios a su nombre?</p>
+    </div>
+  </div>
+
+  <hr class="separador" />
+
+  <div class="contenido-form">
+
+    <div class="border p-3 mb-3">
+      <div class="row mb-3 align-items-center">
+        <div class="col-md-4 fw-bold etiqueta">Cuentas y/o Libretas de Ahorro</div>
+        <div class="col-md-7 text-end">
+          <mat-radio-group [(ngModel)]="tieneCuentasLibretas" name="cuentasRadio" (change)="onTieneCuentasLibretaChange($event.value)">
+            <mat-radio-button value="si" class="me-4">Tiene</mat-radio-button>
+            <mat-radio-button value="no">No Tiene</mat-radio-button>
+          </mat-radio-group>
+        </div>
+      </div>
+  
+      <div *ngIf="tieneCuentasLibretas === 'si'">
+        <div class="row mb-3">
+          <div class="col-md-12 text-end">
+            <button mat-raised-button color="primary" (click)="openAddModal()">
+              Agregar
+            </button>
+          </div>
+        </div>
+  
+        <table mat-table [dataSource]="cuentasLibretas" class="w-100 mat-elevation-z8">
+      
+          <!-- Tipo Documento -->
+          <ng-container matColumnDef="tipo">
+            <th mat-header-cell *matHeaderCellDef>Tipo Documento</th>
+            <td mat-cell *matCellDef="let vo">{{ vo.tipoDocumento }}</td>
+          </ng-container>
+  
+          <!-- N° Documento -->
+          <ng-container matColumnDef="razonSocial">
+            <th mat-header-cell *matHeaderCellDef>Nombre o Razón Social</th>
+            <td mat-cell *matCellDef="let vo">{{ vo.razonSocial }}</td>
+          </ng-container>
+
+          <!-- Pais -->
+          <ng-container matColumnDef="pais">
+            <th mat-header-cell *matHeaderCellDef>Pais</th>
+            <td mat-cell *matCellDef="let vo">{{ vo.pais }}</td>
+          </ng-container>
+
+          <!-- Fecha Adquisicion -->
+          <ng-container matColumnDef="fechaAdquisicion">
+            <th mat-header-cell *matHeaderCellDef>Fecha de Adquisición</th>
+            <td mat-cell *matCellDef="let vo">{{ vo.fechaAdquisicion | date: 'dd/MM/yyyy' }}</td>
+          </ng-container>
+  
+          <!-- Valor -->
+          <ng-container matColumnDef="monto">
+            <th mat-header-cell *matHeaderCellDef>Valor</th>
+            <td mat-cell *matCellDef="let vo">{{ vo.monto }}</td>
+          </ng-container>
+  
+          <!-- Moneda -->
+          <ng-container matColumnDef="moneda">
+            <th mat-header-cell *matHeaderCellDef>Moneda</th>
+            <td mat-cell *matCellDef="let vo">{{ vo.moneda }}</td>
+          </ng-container>
+
+          <!-- Gravamen -->
+          <ng-container matColumnDef="gravamen">
+            <th mat-header-cell *matHeaderCellDef>Gravamen</th>
+            <td mat-cell *matCellDef="let vo">{{ vo.gravamen }}</td>
+          </ng-container>
+  
+          <!-- Estado -->
+          <ng-container matColumnDef="estado">
+            <th mat-header-cell *matHeaderCellDef>Estado</th>
+            <td mat-cell *matCellDef="let vo">{{ vo.porcentaje == 100 ? 'Completo' : 'Incompleto' }}</td>
+          </ng-container>
+          <!-- Acciones -->
+          <ng-container matColumnDef="acciones">
+            <th mat-header-cell *matHeaderCellDef>Acciones</th>
+            <td mat-cell *matCellDef="let vo">
+              <button mat-icon-button color="accent" (click)="openEditModal(vo)">
+                <mat-icon>edit</mat-icon>
+              </button>
+  
+            </td>
+          </ng-container>
+  
+          <tr mat-header-row *matHeaderRowDef="['tipo','razonSocial','pais','fechaAdquisicion','monto','moneda','gravamen','estado','acciones']"></tr>
+          <tr mat-row *matRowDef="let row; columns: ['tipo','razonSocial','pais','fechaAdquisicion','monto','moneda','gravamen','estado','acciones'];">
+          </tr>
+        </table>
+      </div>
+    </div>
+
+
+    <div class="border p-3 mb-3">
+      <div class="row mb-3 align-items-center">
+        <div class="col-md-4 fw-bold etiqueta">Ahorro Previsional Voluntario </div>
+        <div class="col-md-7 text-end">
+          <mat-radio-group [(ngModel)]="tieneAhorrosPrevisionales" name="ahorroRadio" (change)="onTieneAhorrosChange($event.value)">
+            <mat-radio-button value="si" class="me-4">Tiene</mat-radio-button>
+            <mat-radio-button value="no">No Tiene</mat-radio-button>
+          </mat-radio-group>
+        </div>
+      </div>
+  
+      <div *ngIf="tieneAhorrosPrevisionales === 'si'">
+        <div class="row mb-3">
+          <div class="col-md-12 text-end">
+            <button mat-raised-button color="primary" (click)="openAddModal()">
+              Agregar
+            </button>
+          </div>
+        </div>
+  
+        <table mat-table [dataSource]="ahorrosPrevisionales" class="w-100 mat-elevation-z8">
+      
+          <!-- Tipo Documento -->
+          <ng-container matColumnDef="tipo">
+            <th mat-header-cell *matHeaderCellDef>Tipo Documento</th>
+            <td mat-cell *matCellDef="let vo">{{ vo.tipoDocumento }}</td>
+          </ng-container>
+  
+          <!-- N° Documento -->
+          <ng-container matColumnDef="razonSocial">
+            <th mat-header-cell *matHeaderCellDef>Nombre o Razón Social</th>
+            <td mat-cell *matCellDef="let vo">{{ vo.razonSocial }}</td>
+          </ng-container>
+
+          <!-- Pais -->
+          <ng-container matColumnDef="pais">
+            <th mat-header-cell *matHeaderCellDef>Pais</th>
+            <td mat-cell *matCellDef="let vo">{{ vo.pais }}</td>
+          </ng-container>
+
+          <!-- Fecha Adquisicion -->
+          <ng-container matColumnDef="fechaAdquisicion">
+            <th mat-header-cell *matHeaderCellDef>Fecha de Inicio</th>
+            <td mat-cell *matCellDef="let vo">{{ vo.fechaInicio | date: 'dd/MM/yyyy' }}</td>
+          </ng-container>
+  
+          <!-- Valor -->
+          <ng-container matColumnDef="monto">
+            <th mat-header-cell *matHeaderCellDef>Valor</th>
+            <td mat-cell *matCellDef="let vo">{{ vo.monto }}</td>
+          </ng-container>
+  
+          <!-- Moneda -->
+          <ng-container matColumnDef="moneda">
+            <th mat-header-cell *matHeaderCellDef>Moneda</th>
+            <td mat-cell *matCellDef="let vo">{{ vo.moneda }}</td>
+          </ng-container>
+
+          <!-- Gravamen -->
+          <ng-container matColumnDef="gravamen">
+            <th mat-header-cell *matHeaderCellDef>Gravamen</th>
+            <td mat-cell *matCellDef="let vo">{{ vo.gravamen }}</td>
+          </ng-container>
+  
+          <!-- Estado -->
+          <ng-container matColumnDef="estado">
+            <th mat-header-cell *matHeaderCellDef>Estado</th>
+            <td mat-cell *matCellDef="let vo">{{ vo.porcentaje == 100 ? 'Completo' : 'Incompleto' }}</td>
+          </ng-container>
+          <!-- Acciones -->
+          <ng-container matColumnDef="acciones">
+            <th mat-header-cell *matHeaderCellDef>Acciones</th>
+            <td mat-cell *matCellDef="let vo">
+              <button mat-icon-button color="accent" (click)="openEditModal(vo)">
+                <mat-icon>edit</mat-icon>
+              </button>
+  
+            </td>
+          </ng-container>
+  
+          <tr mat-header-row *matHeaderRowDef="['tipo','razonSocial','pais','fechaAdquisicion','monto','moneda','gravamen','estado','acciones']"></tr>
+          <tr mat-row *matRowDef="let row; columns: ['tipo','razonSocial','pais','fechaAdquisicion','monto','moneda','gravamen','estado','acciones'];">
+          </tr>
+        </table>
+      </div>
+    </div>
+
+
+    <div class="border p-3 mb-3">
+      <div class="row mb-3 align-items-center">
+        <div class="col-md-4 fw-bold etiqueta">Depósito a Plazo </div>
+        <div class="col-md-7 text-end">
+          <mat-radio-group [(ngModel)]="tieneDepositosPlazo" name="depositoRadio" (change)="onTieneDepositoAPlazoChange($event.value)">
+            <mat-radio-button value="si" class="me-4">Tiene</mat-radio-button>
+            <mat-radio-button value="no">No Tiene</mat-radio-button>
+          </mat-radio-group>
+        </div>
+      </div>
+  
+      <div *ngIf="tieneDepositosPlazo === 'si'">
+        <div class="row mb-3">
+          <div class="col-md-12 text-end">
+            <button mat-raised-button color="primary" (click)="openAddModal()">
+              Agregar
+            </button>
+          </div>
+        </div>
+  
+        <table mat-table [dataSource]="depositosPlazo" class="w-100 mat-elevation-z8">
+      
+          <!-- Tipo Documento -->
+          <ng-container matColumnDef="tipo">
+            <th mat-header-cell *matHeaderCellDef>Tipo Documento</th>
+            <td mat-cell *matCellDef="let vo">{{ vo.tipoDocumento }}</td>
+          </ng-container>
+  
+          <!-- N° Documento -->
+          <ng-container matColumnDef="razonSocial">
+            <th mat-header-cell *matHeaderCellDef>Nombre o Razón Social</th>
+            <td mat-cell *matCellDef="let vo">{{ vo.razonSocial }}</td>
+          </ng-container>
+
+          <!-- Pais -->
+          <ng-container matColumnDef="pais">
+            <th mat-header-cell *matHeaderCellDef>Pais</th>
+            <td mat-cell *matCellDef="let vo">{{ vo.pais }}</td>
+          </ng-container>
+
+          <!-- Fecha Adquisicion -->
+          <ng-container matColumnDef="fechaAdquisicion">
+            <th mat-header-cell *matHeaderCellDef>Fecha de Contratación</th>
+            <td mat-cell *matCellDef="let vo">{{ vo.fechaContratacion | date: 'dd/MM/yyyy' }}</td>
+          </ng-container>
+  
+          <!-- Valor -->
+          <ng-container matColumnDef="monto">
+            <th mat-header-cell *matHeaderCellDef>Valor</th>
+            <td mat-cell *matCellDef="let vo">{{ vo.monto }}</td>
+          </ng-container>
+  
+          <!-- Moneda -->
+          <ng-container matColumnDef="moneda">
+            <th mat-header-cell *matHeaderCellDef>Moneda</th>
+            <td mat-cell *matCellDef="let vo">{{ vo.moneda }}</td>
+          </ng-container>
+
+          <!-- Gravamen -->
+          <ng-container matColumnDef="gravamen">
+            <th mat-header-cell *matHeaderCellDef>Gravamen</th>
+            <td mat-cell *matCellDef="let vo">{{ vo.gravamen }}</td>
+          </ng-container>
+  
+          <!-- Estado -->
+          <ng-container matColumnDef="estado">
+            <th mat-header-cell *matHeaderCellDef>Estado</th>
+            <td mat-cell *matCellDef="let vo">{{ vo.porcentaje == 100 ? 'Completo' : 'Incompleto' }}</td>
+          </ng-container>
+          <!-- Acciones -->
+          <ng-container matColumnDef="acciones">
+            <th mat-header-cell *matHeaderCellDef>Acciones</th>
+            <td mat-cell *matCellDef="let vo">
+              <button mat-icon-button color="accent" (click)="openEditModal(vo)">
+                <mat-icon>edit</mat-icon>
+              </button>
+  
+            </td>
+          </ng-container>
+  
+          <tr mat-header-row *matHeaderRowDef="['tipo','razonSocial','pais','fechaAdquisicion','monto','moneda','gravamen','estado','acciones']"></tr>
+          <tr mat-row *matRowDef="let row; columns: ['tipo','razonSocial','pais','fechaAdquisicion','monto','moneda','gravamen','estado','acciones'];">
+          </tr>
+        </table>
+      </div>
+    </div>
+
+
+    <div class="border p-3 mb-3">
+      <div class="row mb-3 align-items-center">
+        <div class="col-md-4 fw-bold etiqueta">Seguros </div>
+        <div class="col-md-7 text-end">
+          <mat-radio-group [(ngModel)]="tieneSeguros" name="seguroRadio" (change)="onTieneSeguroChange($event.value)">
+            <mat-radio-button value="si" class="me-4">Tiene</mat-radio-button>
+            <mat-radio-button value="no">No Tiene</mat-radio-button>
+          </mat-radio-group>
+        </div>
+      </div>
+  
+      <div *ngIf="tieneSeguros === 'si'">
+        <div class="row mb-3">
+          <div class="col-md-12 text-end">
+            <button mat-raised-button color="primary" (click)="openAddModal()">
+              Agregar
+            </button>
+          </div>
+        </div>
+  
+        <table mat-table [dataSource]="seguros" class="w-100 mat-elevation-z8">
+      
+          <!-- Tipo Documento -->
+          <ng-container matColumnDef="tipo">
+            <th mat-header-cell *matHeaderCellDef>Tipo Documento</th>
+            <td mat-cell *matCellDef="let vo">{{ vo.tipoDocumento }}</td>
+          </ng-container>
+
+          <!-- Tipo Seguro -->
+          <ng-container matColumnDef="tipoSeguro">
+            <th mat-header-cell *matHeaderCellDef>Tipo Seguro</th>
+            <td mat-cell *matCellDef="let vo">{{ vo.tipoSeguro }}</td>
+          </ng-container>
+
+          <!-- N° Documento -->
+          <ng-container matColumnDef="razonSocial">
+            <th mat-header-cell *matHeaderCellDef>Nombre o Razón Social</th>
+            <td mat-cell *matCellDef="let vo">{{ vo.razonSocial }}</td>
+          </ng-container>
+
+          <!-- Pais -->
+          <ng-container matColumnDef="pais">
+            <th mat-header-cell *matHeaderCellDef>Pais</th>
+            <td mat-cell *matCellDef="let vo">{{ vo.pais }}</td>
+          </ng-container>
+
+          <!-- Fecha Adquisicion -->
+          <ng-container matColumnDef="fechaAdquisicion">
+            <th mat-header-cell *matHeaderCellDef>Fecha de Contratación</th>
+            <td mat-cell *matCellDef="let vo">{{ vo.fechaContratacion | date: 'dd/MM/yyyy' }}</td>
+          </ng-container>
+  
+          <!-- Valor -->
+          <ng-container matColumnDef="monto">
+            <th mat-header-cell *matHeaderCellDef>Valor</th>
+            <td mat-cell *matCellDef="let vo">{{ vo.monto }}</td>
+          </ng-container>
+  
+          <!-- Moneda -->
+          <ng-container matColumnDef="moneda">
+            <th mat-header-cell *matHeaderCellDef>Moneda</th>
+            <td mat-cell *matCellDef="let vo">{{ vo.moneda }}</td>
+          </ng-container>
+
+          <!-- Gravamen -->
+          <ng-container matColumnDef="gravamen">
+            <th mat-header-cell *matHeaderCellDef>Gravamen</th>
+            <td mat-cell *matCellDef="let vo">{{ vo.gravamen }}</td>
+          </ng-container>
+  
+          <!-- Estado -->
+          <ng-container matColumnDef="estado">
+            <th mat-header-cell *matHeaderCellDef>Estado</th>
+            <td mat-cell *matCellDef="let vo">{{ vo.porcentaje == 100 ? 'Completo' : 'Incompleto' }}</td>
+          </ng-container>
+          <!-- Acciones -->
+          <ng-container matColumnDef="acciones">
+            <th mat-header-cell *matHeaderCellDef>Acciones</th>
+            <td mat-cell *matCellDef="let vo">
+              <button mat-icon-button color="accent" (click)="openEditModal(vo)">
+                <mat-icon>edit</mat-icon>
+              </button>
+  
+            </td>
+          </ng-container>
+  
+          <tr mat-header-row *matHeaderRowDef="['tipo', 'tipoSeguro','razonSocial','pais','fechaAdquisicion','monto','moneda','gravamen','estado','acciones']"></tr>
+          <tr mat-row *matRowDef="let row; columns: ['tipo','tipoSeguro','razonSocial','pais','fechaAdquisicion','monto','moneda','gravamen','estado','acciones'];">
+          </tr>
+        </table>
+      </div>
+    </div>
+
+
+
+   
+  </div>
+  <!-- Botón Guardar -->
+  <mat-card-actions class="acciones justify-content-end mt-3">
+    <button mat-raised-button color="primary" type="submit" (click)="onSubmit()">
+      Guardar/Siguiente
+    </button>
+  </mat-card-actions>
+</mat-card>
+
+<!-- Modal inline -->
+<!-- <ng-template #valObligModal let-dialogRef>
+  <h2 mat-dialog-title>
+    {{ editMode ? 'Editar Valor Obligatorio' : 'Agregar Valor Obligatorio' }}
+  </h2>
+
+  <mat-dialog-content>
+    <form [formGroup]="valObligForm">
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Tipo de Documento</mat-label>
+        <mat-select formControlName="tipoDocumento">
+          <mat-option value="PAGARE">Pagaré</mat-option>
+          <mat-option value="LETRA">Letra</mat-option>
+          <mat-option value="OTRO">Otro</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>N° de Documento</mat-label>
+        <input matInput formControlName="nroDocumento" />
+      </mat-form-field>
+
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Valor</mat-label>
+        <input matInput type="number" formControlName="valor" />
+      </mat-form-field>
+
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Fecha Emisión</mat-label>
+        <input matInput formControlName="fechaEmision" placeholder="YYYY-MM-DD" />
+      </mat-form-field>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="dialogRef.close()">Cancelar</button>
+    <button mat-raised-button color="primary" (click)="saveValorOblig(dialogRef)">
+      Guardar
+    </button>
+  </mat-dialog-actions>
+</ng-template> -->

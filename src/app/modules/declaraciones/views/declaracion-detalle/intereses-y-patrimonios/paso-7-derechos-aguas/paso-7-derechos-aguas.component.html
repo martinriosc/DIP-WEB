@@ -1,0 +1,251 @@
+<mat-card class="tarjeta-declaracion">
+  <!-- Encabezado -->
+  <div class="encabezado">
+    <h2 class="titulo m-0">Derechos de Aguas</h2>
+    <div class="subtitulo">
+      <p class="m-0">¿Posee derechos de aguas inscritos a su nombre?</p>
+    </div>
+  </div>
+
+  <hr class="separador" />
+
+  <div class="contenido-form">
+
+    <div class="border p-3 mb-3">
+
+      <div class="row mb-3 align-items-center">
+        <div class="col-md-4 etiqueta fw-bold">
+          Derecho de Aprovechamiento de Aguas
+        </div>
+        <div class="col-md-7 text-end">
+          <mat-radio-group [value]="tieneDerechosAguas" (change)="onTieneDerechosChange($event.value)">
+            <mat-radio-button value="si" class="me-4">Tiene</mat-radio-button>
+            <mat-radio-button value="no">No Tiene</mat-radio-button>
+          </mat-radio-group>
+        </div>
+      </div>
+
+      <!-- Si tiene, mostramos tabla y botón "Agregar" -->
+      <div *ngIf="tieneDerechosAguas === 'si'">
+        <div class="row mb-3">
+          <div class="col-md-12 text-end">
+            <button mat-raised-button color="primary" (click)="openAddModal()">
+              Agregar Derecho de Agua
+            </button>
+          </div>
+        </div>
+
+        <table mat-table [dataSource]="derechosAguasData" class="w-100 mat-elevation-z8">
+          <!-- Nro Resolucion -->
+          <ng-container matColumnDef="nroResolucion">
+            <th mat-header-cell *matHeaderCellDef>Nro Resolucion</th>
+            <td mat-cell *matCellDef="let d"> {{ d.nroResolucion }} </td>
+          </ng-container>
+
+          <!-- Año Resolucion -->
+          <ng-container matColumnDef="anoResolucion">
+            <th mat-header-cell *matHeaderCellDef>Año Resolucion</th>
+            <td mat-cell *matCellDef="let d"> {{ d.anoResolucion }} </td>
+          </ng-container>
+
+          <!-- Entidad Emisora -->
+          <ng-container matColumnDef="entidadEmisora">
+            <th mat-header-cell *matHeaderCellDef>Entidad Emisora</th>
+            <td mat-cell *matCellDef="let d"> {{ d.entidadEmisora }} </td>
+          </ng-container>
+
+          <!-- Tipo Derecho -->
+          <ng-container matColumnDef="tipoDerecho">
+            <th mat-header-cell *matHeaderCellDef>Tipo Derecho</th>
+            <td mat-cell *matCellDef="let d"> {{ d.tipoDerecho }} </td>
+          </ng-container>
+
+          <!-- Naturaleza Agua -->
+          <ng-container matColumnDef="naturalezaAgua">
+            <th mat-header-cell *matHeaderCellDef>Naturaleza Agua</th>
+            <td mat-cell *matCellDef="let d"> {{ d.naturalezaAgua }} </td>
+          </ng-container>
+
+          <!-- Nombre Alveo -->
+          <ng-container matColumnDef="nombreAlveo">
+            <th mat-header-cell *matHeaderCellDef>Nombre Alveo</th>
+            <td mat-cell *matCellDef="let d"> {{ d.nombreAlveo }} </td>
+          </ng-container>  
+
+          <!-- Rol Expediente -->          
+          <ng-container matColumnDef="rolExpediente">
+            <th mat-header-cell *matHeaderCellDef>Rol Expediente</th>
+            <td mat-cell *matCellDef="let d"> {{ d.rolExpediente }} </td>
+          </ng-container>          
+
+          <!-- Region -->          
+          <ng-container matColumnDef="region">
+            <th mat-header-cell *matHeaderCellDef>Region</th>
+            <td mat-cell *matCellDef="let d"> {{ d.region }} </td>
+          </ng-container>          
+
+          <!-- Estado -->
+          <ng-container matColumnDef="estado">
+            <th mat-header-cell *matHeaderCellDef>Estado</th>
+            <td mat-cell *matCellDef="let d"> {{ d.estado }} </td>
+          </ng-container>
+
+          <!-- Acciones -->
+          <ng-container matColumnDef="acciones">
+            <th mat-header-cell *matHeaderCellDef>Acciones</th>
+            <td mat-cell *matCellDef="let d">
+              <button mat-icon-button color="accent" (click)="openEditModal(d)">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button color="warn" (click)="eliminarDerecho(d)">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="['nroResolucion','anoResolucion','entidadEmisora','tipoDerecho','naturalezaAgua','nombreAlveo','rolExpediente','region','estado','acciones']"></tr>
+          <tr mat-row *matRowDef="let row; columns: ['nroResolucion','anoResolucion','entidadEmisora','tipoDerecho','naturalezaAgua','nombreAlveo','rolExpediente','region','estado','acciones'];"></tr>
+        </table>
+      </div>
+    </div>
+
+
+
+    <div class="border p-3 mb-3">
+
+      <div class="row mb-3 align-items-center">
+        <div class="col-md-4 etiqueta fw-bold">
+          Concesiones
+        </div>
+        <div class="col-md-7 text-end">
+          <mat-radio-group [value]="tieneConcesiones" (change)="onTieneConcesionesChange($event.value)">
+            <mat-radio-button value="si" class="me-4">Tiene</mat-radio-button>
+            <mat-radio-button value="no">No Tiene</mat-radio-button>
+          </mat-radio-group>
+        </div>
+      </div>
+
+      <!-- Si tiene, mostramos tabla y botón "Agregar" -->
+      <div *ngIf="tieneConcesiones === 'si'">
+        <div class="row mb-3">
+          <div class="col-md-12 text-end">
+            <button mat-raised-button color="primary" (click)="openAddModal()">
+              Agregar Concesion
+            </button>
+          </div>
+        </div>
+
+        <table mat-table [dataSource]="concesionesData" class="w-100 mat-elevation-z8">
+          <!-- Acto que la otorga -->
+          <ng-container matColumnDef="actoOtorga">
+            <th mat-header-cell *matHeaderCellDef>Acto que la otorga</th>
+            <td mat-cell *matCellDef="let d">{{ d.actoOtorga }}</td>
+          </ng-container>
+
+          <!-- Número -->
+          <ng-container matColumnDef="numero">
+            <th mat-header-cell *matHeaderCellDef>Número</th>
+            <td mat-cell *matCellDef="let d">{{ d.numero }}</td>
+          </ng-container>
+
+          <!-- Año -->
+          <ng-container matColumnDef="ano">
+            <th mat-header-cell *matHeaderCellDef>Año</th>
+            <td mat-cell *matCellDef="let d">{{ d.ano }}</td>
+          </ng-container>
+
+          <!-- Servicio Emisor -->
+          <ng-container matColumnDef="servicioEmisor">
+            <th mat-header-cell *matHeaderCellDef>Servicio Emisor</th>
+            <td mat-cell *matCellDef="let d">{{ d.servicioEmisor }}</td>
+          </ng-container>
+
+          <!-- Tipo -->
+          <ng-container matColumnDef="tipo">
+            <th mat-header-cell *matHeaderCellDef>Tipo</th>
+            <td mat-cell *matCellDef="let d">{{ d.tipo }}</td>
+          </ng-container>
+
+          <!-- Nro Registro -->
+          <ng-container matColumnDef="nroRegistro">
+            <th mat-header-cell *matHeaderCellDef>Nro Registro</th>
+            <td mat-cell *matCellDef="let d">{{ d.nroRegistro }}</td>
+          </ng-container>
+
+          <!-- Ano Registro -->
+          <ng-container matColumnDef="anoRegistro">
+            <th mat-header-cell *matHeaderCellDef>Ano Registro</th>
+            <td mat-cell *matCellDef="let d">{{ d.anoRegistro }}</td>
+          </ng-container>
+
+          <!-- Estado -->
+          <ng-container matColumnDef="estado">
+            <th mat-header-cell *matHeaderCellDef>Estado</th>
+            <td mat-cell *matCellDef="let d">{{ d.estado }}</td>
+          </ng-container>
+      
+
+          <!-- Acciones -->
+          <ng-container matColumnDef="acciones">
+            <th mat-header-cell *matHeaderCellDef>Acciones</th>
+            <td mat-cell *matCellDef="let d">
+              <button mat-icon-button color="accent" (click)="openEditModal(d)">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button color="warn" (click)="eliminarDerecho(d)">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="['actoOtorga','numero','ano','servicioEmisor','tipo','nroRegistro','anoRegistro','estado','acciones']"></tr>
+          <tr mat-row *matRowDef="let row; columns: ['actoOtorga','numero','ano','servicioEmisor','tipo','nroRegistro','anoRegistro','estado','acciones'];"></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+  <!-- Botón Guardar -->
+  <mat-card-actions class="acciones justify-content-end mt-3">
+    <button mat-raised-button color="primary" type="submit" (click)="onSubmit()">
+      Guardar/Siguiente
+    </button>
+  </mat-card-actions>
+</mat-card>
+
+<!-- MODAL inline para Agregar/Editar Derecho de Agua -->
+<ng-template #derechosAguasModal let-dialogRef>
+  <h2 mat-dialog-title>
+    {{ editMode ? 'Editar Derecho de Agua' : 'Agregar Derecho de Agua' }}
+  </h2>
+
+  <mat-dialog-content>
+    <form [formGroup]="derechosAguasForm">
+      <!-- Tipo Derecho -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Tipo Derecho</mat-label>
+        <mat-select formControlName="tipo">
+          <mat-option value="APROVECHAMIENTO">Aprovechamiento</mat-option>
+          <mat-option value="CONSUNTIVO">Consuntivo</mat-option>
+          <mat-option value="NO_CONSUNTIVO">No Consuntivo</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <!-- Rol/Identificador -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Rol / Identificador</mat-label>
+        <input matInput formControlName="rol" />
+      </mat-form-field>
+
+      <!-- Caudal -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Caudal (l/s)</mat-label>
+        <input matInput type="number" formControlName="caudal" />
+      </mat-form-field>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="dialogRef.close()">Cancelar</button>
+    <button mat-raised-button color="primary" (click)="saveDerecho(dialogRef)">Guardar</button>
+  </mat-dialog-actions>
+</ng-template>

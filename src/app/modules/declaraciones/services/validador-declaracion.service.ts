@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, firstValueFrom } from 'rxjs';
+import { StepperStatusService } from './stepper-status.service';
+import { Declaracion } from '../models/Step';
 
 /**
  * Interfaz para representar un “subpaso” o “paso”.
@@ -30,7 +32,16 @@ export class ValidadorDeclaracionService {
   private stepsSubject = new BehaviorSubject<StepData[]>([]);
   steps$ = this.stepsSubject.asObservable();
 
-  constructor() {}
+  constructor(private store: StepperStatusService) {}
+
+    /**
+   * Devuelve un array tipado de Declaración en su estado actual.
+   * Se clona para evitar que el componente modifique el store por accidente.
+   */
+    async getDeclaraciones(): Promise<Declaracion[]> {
+      const snapshot = await firstValueFrom(this.store.state$);
+      return structuredClone(snapshot.declaraciones) as Declaracion[];
+    }
 
   /**
    * Carga un nuevo arreglo de pasos (y subpasos) en el servicio.
@@ -129,6 +140,7 @@ export class ValidadorDeclaracionService {
   getCompletionPercentage(): number {
     const steps = this.getStepsSnapshot();
     const total = this.countAllSteps(steps);
+
     if (total === 0) {
       return 0;
     }
@@ -143,9 +155,6 @@ export class ValidadorDeclaracionService {
     let count = 0;
     for (const step of steps) {
       count += 1;
-      if (step.subSteps && step.subSteps.length > 0) {
-        count += this.countAllSteps(step.subSteps);
-      }
     }
     return count;
   }
@@ -171,7 +180,6 @@ export class ValidadorDeclaracionService {
    */
   enviarDeclaracionFinal(): void {
     const stepsData = this.getStepsSnapshot();
-    console.log('Enviando declaración al backend (futuro). Pasos:', stepsData);
   }
 
 

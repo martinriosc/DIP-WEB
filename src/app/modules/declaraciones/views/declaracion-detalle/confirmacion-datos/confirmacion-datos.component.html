@@ -1,0 +1,94 @@
+<mat-card class="tarjeta-declaracion">
+
+  <div class="encabezado">
+    <h2 class="titulo m-0">Confirmación Final de Datos</h2>
+    <p class="m-0">Revisa si todos los pasos están completos y confirma tu declaración.</p>
+  </div>
+
+  <hr class="separador" />
+
+  <!-- Acordeones por declarante -->
+  <mat-accordion multi class="mb-4">
+    <mat-expansion-panel *ngFor="let decl of declaraciones" [expanded]="true">
+
+      <!-- Cabecera del acordeón -->
+      <mat-expansion-panel-header>
+        <mat-panel-title>{{ decl.declara }}</mat-panel-title>
+        <mat-panel-description
+          class="text-success"
+          *ngIf="decl.completed; else incompleto">
+          ✔ Completado
+        </mat-panel-description>
+        <ng-template #incompleto>
+          <span class="text-danger">Pendiente</span>
+        </ng-template>
+      </mat-expansion-panel-header>
+
+      <!-- Tabla de pasos -->
+      <table class="table table-sm align-middle">
+        <thead>
+          <tr>
+            <th>Elemento</th>
+            <th class="text-center">Completado</th>
+            <th class="text-center">Ver</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let paso of decl.intereses">
+            <td>{{ paso.label }}</td>
+
+            <!-- Estado -->
+            <td class="text-center">
+              <mat-icon
+                [ngClass]="paso.completed ? 'text-success' : 'text-danger'">
+                {{ paso.completed ? 'check_circle' : 'error_outline' }}
+              </mat-icon>
+            </td>
+
+            <!-- Botón Ver -->
+            <td class="text-center">
+              <button mat-icon-button
+                      color="primary"
+                      (click)="verPaso(decl.id, paso.key)">
+                <mat-icon>visibility</mat-icon>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+    </mat-expansion-panel>
+  </mat-accordion>
+
+  <!-- Advertencias -->
+  <div class="alert alert-warning" *ngIf="advertencias.length">
+    <h5 class="mb-2">Hay pasos incompletos:</h5>
+    <ul>
+      <li *ngFor="let msg of advertencias">{{ msg }}</li>
+    </ul>
+  </div>
+
+  <!-- Mensaje y checkbox de aceptación -->
+  <p *ngIf="!advertencias.length">
+    Todos los pasos están completos. Marca la casilla y presiona “Finalizar”.
+  </p>
+
+  <div class="form-check mb-3" *ngIf="!advertencias.length">
+    <input
+      id="acepta"
+      class="form-check-input"
+      type="checkbox"
+      [(ngModel)]="aceptaResponsabilidad" />
+    <label for="acepta" class="form-check-label">
+      Declaro bajo juramento que la información presentada es veraz y completa.
+    </label>
+  </div>
+
+  <!-- Botón final -->
+  <button mat-raised-button color="primary"
+          (click)="finalizar()"
+          [disabled]="advertencias.length || !aceptaResponsabilidad">
+    Finalizar Declaración
+  </button>
+
+</mat-card>

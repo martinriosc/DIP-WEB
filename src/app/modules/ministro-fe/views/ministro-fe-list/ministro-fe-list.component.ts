@@ -33,11 +33,13 @@ export class MinistroFeListComponent implements OnInit {
    *  - 'enviadas'
    *  - 'archivadas'
    */
-  currentTab: 'pendientes' | 'enviadas' | 'archivadas' = 'pendientes';
+  currentTab: 'pendientes' | 'firma-envio-masivo' | 'enviadas' | 'archivo-masivo' | 'archivadas' = 'pendientes';
 
   // Conteo que se muestra en las pestañas
   pendientesCount = 14;
+  firmaEnvioCount = 5;
   enviadasCount = 35;
+  archivoMasivoCount = 10;
   archivadasCount = 10;
 
   // Filtros (FormControls para usar en la plantilla)
@@ -150,7 +152,7 @@ export class MinistroFeListComponent implements OnInit {
   ngOnInit(): void {}
 
   // Cambia la pestaña actual
-  setTab(tab: 'pendientes' | 'enviadas' | 'archivadas'): void {
+  setTab(tab: 'pendientes' | 'firma-envio-masivo' | 'enviadas' | 'archivo-masivo' | 'archivadas'): void {
     this.currentTab = tab;
   }
 

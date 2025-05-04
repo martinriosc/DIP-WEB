@@ -1,0 +1,225 @@
+<mat-card class="tarjeta-declaracion">
+
+  <!-- Encabezado (Título y Subtítulo) -->
+  <div class="encabezado">
+    <h2 class="titulo m-0">Datos Personales</h2>
+    <div class="subtitulo">
+      <p class="m-0">Ingrese la información personal requerida</p>
+    </div>
+  </div>
+
+  <!-- Separador visual -->
+  <hr class="separador" />
+
+  <!-- Contenido del Formulario -->
+  <div class="contenido-form">
+    <form [formGroup]="datosPersonalesForm" (ngSubmit)="onSubmit()" class="form-declaracion">
+
+      <!-- RUT -->
+      <div class="row mb-3 align-items-center">
+        <div class="col-md-4">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>R.U.T.</mat-label>
+            <input matInput formControlName="rut" placeholder="15381086-9" />
+          </mat-form-field>
+        </div>
+        <div class="col-md-8">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Nombres</mat-label>
+            <input matInput formControlName="nombres" />
+          </mat-form-field>
+        </div>
+      </div>
+
+      <!-- Apellido Paterno -->
+      <div class="row mb-3 align-items-center">
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Apellido Paterno</mat-label>
+            <input matInput formControlName="apellidoPaterno" />
+          </mat-form-field>
+        </div>
+
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Apellido Materno</mat-label>
+            <input matInput formControlName="apellidoMaterno" />
+          </mat-form-field>
+        </div>
+      </div>
+
+      <!-- Profesión / Oficio -->
+      <div class="row mb-3 align-items-center">
+        <div class="col-md-12">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Profesión u Oficio</mat-label>
+            <mat-select formControlName="profesion">
+              <mat-option *ngFor="let p of profesiones" [value]="p.id"> {{ p.nombre }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="row mb-3 align-items-center">
+        <div class="col-md-12">
+          <strong>Lugar donde reside :</strong>
+          <br>
+          <mat-radio-group formControlName="lugarReside" (change)="onChangeNacionalidad($event.value)">
+            <mat-radio-button class="me-4" [value]="'chile'">Chile</mat-radio-button>
+            <mat-radio-button [value]="'extranjero'">Extranjero</mat-radio-button>
+          </mat-radio-group>
+        </div>
+      </div>
+
+      <div class="container-fluid" *ngIf="datosPersonalesForm.value.lugarReside === 'chile'">
+        <div class="row mb-3 align-items-center">
+          <div class="col-md-6">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Seleccione la Región</mat-label>
+              <mat-select formControlName="region" (selectionChange)="onChangeRegion()">
+                <mat-option *ngFor="let r of regiones" [value]="r.id">
+                  {{ r.nombre }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="col-md-6">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Seleccione la Comuna</mat-label>
+              <mat-select formControlName="comuna">
+                <mat-option *ngFor="let c of comunas" [value]="c.id">
+                  {{ c.nombre }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
+      </div>
+
+      <div class="container-fluid" *ngIf="datosPersonalesForm.value.lugarReside === 'extranjero'">
+        <div class="row mb-3 align-items-center">
+          <div class="col-md-6">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Seleccione el Pais</mat-label>
+              <mat-select formControlName="pais">
+                <mat-option *ngFor="let p of paises" [value]="p.id">
+                  {{ p.nombre }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="col-md-6">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Ingrese la Ciudad</mat-label>
+              <input matInput formControlName="ciudad" />
+
+            </mat-form-field>
+          </div>
+        </div>
+      </div>
+
+      <div class="row mb-3 align-items-center" *ngIf="datosPersonalesForm.value.lugarReside === 'chile'">
+        <div class="col-md-4">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Calle o Nombre del Predio</mat-label>
+            <input matInput formControlName="domicilioCalle" />
+          </mat-form-field>
+        </div>
+        <div class="col-md-4">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Numero</mat-label>
+            <input matInput formControlName="domicilioNumero" />
+          </mat-form-field>
+        </div>
+        <div class="col-md-4">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>DP/LOC/BX/BD</mat-label>
+            <input matInput formControlName="domicilioDepto" />
+          </mat-form-field>
+        </div>
+      </div>
+
+      <div class="row mb-3 align-items-center">
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Estado Civil</mat-label>
+            <mat-select formControlName="estadoCivil" (selectionChange)="onChangeEstadoCivil($event)">
+              <mat-option *ngFor="let ec of estadosCiviles" [value]="ec.id"> {{ ec.nombre }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Régimen Patrimonial</mat-label>
+            <mat-select formControlName="regimenPatrimonial">
+              <mat-option *ngFor="let rp of regimenesFiltered" [value]="rp.id"> {{ rp.nombre }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
+
+
+
+      <div class="container-fluid" *ngIf="this.conyugeFlag == true">
+        <div class="row mb-3 align-items-center">
+          <div class="col-md-4">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>R.U.N. Cónyuge</mat-label>
+              <input matInput formControlName="rutConyuge" />
+            </mat-form-field>
+          </div>
+
+          <div class="col-md-8">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Nombres Cónyuge</mat-label>
+              <input matInput formControlName="nombresConyuge" />
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="row mb-3 align-items-center">
+          <div class="col-md-6">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Apellido Paterno Cónyuge</mat-label>
+              <input matInput formControlName="apellidoPaternoConyuge" />
+            </mat-form-field>
+          </div>
+
+          <div class="col-md-6">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Apellido Materno Cónyuge</mat-label>
+              <input matInput formControlName="apellidoMaternoConyuge" />
+            </mat-form-field>
+          </div>
+        </div>
+
+
+        <div class="row mb-3 align-items-center">
+          <p><strong>DECLARA BIENES DEL CÓNYUGE O CONVIVIENTE CIVIL</strong></p>
+          <p>¿Ha obtenido el consentimiento expreso y por escrito del cónyuge o conviviente civil en caso de tener régimen de separación de bienes o participación en los gananciales?</p>
+        
+          <div class="row mb-3 align-items-center">
+            <div class="col-md-12">
+              <br>
+              <mat-radio-group formControlName="declaraConyuge">
+                <mat-radio-button class="me-4" [value]="'si'">Si</mat-radio-button>
+                <mat-radio-button [value]="'no'">No</mat-radio-button>
+              </mat-radio-group>
+              <br>
+              <p>Si la opción seleccionada corresponde a "SI", en los próximos pasos se habilitará una pestaña para que pueda declarar los bienes del cónyuge o conviviente civil</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <mat-card-actions class="acciones justify-content-end mt-3">
+        <button mat-raised-button color="primary" type="submit" (click)="onSubmit()">
+          Guardar/Siguiente
+        </button>
+      </mat-card-actions>
+    </form>
+  </div>
+</mat-card>

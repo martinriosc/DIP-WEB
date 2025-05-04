@@ -15,8 +15,6 @@
   <h2 class="component-title mb-3">Bandeja Declarante <span class="me-2"> ({{ dataSource?.data!.length }})</span>
   </h2>
 
-
-
   <!-- Botón para mostrar/ocultar filtros -->
   <div class="filtros-header d-flex align-items-center mb-1">
     <span class="me-2 fw-bold">Filtros avanzados</span>
@@ -29,13 +27,23 @@
   <!-- Caja de filtros (colapsable) -->
   <div class="filtros-caja" [class.collapsed]="!showFilters">
     <div class="row g-2 mt-2">
-      <!-- Fecha Declaración -->
+      <!-- Fecha Recepción -->
       <div class="col-md-2">
         <mat-form-field appearance="outline" class="small-form-field w-100">
-          <mat-label>Fecha Declaración</mat-label>
-          <input matInput [matDatepicker]="picker" [formControl]="fechaDeclaracion">
-          <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-          <mat-datepicker #picker></mat-datepicker>
+          <mat-label>Fecha Recepción</mat-label>
+          <input matInput [matDatepicker]="pickerRecepcion" [formControl]="fechaRecepcion">
+          <mat-datepicker-toggle matSuffix [for]="pickerRecepcion"></mat-datepicker-toggle>
+          <mat-datepicker #pickerRecepcion></mat-datepicker>
+        </mat-form-field>
+      </div>
+
+      <!-- Fecha Firma Declarante -->
+      <div class="col-md-2">
+        <mat-form-field appearance="outline" class="small-form-field w-100">
+          <mat-label>Fecha Firma Declarante</mat-label>
+          <input matInput [matDatepicker]="pickerFirma" [formControl]="fechaFirmaDeclarante">
+          <mat-datepicker-toggle matSuffix [for]="pickerFirma"></mat-datepicker-toggle>
+          <mat-datepicker #pickerFirma></mat-datepicker>
         </mat-form-field>
       </div>
 
@@ -45,8 +53,9 @@
           <mat-label>Tipo</mat-label>
           <mat-select [formControl]="tipo">
             <mat-option value="">TODOS</mat-option>
-            <mat-option value="FIRMA DECLARACIÓN">FIRMA DECLARACIÓN</mat-option>
-            <mat-option value="PRIMERA DECLARACIÓN">PRIMERA DECLARACIÓN</mat-option>
+            <mat-option *ngFor="let tipo of tiposDeclaracion" [value]="tipo.id">
+              {{tipo.nombre}}
+            </mat-option>
           </mat-select>
         </mat-form-field>
       </div>
@@ -57,7 +66,9 @@
           <mat-label>Servicio</mat-label>
           <mat-select [formControl]="servicio">
             <mat-option value="">TODOS</mat-option>
-            <mat-option value="CONTRALORÍA GENERAL">CONTRALORÍA GENERAL</mat-option>
+            <mat-option *ngFor="let servicio of servicios" [value]="servicio.id">
+              {{servicio.nombre}}
+            </mat-option>
           </mat-select>
         </mat-form-field>
       </div>
@@ -80,9 +91,9 @@
           <mat-label>Estado</mat-label>
           <mat-select [formControl]="estado">
             <mat-option value="">TODOS</mat-option>
-            <mat-option value="RECEPCIONADA">RECEPCIONADA</mat-option>
-            <mat-option value="ARCHIVADA">ARCHIVADA</mat-option>
-            <mat-option value="RECIBIDA">RECIBIDA</mat-option>
+            <mat-option *ngFor="let estado of estadosDeclaracion" [value]="estado.id">
+              {{estado.nombre}}
+            </mat-option>
           </mat-select>
         </mat-form-field>
       </div>
@@ -100,35 +111,38 @@
     </div>
   </div>
   <br>
+</div>
 
+<!-- VISTA DE ESCRITORIO: TABLA (visible desde md en adelante) -->
+<div class="d-none d-md-block">
   <!-- Barra de acciones: Descargar y Agregar Declaración -->
-
-
-  <!-- Botón Agregar Declaración al final -->
   <div class="col-auto ms-auto float-end pb-3">
-    <button mat-raised-button color="primary" [routerLink]="['/declaraciones/nueva']">
+    <button mat-raised-button color="primary" (click)="crear()">
       <img src="assets/icons/icon-btn-home_nueva_declaracion.svg" style="width: 18px;" alt="">
       Nueva Declaración
     </button>
   </div>
-</div>
 
-<!-- Tabla con checkboxes -->
-<!-- VISTA DE ESCRITORIO: TABLA (visible desde md en adelante) -->
-<div class="d-none d-md-block">
-  <table mat-table [dataSource]="dataSource" class="small-table mat-elevation-z8 w-100">
+  <!-- Spinner de carga -->
+  <div *ngIf="isLoading" class="loading-spinner-container">
+    <div class="spinner-content">
+      <mat-spinner diameter="50"></mat-spinner>
+      <p class="loading-text">Cargando declaraciones...</p>
+    </div>
+  </div>
 
+  <table mat-table [dataSource]="dataSource" class="small-table mat-elevation-z8 w-100" [class.loading]="isLoading">
     <!-- Nro Declaración -->
     <ng-container matColumnDef="nro">
       <th mat-header-cell *matHeaderCellDef> Nro Declaración </th>
-      <td mat-cell *matCellDef="let element"> {{ element.nro }} </td>
+      <td mat-cell *matCellDef="let element"> {{ element.id }} </td>
     </ng-container>
 
     <!-- Fecha Recepción -->
     <ng-container matColumnDef="fechaRecepcion">
       <th mat-header-cell *matHeaderCellDef> Fecha Recepción </th>
       <td mat-cell *matCellDef="let element">
-        {{ element.fechaRecepcion }}
+        {{ element.recepcion ? (element.recepcion | date:'dd/MM/yyyy HH:mm:ss') : 'No disponible' }}
       </td>
     </ng-container>
 
@@ -136,7 +150,7 @@
     <ng-container matColumnDef="tipo">
       <th mat-header-cell *matHeaderCellDef> Tipo </th>
       <td mat-cell *matCellDef="let element">
-        {{ element.tipo }}
+        {{ element.declaTipo }}
       </td>
     </ng-container>
 
@@ -160,16 +174,14 @@
     <ng-container matColumnDef="estado">
       <th mat-header-cell *matHeaderCellDef style="align-content: center !important;">
         <p style="display:inline; text-align: justify; align-content: center;">Estado</p>
-
         <!-- Botón "Estados" -->
         <button mat-icon-button [matMenuTriggerFor]="menuEstados" aria-label="Leyenda de Estados">
           <img src="assets/icons/icon-info.svg" alt="">
         </button>
       </th>
-
       <td mat-cell *matCellDef="let element">
-        <span [ngClass]="getEstadoPillClass(element.estado)" class="estado-pill">
-          {{ element.estado }}
+        <span [ngClass]="getEstadoPillClass(element.declaEstado)" class="estado-pill">
+          {{ element.declaEstado }}
         </span>
       </td>
     </ng-container>
@@ -181,10 +193,12 @@
         <button mat-icon-button [matMenuTriggerFor]="menuAcciones" aria-label="Leyenda de Acciones">
           <img src="assets/icons/icon-info.svg" alt="">
         </button>
-
       </th>
       <td mat-cell *matCellDef="let element" class="actions-cell">
-        <button mat-icon-button color="primary" (click)="editar(element)" matTooltip="Editar">
+        <button mat-icon-button color="primary" (click)="verDetalle(element.nro)" matTooltip="Ver detalle">
+          <img src="assets/icons/icon-btn-tabla_ver.svg">
+        </button>
+        <button mat-icon-button color="accent" (click)="editar(element)" matTooltip="Editar">
           <img src="assets/icons/icon-btn-tabla_editar.svg">
         </button>
         <button mat-icon-button color="accent" (click)="bitacora(element)" matTooltip="Bitácora">
@@ -193,16 +207,9 @@
         <button mat-icon-button color="accent" (click)="archivar(element)" matTooltip="Archivar">
           <img src="assets/icons/icon-btn-tabla_archivar.svg">
         </button>
-
-        <button mat-icon-button color="accent" (click)="archivar(element)" matTooltip="Descargar">
+        <button mat-icon-button color="primary" (click)="descargarDeclaracion(element)" matTooltip="Descargar">
           <img src="assets/icons/icon-btn-tabla_descargar.svg">
         </button>
-
-        <!-- <button mat-icon-button color="accent" (click)="archivar(element)" matTooltip="Archivar">
-            <img src="assets/icons/icon-btn-tabla_archivar.svg">
-          </button> -->
-
-
         <button mat-icon-button color="warn" (click)="eliminar(element)" matTooltip="Eliminar">
           <img src="assets/icons/icon-btn-tabla_eliminar.svg">
         </button>
@@ -214,30 +221,53 @@
     <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
   </table>
   <div class="col-12 d-flex justify-content-center" style="background-color: rgba(255, 255, 255, 0.729);">
-    <mat-paginator style="background-color: transparent;" [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons [length]="dataSource?.data!.length"
+    <mat-paginator 
+      style="background-color: transparent;" 
+      [pageSizeOptions]="[5, 10, 20]" 
+      showFirstLastButtons 
+      [length]="totalItems"
+      [pageSize]="pageSize"
+      (page)="onPageChange($event)"
       aria-label="Paginador de Declaraciones">
     </mat-paginator>
   </div>
 </div>
 
-
 <!-- VISTA DE MOBILE: LISTA -->
 <div class="d-block d-md-none">
-  <div class="list-group">
-    <div class="list-group-item" *ngFor="let element of dataSource.data"
-      [class.selected]="selection.isSelected(element)">
+  <!-- Botón Nueva Declaración -->
+  <div class="row mb-3">
+    <div class="col-12">
+      <button mat-raised-button color="primary" class="w-100" (click)="crear()">
+        <img src="assets/icons/icon-btn-home_nueva_declaracion.svg" style="width: 18px;" alt="">
+        Nueva Declaración
+      </button>
+    </div>
+  </div>
+
+  <!-- Spinner de carga -->
+  <div *ngIf="isLoading" class="loading-spinner-container">
+    <div class="spinner-content">
+      <mat-spinner diameter="50"></mat-spinner>
+      <p class="loading-text">Cargando declaraciones...</p>
+    </div>
+  </div>
+
+  <div class="list-group" [class.loading]="isLoading">
+    <div class="list-group-item" *ngFor="let element of dataSource.data">
       <div class="first-row d-flex justify-content-between align-items-center">
-        <div class="left-col d-flex align-items-center">
-          <mat-checkbox (click)="$event.stopPropagation()" (change)="$event ? toggle(element) : null"
-            [checked]="selection.isSelected(element)" color="primary">
-          </mat-checkbox>
-          <h5 class="mb-0 ml-2">{{ element.nro }}</h5>
+        <div class="left-col">
+          <h5 class="mb-0 ml-2">{{ element.id }}</h5>
         </div>
         <div class="right-col">
           <button mat-icon-button [matMenuTriggerFor]="menu" (click)="$event.stopPropagation()">
             <mat-icon>more_vert</mat-icon>
           </button>
           <mat-menu #menu="matMenu">
+            <button mat-menu-item (click)="verDetalle(element.id.toString()); $event.stopPropagation()">
+              <mat-icon>visibility</mat-icon>
+              <span>Ver detalle</span>
+            </button>
             <button mat-menu-item (click)="editar(element); $event.stopPropagation()">
               <mat-icon>edit</mat-icon>
               <span>Editar</span>
@@ -250,6 +280,10 @@
               <mat-icon>archive</mat-icon>
               <span>Archivar</span>
             </button>
+            <button mat-menu-item (click)="descargarDeclaracion(element); $event.stopPropagation()">
+              <mat-icon>download</mat-icon>
+              <span>Descargar</span>
+            </button>
             <button mat-menu-item (click)="eliminar(element); $event.stopPropagation()">
               <mat-icon>delete</mat-icon>
               <span>Eliminar</span>
@@ -258,22 +292,20 @@
         </div>
       </div>
       <div class="details mt-2">
-        <p class="mb-1">Fecha Recepción: {{ element.fechaRecepcion }}</p>
-        <p class="mb-1">Tipo: {{ element.tipo }}</p>
+        <p class="mb-1">Fecha Recepción: {{ element.recepcion ? (element.recepcion | date:'dd/MM/yyyy HH:mm:ss') : 'No disponible' }}</p>
+        <p class="mb-1">Tipo: {{ element.declaTipo }}</p>
         <p class="mb-1">Servicio: {{ element.servicio }}</p>
         <p class="mb-1">Cargo: {{ element.cargo }}</p>
         <p class="mb-1">
           Estado:
-          <span [ngClass]="getEstadoPillClass(element.estado)" class="estado-pill">
-            {{ element.estado }}
+          <span [ngClass]="getEstadoPillClass(element.declaEstado)" class="estado-pill">
+            {{ element.declaEstado }}
           </span>
         </p>
       </div>
     </div>
   </div>
 </div>
-
-
 
 <mat-menu #menuEstados="matMenu" class="mini-popover">
   <div class="popover-content p-2">
@@ -296,7 +328,6 @@
   </div>
 </mat-menu>
 
-
 <mat-menu #menuAcciones="matMenu" class="mini-popover">
   <div class="popover-content p-2">
     <div class="legend-item">
@@ -313,6 +344,11 @@
       <img src="assets/icons/icon-btn-tabla_archivar.svg" alt="Archivar" class="accion-icon">
       <strong>Archivar</strong>
       <span> = Mueve la declaración al archivo.</span>
+    </div>
+    <div class="legend-item">
+      <img src="assets/icons/icon-btn-tabla_descargar.svg" alt="Descargar" class="accion-icon">
+      <strong>Descargar</strong>
+      <span> = Descarga la declaración.</span>
     </div>
     <div class="legend-item">
       <img src="assets/icons/icon-btn-tabla_eliminar.svg" alt="Eliminar" class="accion-icon">
