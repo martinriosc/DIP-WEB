@@ -40,12 +40,14 @@ export interface DerechoAccion {
 })
 export class Paso9DerechosAccionesComponent implements OnInit {
   @ViewChild('dialogTemplate') dialogTemplate!: TemplateRef<any>;
+  @ViewChild('modalChile') modalChile!: TemplateRef<any>;
+  @ViewChild('modalExtranjero') modalExtranjero!: TemplateRef<any>;
 
   derechosAcciones: DerechoAccion[] = [];
   formDerechoAccion!: FormGroup;
   dialogRef: MatDialogRef<any> | null = null;
-  isEditing = false;
-  editIndex: number | null = null;
+  editMode = false;
+  currentItem: DerechoAccion | null = null;
 
   private activeDeclId!: string;
 
@@ -172,43 +174,70 @@ export class Paso9DerechosAccionesComponent implements OnInit {
   /** crea o reinicia el form */
   private initForm(item?: DerechoAccion): void {
     this.formDerechoAccion = this.fb.group({
-      titulo                 : [item?.titulo || '',                Validators.required],
-      tipoCantidadPorcentaje : [item?.tipoCantidadPorcentaje || 'Cantidad', Validators.required],
-      cantidadPorcentaje     : [item?.cantidadPorcentaje || '',     [Validators.required, Validators.pattern('^[0-9]+$')]],
-      razonSocial            : [item?.razonSocial || '',           Validators.required],
-      rut                    : [item?.rut || '',                   Validators.required],
-      giro                   : [item?.giro || ''],
-      fechaAdquisicion       : [item?.fechaAdquisicion || ''],
-      tipoValor              : [item?.tipoValor || 'Valor corriente', Validators.required],
-      valor                  : [item?.valor || '',                 [Validators.required, Validators.pattern('^[0-9]+$')]],
-      gravamenes             : [item?.gravamenes || ''],
-      controlador            : [item?.controlador ?? false,        Validators.required]
+      titulo: [item?.titulo || ''],
+      tipoCantidadPorcentaje: [item?.tipoCantidadPorcentaje || 'Cantidad'],
+      cantidadPorcentaje: [item?.cantidadPorcentaje || '', [Validators.pattern('^[0-9]+$')]],
+      razonSocial: [item?.razonSocial || ''],
+      rut: [item?.rut || ''],
+      giro: [item?.giro || ''],
+      fechaAdquisicion: [item?.fechaAdquisicion || ''],
+      tipoValor: [item?.tipoValor || 'Valor corriente'],
+      valor: [item?.valor || '', [Validators.pattern('^[0-9]+$')]],
+      gravamenes: [item?.gravamenes || ''],
+      controlador: [item?.controlador ?? false]
     });
   }
 
-  /** abre dialog para agregar o editar */
-  openDialog(item?: DerechoAccion, index?: number): void {
-    if (item && index !== undefined) {
-      this.isEditing = true;
-      this.editIndex = index;
-      this.initForm(item);
-    } else {
-      this.isEditing = false;
-      this.editIndex = null;
-      this.initForm();
-    }
-    this.dialogRef = this.dialog.open(this.dialogTemplate, {
+  /** Abre modal para agregar nuevo derecho/acción en Chile */
+  openAddModalChile(): void {
+    this.editMode = false;
+    this.currentItem = null;
+    this.initForm();
+    this.dialogRef = this.dialog.open(this.modalChile, {
       width: '800px',
       disableClose: true
     });
   }
 
-  /** cierra dialog */
+  /** Abre modal para editar derecho/acción en Chile */
+  openEditModalChile(item: DerechoAccion): void {
+    this.editMode = true;
+    this.currentItem = item;
+    this.initForm(item);
+    this.dialogRef = this.dialog.open(this.modalChile, {
+      width: '800px',
+      disableClose: true
+    });
+  }
+
+  /** Abre modal para agregar nuevo derecho/acción en el extranjero */
+  openAddModalExtranjero(): void {
+    this.editMode = false;
+    this.currentItem = null;
+    this.initForm();
+    this.dialogRef = this.dialog.open(this.modalExtranjero, {
+      width: '800px',
+      disableClose: true
+    });
+  }
+
+  /** Abre modal para editar derecho/acción en el extranjero */
+  openEditModalExtranjero(item: DerechoAccion): void {
+    this.editMode = true;
+    this.currentItem = item;
+    this.initForm(item);
+    this.dialogRef = this.dialog.open(this.modalExtranjero, {
+      width: '800px',
+      disableClose: true
+    });
+  }
+
+  /** Cierra el modal actual */
   closeDialog(): void {
     this.dialogRef?.close();
   }
 
-  /** guarda o actualiza un registro */
+  /** Guarda el derecho/acción y cierra el modal */
   saveDialog(): void {
     const path = ['declaraciones', this.activeDeclId, 'paso9'];
     if (this.formDerechoAccion.invalid) {
@@ -218,8 +247,9 @@ export class Paso9DerechosAccionesComponent implements OnInit {
     }
 
     const data = this.formDerechoAccion.value as DerechoAccion;
-    if (this.isEditing && this.editIndex !== null) {
-      this.derechosAcciones[this.editIndex] = data;
+    if (this.editMode && this.currentItem) {
+      const idx = this.derechosAcciones.indexOf(this.currentItem);
+      if (idx >= 0) this.derechosAcciones[idx] = data;
     } else {
       this.derechosAcciones.push(data);
     }

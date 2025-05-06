@@ -27,10 +27,9 @@
       </div>
 
       <div *ngIf="tieneDerechosChile === 'si'">
-
         <div class="row mb-3">
           <div class="col-md-12 text-end">
-            <button mat-raised-button color="primary" (click)="openDialog()">
+            <button mat-raised-button color="primary" (click)="openAddModalChile()">
               Agregar Derecho / Acción
             </button>
           </div>
@@ -108,11 +107,11 @@
           <!-- Acciones -->
           <ng-container matColumnDef="acciones">
             <th mat-header-cell *matHeaderCellDef>Acciones</th>
-            <td mat-cell *matCellDef="let d; let i = index">
-              <button mat-icon-button color="accent" (click)="openDialog(d, i)">
+            <td mat-cell *matCellDef="let d">
+              <button mat-icon-button color="accent" (click)="openEditModalChile(d)">
                 <mat-icon>edit</mat-icon>
               </button>
-              <button mat-icon-button color="warn" (click)="deleteItem(i)">
+              <button mat-icon-button color="warn" (click)="deleteItem(d)">
                 <mat-icon>delete</mat-icon>
               </button>
             </td>
@@ -141,10 +140,9 @@
       </div>
 
       <div *ngIf="tieneDerechosExtranjero === 'si'">
-
         <div class="row mb-3">
           <div class="col-md-12 text-end">
-            <button mat-raised-button color="primary" (click)="openDialog()">
+            <button mat-raised-button color="primary" (click)="openAddModalExtranjero()">
               Agregar Derecho / Acción
             </button>
           </div>
@@ -211,11 +209,11 @@
           <!-- Acciones -->
           <ng-container matColumnDef="acciones">
             <th mat-header-cell *matHeaderCellDef>Acciones</th>
-            <td mat-cell *matCellDef="let d; let i = index">
-              <button mat-icon-button color="accent" (click)="openDialog(d, i)">
+            <td mat-cell *matCellDef="let d">
+              <button mat-icon-button color="accent" (click)="openEditModalExtranjero(d)">
                 <mat-icon>edit</mat-icon>
               </button>
-              <button mat-icon-button color="warn" (click)="deleteItem(i)">
+              <button mat-icon-button color="warn" (click)="deleteItem(d)">
                 <mat-icon>delete</mat-icon>
               </button>
             </td>
@@ -242,10 +240,10 @@
   </mat-card-actions>
 </mat-card>
 
-<!-- MODAL -->
-<ng-template #dialogTemplate let-dialogRef>
+<!-- MODAL CHILE -->
+<ng-template #modalChile let-dialogRef>
   <h2 mat-dialog-title>
-    {{ isEditing ? 'Editar Derecho / Acción' : 'Agregar Derecho / Acción' }}
+    {{ editMode ? 'Editar Derecho / Acción en Chile' : 'Agregar Derecho / Acción en Chile' }}
   </h2>
 
   <mat-dialog-content>
@@ -253,7 +251,11 @@
       <!-- Título -->
       <mat-form-field appearance="fill" class="w-100 mb-3">
         <mat-label>Título</mat-label>
-        <input matInput formControlName="titulo" />
+        <mat-select formControlName="titulo">
+          <mat-option *ngFor="let titulo of titulos" [value]="titulo.id">
+            {{titulo.nombre}}
+          </mat-option>
+        </mat-select>
       </mat-form-field>
 
       <!-- Tipo Cantidad/Porcentaje -->
@@ -270,7 +272,7 @@
       <!-- Cantidad/Porcentaje -->
       <mat-form-field appearance="fill" class="w-100 mb-3">
         <mat-label>Cantidad o Porcentaje</mat-label>
-        <input matInput formControlName="cantidadPorcentaje" />
+        <input matInput type="number" formControlName="cantidadPorcentaje" />
       </mat-form-field>
 
       <!-- Razón Social -->
@@ -294,7 +296,9 @@
       <!-- Fecha Adquisición -->
       <mat-form-field appearance="fill" class="w-100 mb-3">
         <mat-label>Fecha de Adquisición</mat-label>
-        <input matInput formControlName="fechaAdquisicion" placeholder="YYYY-MM-DD" />
+        <input matInput formControlName="fechaAdquisicion" [matDatepicker]="pickerChile" />
+        <mat-datepicker-toggle matSuffix [for]="pickerChile"></mat-datepicker-toggle>
+        <mat-datepicker #pickerChile></mat-datepicker>
       </mat-form-field>
 
       <!-- Tipo Valor -->
@@ -308,16 +312,127 @@
         </div>
       </div>
 
-      <!-- Valor Numérico -->
+      <!-- Valor -->
       <mat-form-field appearance="fill" class="w-100 mb-3">
         <mat-label>Valor</mat-label>
-        <input matInput formControlName="valor" />
+        <input matInput type="number" formControlName="valor" />
       </mat-form-field>
 
       <!-- Gravámenes -->
       <mat-form-field appearance="fill" class="w-100 mb-3">
         <mat-label>Gravámenes</mat-label>
-        <input matInput formControlName="gravamenes" />
+        <mat-select formControlName="gravamenes">
+          <mat-option *ngFor="let gravamen of gravamenes" [value]="gravamen.id">
+            {{gravamen.nombre}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <!-- Controlador -->
+      <div class="row mb-3">
+        <div class="col-md-5 fw-bold etiqueta">¿Eres controlador?</div>
+        <div class="col-md-7">
+          <mat-radio-group formControlName="controlador">
+            <mat-radio-button [value]="true" class="me-4">Sí</mat-radio-button>
+            <mat-radio-button [value]="false">No</mat-radio-button>
+          </mat-radio-group>
+        </div>
+      </div>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="closeDialog()">Cancelar</button>
+    <button mat-raised-button color="primary" (click)="saveDialog()">
+      Guardar
+    </button>
+  </mat-dialog-actions>
+</ng-template>
+
+<!-- MODAL EXTRANJERO -->
+<ng-template #modalExtranjero let-dialogRef>
+  <h2 mat-dialog-title>
+    {{ editMode ? 'Editar Derecho / Acción en el Extranjero' : 'Agregar Derecho / Acción en el Extranjero' }}
+  </h2>
+
+  <mat-dialog-content>
+    <form [formGroup]="formDerechoAccion">
+      <!-- Título -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Título</mat-label>
+        <mat-select formControlName="titulo">
+          <mat-option *ngFor="let titulo of titulos" [value]="titulo.id">
+            {{titulo.nombre}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <!-- Tipo Cantidad/Porcentaje -->
+      <div class="row mb-3">
+        <div class="col-md-5 fw-bold etiqueta">¿Tipo de registro?</div>
+        <div class="col-md-7">
+          <mat-radio-group formControlName="tipoCantidadPorcentaje">
+            <mat-radio-button value="Cantidad" class="me-4">Cantidad</mat-radio-button>
+            <mat-radio-button value="Porcentaje">Porcentaje</mat-radio-button>
+          </mat-radio-group>
+        </div>
+      </div>
+
+      <!-- Cantidad/Porcentaje -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Cantidad o Porcentaje</mat-label>
+        <input matInput type="number" formControlName="cantidadPorcentaje" />
+      </mat-form-field>
+
+      <!-- Razón Social -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Razón Social</mat-label>
+        <input matInput formControlName="razonSocial" />
+      </mat-form-field>
+
+      <!-- País -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>País</mat-label>
+        <mat-select formControlName="pais">
+          <mat-option *ngFor="let pais of paises" [value]="pais.id">
+            {{pais.nombre}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <!-- Fecha Adquisición -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Fecha de Adquisición</mat-label>
+        <input matInput formControlName="fechaAdquisicion" [matDatepicker]="pickerExt" />
+        <mat-datepicker-toggle matSuffix [for]="pickerExt"></mat-datepicker-toggle>
+        <mat-datepicker #pickerExt></mat-datepicker>
+      </mat-form-field>
+
+      <!-- Tipo Valor -->
+      <div class="row mb-3">
+        <div class="col-md-5 fw-bold etiqueta">Tipo de Valor</div>
+        <div class="col-md-7">
+          <mat-radio-group formControlName="tipoValor">
+            <mat-radio-button value="Valor corriente" class="me-4">Valor corriente</mat-radio-button>
+            <mat-radio-button value="Valor libro">Valor libro</mat-radio-button>
+          </mat-radio-group>
+        </div>
+      </div>
+
+      <!-- Valor -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Valor</mat-label>
+        <input matInput type="number" formControlName="valor" />
+      </mat-form-field>
+
+      <!-- Gravámenes -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Gravámenes</mat-label>
+        <mat-select formControlName="gravamenes">
+          <mat-option *ngFor="let gravamen of gravamenes" [value]="gravamen.id">
+            {{gravamen.nombre}}
+          </mat-option>
+        </mat-select>
       </mat-form-field>
 
       <!-- Controlador -->

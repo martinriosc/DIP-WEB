@@ -21,9 +21,12 @@ import { ComunService } from 'src/app/modules/declaraciones/services/comun.servi
 import { DeclaracionHelperService } from 'src/app/modules/declaraciones/services/declaracion-helper.service';
 
 interface OtroBien {
-  descripcion:   string;
-  valorAprox:    number;
+  tipo: string;
+  descripcion: string;
+  valor: number;
+  fecha: string;
   observaciones: string;
+  estado: string;
 }
 
 @Component({
@@ -35,12 +38,8 @@ interface OtroBien {
 export class Paso15OtrosBienesComponent implements OnInit {
   @ViewChild('otrosBienesModal') otrosBienesModal!: TemplateRef<any>;
 
-  tieneOtrosBienes    = 'no';
-  otrosBienesData: OtroBien[] = [
-    { descripcion: 'Colección de Arte', valorAprox: 2000000, observaciones: 'Cuadros de autor chileno' }
-  ];
-
-  otroBienForm!: FormGroup;
+  tieneOtrosBienes = 'no';
+  otrosBienesForm!: FormGroup;
   editMode = false;
   currentItem: OtroBien | null = null;
   dialogRef: MatDialogRef<any> | null = null;
@@ -111,11 +110,11 @@ export class Paso15OtrosBienesComponent implements OnInit {
     });
   }
 
-  /** Maneja click “Guardar / Siguiente” */
+  /** Maneja click "Guardar / Siguiente" */
   onSubmit(): void {
     const ok =
       this.tieneOtrosBienes === 'no' ||
-      (this.tieneOtrosBienes === 'si' && this.otrosBienesData.length > 0);
+      (this.tieneOtrosBienes === 'si' && this.otrosBienes.length > 0);
 
     const path = ['declaraciones', this.activeDeclId, this.key];
 
@@ -129,7 +128,7 @@ export class Paso15OtrosBienesComponent implements OnInit {
     }
   }
 
-  /** Radio “¿Tiene otros bienes?” */
+  /** Radio "¿Tiene otros bienes?" */
   onTieneOtrosBienesChange(value: string): void {
     this.tieneOtrosBienes = value;
     const path = ['declaraciones', this.activeDeclId, this.key];
@@ -138,7 +137,7 @@ export class Paso15OtrosBienesComponent implements OnInit {
       this.validador.markComplete(this.key);
       this.stepperState.markStepCompleted(path);
     } else {
-      if (this.otrosBienesData.length > 0) {
+      if (this.otrosBienes.length > 0) {
         this.validador.markComplete(this.key);
         this.stepperState.markStepCompleted(path);
       } else {
@@ -166,44 +165,47 @@ export class Paso15OtrosBienesComponent implements OnInit {
 
   /** Construye o resetea el formulario */
   private buildForm(item?: OtroBien): void {
-    this.otroBienForm = this.fb.group({
-      descripcion:   [item?.descripcion   || '', Validators.required],
-      valorAprox:    [item?.valorAprox    || 0,  [Validators.required, Validators.min(0)]],
-      observaciones: [item?.observaciones || '']
+    this.otrosBienesForm = this.fb.group({
+      tipo: [item?.tipo || ''],
+      descripcion: [item?.descripcion || ''],
+      valor: [item?.valor || 0, [Validators.min(0)]],
+      fecha: [item?.fecha || ''],
+      observaciones: [item?.observaciones || ''],
+      estado: [item?.estado || 'Activo']
     });
   }
 
-  /** Guarda o actualiza el bien tras cerrar modal */
-  saveOtroBien(dialogRef: MatDialogRef<any>): void {
-    const path = ['declaraciones', this.activeDeclId, this.key];
+  /** Guarda o actualiza un bien */
+  saveOtroBien(dialogRef: any): void {
+    const key = 'paso15';
+    const path = ['declaraciones', this.activeDeclId, key];
 
-    if (this.otroBienForm.invalid) {
-      this.validador.markIncomplete(this.key);
+    if (this.otrosBienesForm.invalid) {
+      this.validador.markIncomplete(key);
       this.stepperState.markStepIncomplete(path);
       return;
     }
 
-    const data = this.otroBienForm.value as OtroBien;
+    const b = this.otrosBienesForm.value as any;
     if (this.editMode && this.currentItem) {
-      const idx = this.otrosBienesData.indexOf(this.currentItem);
-      if (idx >= 0) this.otrosBienesData[idx] = data;
+      const idx = this.otrosBienes.indexOf(this.currentItem);
+      if (idx >= 0) this.otrosBienes[idx] = b;
     } else {
-      this.otrosBienesData.push(data);
+      this.otrosBienes.push(b);
     }
-
-    // marca completo si hay al menos un registro
-    this.validador.markComplete(this.key);
-    this.stepperState.markStepCompleted(path);
-
     dialogRef.close();
+
+    // Marca completo si hay al menos uno
+    this.validador.markComplete(key);
+    this.stepperState.markStepCompleted(path);
   }
 
   /** Elimina un bien y actualiza estado */
   eliminarOtroBien(item: OtroBien): void {
     const path = ['declaraciones', this.activeDeclId, this.key];
-    this.otrosBienesData = this.otrosBienesData.filter(x => x !== item);
+    this.otrosBienes = this.otrosBienes.filter(x => x !== item);
 
-    if (this.otrosBienesData.length > 0) {
+    if (this.otrosBienes.length > 0) {
       this.validador.markComplete(this.key);
       this.stepperState.markStepCompleted(path);
     } else {

@@ -13,12 +13,15 @@ import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 
 import { ValidadorDeclaracionService } from '../../../../services/validador-declaracion.service';
 import { StepperStatusService }        from 'src/app/modules/declaraciones/services/stepper-status.service';
-import { OtraFuenteService } from 'src/app/modules/declaraciones/services/otra-fuente.service';
 import { DeclaracionHelperService } from 'src/app/modules/declaraciones/services/declaracion-helper.service';
+import { OtraFuenteService } from 'src/app/modules/declaraciones/services/otra-fuente.service';
 
 interface FuenteConflicto {
-  descripcion:   string;
-  tipoConflicto: string;
+  tipo: string;
+  descripcion: string;
+  fecha: string;
+  observaciones: string;
+  estado: string;
 }
 
 @Component({
@@ -31,13 +34,10 @@ export class Paso14FuenteConflictoComponent implements OnInit {
   @ViewChild('conflictoModal') conflictoModal!: TemplateRef<any>;
 
   tieneFuenteConflicto = 'no';
-  fuentesData: FuenteConflicto[] = [
-    { descripcion: 'Tiene participación familiar en empresa X', tipoConflicto: 'FAMILIAR' }
-  ];
-
+  conflictos: any[] = [];
   conflictoForm!: FormGroup;
   editMode = false;
-  currentItem: FuenteConflicto | null = null;
+  currentItem: any | null = null;
   dialogRef: MatDialogRef<any> | null = null;
 
   private activeDeclId!: string;
@@ -99,7 +99,7 @@ export class Paso14FuenteConflictoComponent implements OnInit {
   onSubmit(): void {
     const ok =
       this.tieneFuenteConflicto === 'no' ||
-      (this.tieneFuenteConflicto === 'si' && this.fuentesData.length > 0);
+      (this.tieneFuenteConflicto === 'si' && this.otrasFuentes.length > 0);
 
     const path = ['declaraciones', this.activeDeclId, this.key];
 
@@ -113,7 +113,7 @@ export class Paso14FuenteConflictoComponent implements OnInit {
     }
   }
 
-  /** Radio “¿Tiene conflicto?” */
+  /** Radio "¿Tiene conflicto?" */
   onTieneConflictoChange(value: string): void {
     this.tieneFuenteConflicto = value;
     const path = ['declaraciones', this.activeDeclId, this.key];
@@ -122,7 +122,7 @@ export class Paso14FuenteConflictoComponent implements OnInit {
       this.validador.markComplete(this.key);
       this.stepperState.markStepCompleted(path);
     } else {
-      if (this.fuentesData.length > 0) {
+      if (this.otrasFuentes.length > 0) {
         this.validador.markComplete(this.key);
         this.stepperState.markStepCompleted(path);
       } else {
@@ -151,41 +151,44 @@ export class Paso14FuenteConflictoComponent implements OnInit {
   /** Construye o reinicia el formulario */
   private buildForm(item?: FuenteConflicto): void {
     this.conflictoForm = this.fb.group({
-      descripcion:   [item?.descripcion   || '',          Validators.required],
-      tipoConflicto: [item?.tipoConflicto || 'FAMILIAR', Validators.required]
+      tipo: [item?.tipo || ''],
+      descripcion: [item?.descripcion || ''],
+      fecha: [item?.fecha || ''],
+      observaciones: [item?.observaciones || ''],
+      estado: [item?.estado || 'Activo']
     });
   }
 
-  /** Guarda o actualiza tras cerrar modal */
-  saveFuente(dialogRef: MatDialogRef<any>): void {
-    const path = ['declaraciones', this.activeDeclId, this.key];
+  /** Guarda o actualiza una fuente de conflicto */
+  saveConflicto(dialogRef: any): void {
+    const key = 'paso14';
+    const path = ['declaraciones', this.activeDeclId, key];
 
     if (this.conflictoForm.invalid) {
-      this.validador.markIncomplete(this.key);
+      this.validador.markIncomplete(key);
       this.stepperState.markStepIncomplete(path);
       return;
     }
 
-    const data = this.conflictoForm.value as FuenteConflicto;
+    const c = this.conflictoForm.value as FuenteConflicto;
     if (this.editMode && this.currentItem) {
-      const idx = this.fuentesData.indexOf(this.currentItem);
-      if (idx >= 0) this.fuentesData[idx] = data;
+      const idx = this.conflictos.indexOf(this.currentItem);
+      if (idx >= 0) this.conflictos[idx] = c;
     } else {
-      this.fuentesData.push(data);
+      this.conflictos.push(c);
     }
-
-    // si hay al menos uno, marcamos completo
-    this.validador.markComplete(this.key);
-    this.stepperState.markStepCompleted(path);
-
     dialogRef.close();
+
+    // Marca completo si hay al menos uno
+    this.validador.markComplete(key);
+    this.stepperState.markStepCompleted(path);
   }
 
   /** Elimina un registro */
   eliminarFuente(item: FuenteConflicto): void {
     const path = ['declaraciones', this.activeDeclId, this.key];
-    this.fuentesData = this.fuentesData.filter(x => x !== item);
-    if (this.fuentesData.length > 0) {
+    this.conflictos = this.conflictos.filter(x => x !== item);
+    if (this.conflictos.length > 0) {
       this.validador.markComplete(this.key);
       this.stepperState.markStepCompleted(path);
     } else {

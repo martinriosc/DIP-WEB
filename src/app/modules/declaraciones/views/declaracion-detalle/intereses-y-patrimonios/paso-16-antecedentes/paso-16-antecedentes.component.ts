@@ -21,9 +21,11 @@ import { DeclaracionService } from 'src/app/modules/declaraciones/services/decla
 import { DeclaracionHelperService } from 'src/app/modules/declaraciones/services/declaracion-helper.service';
 
 interface Antecedente {
-  tipo:             string;  // PENAL, ADMINISTRATIVO, etc.
-  detalle:          string;  // Observaciones
-  fechaResolucion:  string;  // Ej: "12/03/2020"
+  tipo: string;
+  descripcion: string;
+  fecha: string;
+  observaciones: string;
+  estado: string;
 }
 
 @Component({
@@ -35,11 +37,8 @@ interface Antecedente {
 export class Paso16AntecedentesComponent implements OnInit {
   @ViewChild('antecedentesModal') antecedentesModal!: TemplateRef<any>;
 
-  tieneAntecedentes    = 'no';
-  antecedentesData: Antecedente[] = [
-    { tipo: 'PENAL', detalle: 'Condena cumplida en 2010', fechaResolucion: '01/06/2010' }
-  ];
-
+  tieneAntecedentes = 'no';
+  antecedentes: any[] = [];
   antecedentesForm!: FormGroup;
   editMode = false;
   currentItem: Antecedente | null = null;
@@ -48,7 +47,6 @@ export class Paso16AntecedentesComponent implements OnInit {
   private activeDeclId!: string;
   private readonly key = 'paso16';
 
-  antecedentes: any[] = [];
 
   declaracionId: number = 1319527;    //1319527
   declaranteId: number = 2882000;
@@ -60,7 +58,7 @@ export class Paso16AntecedentesComponent implements OnInit {
     private stepperState: StepperStatusService,
     private _otrosAntecedentes: OtrosAntecedentesService,
     private _declaracion: DeclaracionService,
-    private _declaracionHelper: DeclaracionHelperService
+    private _declaracionHelper: DeclaracionHelperService,
   ) {}
 
   ngOnInit(): void {
@@ -106,7 +104,7 @@ export class Paso16AntecedentesComponent implements OnInit {
   onSubmit(): void {
     const ok =
       this.tieneAntecedentes === 'no' ||
-      (this.tieneAntecedentes === 'si' && this.antecedentesData.length > 0);
+      (this.tieneAntecedentes === 'si' && this.antecedentes.length > 0);
 
     const path = ['declaraciones', this.activeDeclId, this.key];
 
@@ -120,7 +118,7 @@ export class Paso16AntecedentesComponent implements OnInit {
     }
   }
 
-  /** Radio “¿Tiene antecedentes?” */
+  /** Radio "¿Tiene antecedentes?" */
   onTieneAntecedentesChange(value: string): void {
     this.tieneAntecedentes = value;
     const path = ['declaraciones', this.activeDeclId, this.key];
@@ -129,7 +127,7 @@ export class Paso16AntecedentesComponent implements OnInit {
       this.validador.markComplete(this.key);
       this.stepperState.markStepCompleted(path);
     } else {
-      if (this.antecedentesData.length > 0) {
+      if (this.antecedentes.length > 0) {
         this.validador.markComplete(this.key);
         this.stepperState.markStepCompleted(path);
       } else {
@@ -158,43 +156,45 @@ export class Paso16AntecedentesComponent implements OnInit {
   /** Construye o resetea el formulario */
   private buildForm(item?: Antecedente): void {
     this.antecedentesForm = this.fb.group({
-      tipo:            [item?.tipo            || 'PENAL',      Validators.required],
-      detalle:         [item?.detalle         || '',           Validators.required],
-      fechaResolucion: [item?.fechaResolucion || '',           Validators.required]
+      tipo: [item?.tipo || ''],
+      descripcion: [item?.descripcion || ''],
+      fecha: [item?.fecha || ''],
+      observaciones: [item?.observaciones || ''],
+      estado: [item?.estado || 'Activo']
     });
   }
 
   /** Guarda o actualiza un antecedente */
-  saveAntecedente(dialogRef: MatDialogRef<any>): void {
-    const path = ['declaraciones', this.activeDeclId, this.key];
+  saveAntecedente(dialogRef: any): void {
+    const key = 'paso16';
+    const path = ['declaraciones', this.activeDeclId, key];
 
     if (this.antecedentesForm.invalid) {
-      this.validador.markIncomplete(this.key);
+      this.validador.markIncomplete(key);
       this.stepperState.markStepIncomplete(path);
       return;
     }
 
-    const data = this.antecedentesForm.value as Antecedente;
+    const a = this.antecedentesForm.value as any;
     if (this.editMode && this.currentItem) {
-      const idx = this.antecedentesData.indexOf(this.currentItem);
-      if (idx >= 0) this.antecedentesData[idx] = data;
+      const idx = this.antecedentes.indexOf(this.currentItem);
+      if (idx >= 0) this.antecedentes[idx] = a;
     } else {
-      this.antecedentesData.push(data);
+      this.antecedentes.push(a);
     }
+    dialogRef.close();
 
     // Marca completo si hay al menos uno
-    this.validador.markComplete(this.key);
+    this.validador.markComplete(key);
     this.stepperState.markStepCompleted(path);
-
-    dialogRef.close();
   }
 
   /** Elimina un antecedente */
   eliminarAntecedente(item: Antecedente): void {
     const path = ['declaraciones', this.activeDeclId, this.key];
 
-    this.antecedentesData = this.antecedentesData.filter(x => x !== item);
-    if (this.antecedentesData.length > 0) {
+    this.antecedentes = this.antecedentes.filter(x => x !== item);
+    if (this.antecedentes.length > 0) {
       this.validador.markComplete(this.key);
       this.stepperState.markStepCompleted(path);
     } else {

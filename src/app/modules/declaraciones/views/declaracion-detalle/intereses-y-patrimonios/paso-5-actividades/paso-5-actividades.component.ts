@@ -94,6 +94,7 @@ export class Paso5ActividadesComponent {
 
   loadRegistro() {
     this._declaracionHelper.declaracionesFlag$.subscribe(data => {
+      console.log(data)
       this.actividadesUltimos12Meses = data.actividadesIndividuales ? 'si' : 'no';
       this.actividadesQueRealiza = data.actividadesGremiales ? 'si' : 'no';
       this.actividadesConyuge = data.actividadesDependiente ? 'si' : 'no';

@@ -24,8 +24,8 @@
       <div *ngIf="tieneCuentasLibretas === 'si'">
         <div class="row mb-3">
           <div class="col-md-12 text-end">
-            <button mat-raised-button color="primary" (click)="openAddModal()">
-              Agregar
+            <button mat-raised-button color="primary" (click)="openAddCuentaModal()">
+              Agregar Cuenta/Libreta
             </button>
           </div>
         </div>
@@ -83,7 +83,7 @@
           <ng-container matColumnDef="acciones">
             <th mat-header-cell *matHeaderCellDef>Acciones</th>
             <td mat-cell *matCellDef="let vo">
-              <button mat-icon-button color="accent" (click)="openEditModal(vo)">
+              <button mat-icon-button color="accent" (click)="openEditCuentaModal(vo)">
                 <mat-icon>edit</mat-icon>
               </button>
   
@@ -112,8 +112,8 @@
       <div *ngIf="tieneAhorrosPrevisionales === 'si'">
         <div class="row mb-3">
           <div class="col-md-12 text-end">
-            <button mat-raised-button color="primary" (click)="openAddModal()">
-              Agregar
+            <button mat-raised-button color="primary" (click)="openAddAhorroModal()">
+              Agregar Ahorro Previsional
             </button>
           </div>
         </div>
@@ -171,7 +171,7 @@
           <ng-container matColumnDef="acciones">
             <th mat-header-cell *matHeaderCellDef>Acciones</th>
             <td mat-cell *matCellDef="let vo">
-              <button mat-icon-button color="accent" (click)="openEditModal(vo)">
+              <button mat-icon-button color="accent" (click)="openEditAhorroModal(vo)">
                 <mat-icon>edit</mat-icon>
               </button>
   
@@ -200,8 +200,8 @@
       <div *ngIf="tieneDepositosPlazo === 'si'">
         <div class="row mb-3">
           <div class="col-md-12 text-end">
-            <button mat-raised-button color="primary" (click)="openAddModal()">
-              Agregar
+            <button mat-raised-button color="primary" (click)="openAddDepositoModal()">
+              Agregar Depósito a Plazo
             </button>
           </div>
         </div>
@@ -259,7 +259,7 @@
           <ng-container matColumnDef="acciones">
             <th mat-header-cell *matHeaderCellDef>Acciones</th>
             <td mat-cell *matCellDef="let vo">
-              <button mat-icon-button color="accent" (click)="openEditModal(vo)">
+              <button mat-icon-button color="accent" (click)="openEditDepositoModal(vo)">
                 <mat-icon>edit</mat-icon>
               </button>
   
@@ -288,8 +288,8 @@
       <div *ngIf="tieneSeguros === 'si'">
         <div class="row mb-3">
           <div class="col-md-12 text-end">
-            <button mat-raised-button color="primary" (click)="openAddModal()">
-              Agregar
+            <button mat-raised-button color="primary" (click)="openAddSeguroModal()">
+              Agregar Seguro
             </button>
           </div>
         </div>
@@ -353,7 +353,7 @@
           <ng-container matColumnDef="acciones">
             <th mat-header-cell *matHeaderCellDef>Acciones</th>
             <td mat-cell *matCellDef="let vo">
-              <button mat-icon-button color="accent" (click)="openEditModal(vo)">
+              <button mat-icon-button color="accent" (click)="openEditSeguroModal(vo)">
                 <mat-icon>edit</mat-icon>
               </button>
   
@@ -379,36 +379,80 @@
   </mat-card-actions>
 </mat-card>
 
-<!-- Modal inline -->
-<!-- <ng-template #valObligModal let-dialogRef>
+<!-- MODAL CUENTAS -->
+<ng-template #cuentasModal let-dialogRef>
   <h2 mat-dialog-title>
-    {{ editMode ? 'Editar Valor Obligatorio' : 'Agregar Valor Obligatorio' }}
+    {{ editMode ? 'Editar Cuenta/Libreta' : 'Agregar Cuenta/Libreta' }}
   </h2>
 
   <mat-dialog-content>
-    <form [formGroup]="valObligForm">
+    <form [formGroup]="valorForm">
+      <!-- Tipo de Documento -->
       <mat-form-field appearance="fill" class="w-100 mb-3">
         <mat-label>Tipo de Documento</mat-label>
         <mat-select formControlName="tipoDocumento">
-          <mat-option value="PAGARE">Pagaré</mat-option>
-          <mat-option value="LETRA">Letra</mat-option>
-          <mat-option value="OTRO">Otro</mat-option>
+          <mat-option *ngFor="let tipo of tipoInstrumentos" [value]="tipo.id">
+            {{tipo.nombre}}
+          </mat-option>
         </mat-select>
       </mat-form-field>
 
+      <!-- N° de Documento -->
       <mat-form-field appearance="fill" class="w-100 mb-3">
         <mat-label>N° de Documento</mat-label>
         <input matInput formControlName="nroDocumento" />
       </mat-form-field>
 
+      <!-- Monto Total -->
       <mat-form-field appearance="fill" class="w-100 mb-3">
-        <mat-label>Valor</mat-label>
-        <input matInput type="number" formControlName="valor" />
+        <mat-label>Monto Total</mat-label>
+        <input matInput type="number" formControlName="montoTotal" />
       </mat-form-field>
 
+      <!-- Registra Inscripción -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>¿Registra Inscripción?</mat-label>
+        <mat-select formControlName="registraInscripcion">
+          <mat-option value="SI">Sí</mat-option>
+          <mat-option value="NO">No</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <!-- Estado -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Estado</mat-label>
+        <mat-select formControlName="estado">
+          <mat-option value="Activo">Activo</mat-option>
+          <mat-option value="Pendiente">Pendiente</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <!-- Fecha Emisión -->
       <mat-form-field appearance="fill" class="w-100 mb-3">
         <mat-label>Fecha Emisión</mat-label>
-        <input matInput formControlName="fechaEmision" placeholder="YYYY-MM-DD" />
+        <input matInput formControlName="fechaEmision" [matDatepicker]="pickerCuentas" />
+        <mat-datepicker-toggle matSuffix [for]="pickerCuentas"></mat-datepicker-toggle>
+        <mat-datepicker #pickerCuentas></mat-datepicker>
+      </mat-form-field>
+
+      <!-- Tipo Moneda -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Tipo de Moneda</mat-label>
+        <mat-select formControlName="tipoMoneda">
+          <mat-option *ngFor="let moneda of monedas" [value]="moneda.id">
+            {{moneda.nombre}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <!-- País -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>País</mat-label>
+        <mat-select formControlName="pais">
+          <mat-option *ngFor="let pais of paises" [value]="pais.id">
+            {{pais.nombre}}
+          </mat-option>
+        </mat-select>
       </mat-form-field>
     </form>
   </mat-dialog-content>
@@ -419,4 +463,262 @@
       Guardar
     </button>
   </mat-dialog-actions>
-</ng-template> -->
+</ng-template>
+
+<!-- MODAL AHORROS -->
+<ng-template #ahorrosModal let-dialogRef>
+  <h2 mat-dialog-title>
+    {{ editMode ? 'Editar Ahorro Previsional' : 'Agregar Ahorro Previsional' }}
+  </h2>
+
+  <mat-dialog-content>
+    <form [formGroup]="valorForm">
+      <!-- Tipo de Documento -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Tipo de Documento</mat-label>
+        <mat-select formControlName="tipoDocumento">
+          <mat-option *ngFor="let tipo of tipoInstrumentos" [value]="tipo.id">
+            {{tipo.nombre}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <!-- N° de Documento -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>N° de Documento</mat-label>
+        <input matInput formControlName="nroDocumento" />
+      </mat-form-field>
+
+      <!-- Monto Total -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Monto Total</mat-label>
+        <input matInput type="number" formControlName="montoTotal" />
+      </mat-form-field>
+
+      <!-- Registra Inscripción -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>¿Registra Inscripción?</mat-label>
+        <mat-select formControlName="registraInscripcion">
+          <mat-option value="SI">Sí</mat-option>
+          <mat-option value="NO">No</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <!-- Estado -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Estado</mat-label>
+        <mat-select formControlName="estado">
+          <mat-option value="Activo">Activo</mat-option>
+          <mat-option value="Pendiente">Pendiente</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <!-- Fecha Emisión -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Fecha Emisión</mat-label>
+        <input matInput formControlName="fechaEmision" [matDatepicker]="pickerAhorros" />
+        <mat-datepicker-toggle matSuffix [for]="pickerAhorros"></mat-datepicker-toggle>
+        <mat-datepicker #pickerAhorros></mat-datepicker>
+      </mat-form-field>
+
+      <!-- Tipo Moneda -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Tipo de Moneda</mat-label>
+        <mat-select formControlName="tipoMoneda">
+          <mat-option *ngFor="let moneda of monedas" [value]="moneda.id">
+            {{moneda.nombre}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <!-- País -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>País</mat-label>
+        <mat-select formControlName="pais">
+          <mat-option *ngFor="let pais of paises" [value]="pais.id">
+            {{pais.nombre}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="dialogRef.close()">Cancelar</button>
+    <button mat-raised-button color="primary" (click)="saveValorOblig(dialogRef)">
+      Guardar
+    </button>
+  </mat-dialog-actions>
+</ng-template>
+
+<!-- MODAL DEPÓSITOS -->
+<ng-template #depositosModal let-dialogRef>
+  <h2 mat-dialog-title>
+    {{ editMode ? 'Editar Depósito a Plazo' : 'Agregar Depósito a Plazo' }}
+  </h2>
+
+  <mat-dialog-content>
+    <form [formGroup]="valorForm">
+      <!-- Tipo de Documento -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Tipo de Documento</mat-label>
+        <mat-select formControlName="tipoDocumento">
+          <mat-option *ngFor="let tipo of tipoInstrumentos" [value]="tipo.id">
+            {{tipo.nombre}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <!-- N° de Documento -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>N° de Documento</mat-label>
+        <input matInput formControlName="nroDocumento" />
+      </mat-form-field>
+
+      <!-- Monto Total -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Monto Total</mat-label>
+        <input matInput type="number" formControlName="montoTotal" />
+      </mat-form-field>
+
+      <!-- Registra Inscripción -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>¿Registra Inscripción?</mat-label>
+        <mat-select formControlName="registraInscripcion">
+          <mat-option value="SI">Sí</mat-option>
+          <mat-option value="NO">No</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <!-- Estado -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Estado</mat-label>
+        <mat-select formControlName="estado">
+          <mat-option value="Activo">Activo</mat-option>
+          <mat-option value="Pendiente">Pendiente</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <!-- Fecha Emisión -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Fecha Emisión</mat-label>
+        <input matInput formControlName="fechaEmision" [matDatepicker]="pickerDepositos" />
+        <mat-datepicker-toggle matSuffix [for]="pickerDepositos"></mat-datepicker-toggle>
+        <mat-datepicker #pickerDepositos></mat-datepicker>
+      </mat-form-field>
+
+      <!-- Tipo Moneda -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Tipo de Moneda</mat-label>
+        <mat-select formControlName="tipoMoneda">
+          <mat-option *ngFor="let moneda of monedas" [value]="moneda.id">
+            {{moneda.nombre}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <!-- País -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>País</mat-label>
+        <mat-select formControlName="pais">
+          <mat-option *ngFor="let pais of paises" [value]="pais.id">
+            {{pais.nombre}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="dialogRef.close()">Cancelar</button>
+    <button mat-raised-button color="primary" (click)="saveValorOblig(dialogRef)">
+      Guardar
+    </button>
+  </mat-dialog-actions>
+</ng-template>
+
+<!-- MODAL SEGUROS -->
+<ng-template #segurosModal let-dialogRef>
+  <h2 mat-dialog-title>
+    {{ editMode ? 'Editar Seguro' : 'Agregar Seguro' }}
+  </h2>
+
+  <mat-dialog-content>
+    <form [formGroup]="valorForm">
+      <!-- Tipo de Documento -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Tipo de Documento</mat-label>
+        <mat-select formControlName="tipoDocumento">
+          <mat-option *ngFor="let tipo of tipoInstrumentos" [value]="tipo.id">
+            {{tipo.nombre}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <!-- N° de Documento -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>N° de Documento</mat-label>
+        <input matInput formControlName="nroDocumento" />
+      </mat-form-field>
+
+      <!-- Monto Total -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Monto Total</mat-label>
+        <input matInput type="number" formControlName="montoTotal" />
+      </mat-form-field>
+
+      <!-- Registra Inscripción -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>¿Registra Inscripción?</mat-label>
+        <mat-select formControlName="registraInscripcion">
+          <mat-option value="SI">Sí</mat-option>
+          <mat-option value="NO">No</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <!-- Estado -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Estado</mat-label>
+        <mat-select formControlName="estado">
+          <mat-option value="Activo">Activo</mat-option>
+          <mat-option value="Pendiente">Pendiente</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <!-- Fecha Emisión -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Fecha Emisión</mat-label>
+        <input matInput formControlName="fechaEmision" [matDatepicker]="pickerSeguros" />
+        <mat-datepicker-toggle matSuffix [for]="pickerSeguros"></mat-datepicker-toggle>
+        <mat-datepicker #pickerSeguros></mat-datepicker>
+      </mat-form-field>
+
+      <!-- Tipo Moneda -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Tipo de Moneda</mat-label>
+        <mat-select formControlName="tipoMoneda">
+          <mat-option *ngFor="let moneda of monedas" [value]="moneda.id">
+            {{moneda.nombre}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <!-- País -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>País</mat-label>
+        <mat-select formControlName="pais">
+          <mat-option *ngFor="let pais of paises" [value]="pais.id">
+            {{pais.nombre}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="dialogRef.close()">Cancelar</button>
+    <button mat-raised-button color="primary" (click)="saveValorOblig(dialogRef)">
+      Guardar
+    </button>
+  </mat-dialog-actions>
+</ng-template>

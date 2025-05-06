@@ -107,7 +107,7 @@
   </mat-card-actions>
 </mat-card>
 
-<!-- MODAL inline para Mandato Especial -->
+<!-- MODAL -->
 <ng-template #mandatoModal let-dialogRef>
   <h2 mat-dialog-title>
     {{ editMode ? 'Editar Mandato Especial' : 'Agregar Mandato Especial' }}
@@ -115,23 +115,45 @@
 
   <mat-dialog-content>
     <form [formGroup]="mandatoForm">
+      <!-- Tipo -->
       <mat-form-field appearance="fill" class="w-100 mb-3">
-        <mat-label>Tipo de Mandato</mat-label>
-        <mat-select formControlName="tipoMandato">
-          <mat-option value="GENERAL">General</mat-option>
-          <mat-option value="ESPECIAL">Especial</mat-option>
-          <mat-option value="OTROS">Otros</mat-option>
-        </mat-select>
+        <mat-label>Tipo</mat-label>
+        <input matInput formControlName="tipo" />
       </mat-form-field>
 
+      <!-- Descripción -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Descripción</mat-label>
+        <textarea matInput formControlName="descripcion" rows="3"></textarea>
+      </mat-form-field>
+
+      <!-- Fecha -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Fecha</mat-label>
+        <input matInput formControlName="fecha" [matDatepicker]="picker" />
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+      </mat-form-field>
+
+      <!-- Notaría -->
       <mat-form-field appearance="fill" class="w-100 mb-3">
         <mat-label>Notaría</mat-label>
         <input matInput formControlName="notaria" />
       </mat-form-field>
 
+      <!-- Mandatario -->
       <mat-form-field appearance="fill" class="w-100 mb-3">
-        <mat-label>Fecha</mat-label>
-        <input matInput formControlName="fecha" placeholder="DD/MM/AAAA" />
+        <mat-label>Mandatario</mat-label>
+        <input matInput formControlName="mandatario" />
+      </mat-form-field>
+
+      <!-- Estado -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Estado</mat-label>
+        <mat-select formControlName="estado">
+          <mat-option value="Activo">Activo</mat-option>
+          <mat-option value="Inactivo">Inactivo</mat-option>
+        </mat-select>
       </mat-form-field>
     </form>
   </mat-dialog-content>

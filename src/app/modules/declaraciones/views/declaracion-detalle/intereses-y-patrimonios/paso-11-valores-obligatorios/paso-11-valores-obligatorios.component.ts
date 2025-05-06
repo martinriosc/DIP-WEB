@@ -9,7 +9,7 @@ import {
   FormGroup,
   Validators
 } from '@angular/forms';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 
 import { ValidadorDeclaracionService } from '../../../../services/validador-declaracion.service';
 import { StepperStatusService }        from 'src/app/modules/declaraciones/services/stepper-status.service';
@@ -21,9 +21,13 @@ import { DeclaracionHelperService } from 'src/app/modules/declaraciones/services
 
 interface ValorObligatorio {
   tipoDocumento: string;
-  nroDocumento:  string;
-  valor:         number;
-  fechaEmision:  string;
+  nroDocumento: string;
+  montoTotal: number;
+  registraInscripcion: string;
+  estado: string;
+  fechaEmision: string;
+  tipoMoneda: string;
+  pais: string;
 }
 
 @Component({
@@ -33,15 +37,19 @@ interface ValorObligatorio {
   styleUrls: ['./paso-11-valores-obligatorios.component.scss']
 })
 export class Paso11ValoresObligatoriosComponent implements OnInit {
-  @ViewChild('valObligModal') valObligModal!: TemplateRef<any>;
+  @ViewChild('cuentasModal') cuentasModal!: TemplateRef<any>;
+  @ViewChild('ahorrosModal') ahorrosModal!: TemplateRef<any>;
+  @ViewChild('depositosModal') depositosModal!: TemplateRef<any>;
+  @ViewChild('segurosModal') segurosModal!: TemplateRef<any>;
 
   tieneValoresObligatorios = 'no';
   valoresObligatoriosData: ValorObligatorio[] = [
-    { tipoDocumento: 'PAGARE', nroDocumento: 'ABC-123', valor: 500000, fechaEmision: '2023-01-10' }
+    { tipoDocumento: 'PAGARE', nroDocumento: 'ABC-123', montoTotal: 500000, registraInscripcion: 'SI', estado: 'Activo', fechaEmision: '2023-01-10', tipoMoneda: 'Peso', pais: 'Argentina' }
   ];
   valorForm!: FormGroup;
   editMode = false;
   currentItem: ValorObligatorio | null = null;
+  dialogRef: MatDialogRef<any> | null = null;
 
   private activeDeclId!: string;
 
@@ -214,29 +222,89 @@ export class Paso11ValoresObligatoriosComponent implements OnInit {
     }
   }
 
-  /** Abre modal para agregar nuevo documento */
-  openAddModal(): void {
+  /** Abre modal para agregar nueva cuenta/libreta */
+  openAddCuentaModal(): void {
     this.editMode = false;
     this.currentItem = null;
     this.buildForm();
-    this.dialog.open(this.valObligModal, { width: '800px' });
+    this.loadTiposInstrumentos(1);
+    this.dialogRef = this.dialog.open(this.cuentasModal, { width: '800px' });
   }
 
-  /** Abre modal para editar registro existente */
-  openEditModal(item: ValorObligatorio): void {
+  /** Abre modal para editar cuenta/libreta existente */
+  openEditCuentaModal(item: any): void {
     this.editMode = true;
     this.currentItem = item;
     this.buildForm(item);
-    this.dialog.open(this.valObligModal, { width: '800px' });
+    this.loadTiposInstrumentos(1);
+    this.dialogRef = this.dialog.open(this.cuentasModal, { width: '800px' });
+  }
+
+  /** Abre modal para agregar nuevo ahorro previsional */
+  openAddAhorroModal(): void {
+    this.editMode = false;
+    this.currentItem = null;
+    this.buildForm();
+    this.loadTiposInstrumentos(2);
+    this.dialogRef = this.dialog.open(this.ahorrosModal, { width: '800px' });
+  }
+
+  /** Abre modal para editar ahorro previsional existente */
+  openEditAhorroModal(item: any): void {
+    this.editMode = true;
+    this.currentItem = item;
+    this.buildForm(item);
+    this.loadTiposInstrumentos(2);
+    this.dialogRef = this.dialog.open(this.ahorrosModal, { width: '800px' });
+  }
+
+  /** Abre modal para agregar nuevo depósito */
+  openAddDepositoModal(): void {
+    this.editMode = false;
+    this.currentItem = null;
+    this.buildForm();
+    this.loadTiposInstrumentos(3);
+    this.dialogRef = this.dialog.open(this.depositosModal, { width: '800px' });
+  }
+
+  /** Abre modal para editar depósito existente */
+  openEditDepositoModal(item: any): void {
+    this.editMode = true;
+    this.currentItem = item;
+    this.buildForm(item);
+    this.loadTiposInstrumentos(3);
+    this.dialogRef = this.dialog.open(this.depositosModal, { width: '800px' });
+  }
+
+  /** Abre modal para agregar nuevo seguro */
+  openAddSeguroModal(): void {
+    this.editMode = false;
+    this.currentItem = null;
+    this.buildForm();
+    this.loadTiposInstrumentos(4);
+    this.dialogRef = this.dialog.open(this.segurosModal, { width: '800px' });
+  }
+
+  /** Abre modal para editar seguro existente */
+  openEditSeguroModal(item: any): void {
+    this.editMode = true;
+    this.currentItem = item;
+    this.buildForm(item);
+    this.loadTiposInstrumentos(4);
+    this.dialogRef = this.dialog.open(this.segurosModal, { width: '800px' });
   }
 
   /** Construye o reinicia el formulario de la modal */
   private buildForm(item?: ValorObligatorio): void {
     this.valorForm = this.fb.group({
-      tipoDocumento: [item?.tipoDocumento || 'PAGARE', Validators.required],
-      nroDocumento:  [item?.nroDocumento  || '',        Validators.required],
-      valor:         [item?.valor         || 0,         [Validators.required, Validators.min(0)]],
-      fechaEmision:  [item?.fechaEmision  || '',        Validators.required]
+      tipoDocumento: [item?.tipoDocumento || 'PAGARE'],
+      nroDocumento: [item?.nroDocumento || ''],
+      montoTotal: [item?.montoTotal || 0, [Validators.min(0)]],
+      registraInscripcion: [item?.registraInscripcion || ''],
+      estado: [item?.estado || ''],
+      fechaEmision: [item?.fechaEmision || ''],
+      tipoMoneda: [item?.tipoMoneda || ''],
+      pais: [item?.pais || '']
     });
   }
 

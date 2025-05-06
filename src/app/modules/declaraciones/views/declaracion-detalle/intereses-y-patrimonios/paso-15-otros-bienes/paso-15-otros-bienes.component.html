@@ -95,23 +95,50 @@
   </h2>
 
   <mat-dialog-content>
-    <form [formGroup]="otroBienForm">
+    <form [formGroup]="otrosBienesForm">
+      <!-- Tipo -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Tipo</mat-label>
+        <mat-select formControlName="tipo">
+          <mat-option *ngFor="let tipo of tiposBienes" [value]="tipo.id">
+            {{tipo.nombre}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
       <!-- Descripción -->
       <mat-form-field appearance="fill" class="w-100 mb-3">
         <mat-label>Descripción</mat-label>
-        <textarea matInput rows="3" formControlName="descripcion"></textarea>
+        <textarea matInput formControlName="descripcion" rows="3"></textarea>
       </mat-form-field>
 
-      <!-- Valor Aproximado -->
+      <!-- Valor -->
       <mat-form-field appearance="fill" class="w-100 mb-3">
-        <mat-label>Valor Aproximado</mat-label>
-        <input matInput type="number" formControlName="valorAprox" />
+        <mat-label>Valor</mat-label>
+        <input matInput type="number" formControlName="valor" />
+      </mat-form-field>
+
+      <!-- Fecha -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Fecha</mat-label>
+        <input matInput formControlName="fecha" [matDatepicker]="picker" />
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
       </mat-form-field>
 
       <!-- Observaciones -->
       <mat-form-field appearance="fill" class="w-100 mb-3">
         <mat-label>Observaciones</mat-label>
-        <textarea matInput rows="2" formControlName="observaciones"></textarea>
+        <textarea matInput formControlName="observaciones" rows="3"></textarea>
+      </mat-form-field>
+
+      <!-- Estado -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Estado</mat-label>
+        <mat-select formControlName="estado">
+          <mat-option value="Activo">Activo</mat-option>
+          <mat-option value="Inactivo">Inactivo</mat-option>
+        </mat-select>
       </mat-form-field>
     </form>
   </mat-dialog-content>

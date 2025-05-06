@@ -81,25 +81,37 @@
     <form [formGroup]="antecedentesForm">
       <!-- Tipo -->
       <mat-form-field appearance="fill" class="w-100 mb-3">
-        <mat-label>Tipo de Antecedente</mat-label>
-        <mat-select formControlName="tipo">
-          <mat-option value="PENAL">Penal</mat-option>
-          <mat-option value="ADMINISTRATIVO">Administrativo</mat-option>
-          <mat-option value="JUDICIAL">Judicial</mat-option>
-          <mat-option value="OTROS">Otros</mat-option>
+        <mat-label>Tipo</mat-label>
+        <input matInput formControlName="tipo" />
+      </mat-form-field>
+
+      <!-- Descripción -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Descripción</mat-label>
+        <textarea matInput formControlName="descripcion" rows="3"></textarea>
+      </mat-form-field>
+
+      <!-- Fecha -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Fecha</mat-label>
+        <input matInput formControlName="fecha" [matDatepicker]="picker" />
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+      </mat-form-field>
+
+      <!-- Observaciones -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Observaciones</mat-label>
+        <textarea matInput formControlName="observaciones" rows="3"></textarea>
+      </mat-form-field>
+
+      <!-- Estado -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Estado</mat-label>
+        <mat-select formControlName="estado">
+          <mat-option value="Activo">Activo</mat-option>
+          <mat-option value="Inactivo">Inactivo</mat-option>
         </mat-select>
-      </mat-form-field>
-
-      <!-- Detalle / Observación -->
-      <mat-form-field appearance="fill" class="w-100 mb-3">
-        <mat-label>Detalle / Observación</mat-label>
-        <textarea matInput formControlName="detalle" rows="3"></textarea>
-      </mat-form-field>
-
-      <!-- Fecha Resolución -->
-      <mat-form-field appearance="fill" class="w-100 mb-3">
-        <mat-label>Fecha Resolución</mat-label>
-        <input matInput formControlName="fechaResolucion" placeholder="DD/MM/AAAA" />
       </mat-form-field>
     </form>
   </mat-dialog-content>

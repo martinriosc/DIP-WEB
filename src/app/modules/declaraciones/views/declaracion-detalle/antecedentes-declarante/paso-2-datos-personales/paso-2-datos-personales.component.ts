@@ -72,10 +72,10 @@ export class Paso2DatosPersonalesComponent implements OnInit, AfterViewInit {
     this.loadPaises();
     this.loadRegimenes();
     this.loadEstadosCiviles();
-    
-    
+
+
     this.loadDatosPersonales();
-  
+
   }
 
   ngAfterViewInit(): void {
@@ -95,7 +95,6 @@ export class Paso2DatosPersonalesComponent implements OnInit, AfterViewInit {
     //1319527
 
     this._declarante.getDatosDeclarante(1319527).subscribe(res => {
-      console.log(res)
       this.onChangeEstadoCivil(res.estadoCivil);
       this.datosPersonalesForm.patchValue({
         rut: res.rut,
@@ -108,6 +107,7 @@ export class Paso2DatosPersonalesComponent implements OnInit, AfterViewInit {
         domicilioCalle: res.calle,
         domicilioNumero: res.numero,
         domicilioDepto: res.departamento,
+        regimenPatrimonial: res.regimenPatrimonialId,
         estadoCivil: res.estadoCivil,
         rutConyuge: res.cygRut,
         nombresConyuge: res.cygNombre,
@@ -116,6 +116,8 @@ export class Paso2DatosPersonalesComponent implements OnInit, AfterViewInit {
         declaraConyuge: res.cygForm ? 'si' : 'no',
       })
       this.onChangeRegion();
+      console.log(res)
+      this.onChangeEstadoCivil(res.estadoCivil);
       this.datosPersonalesForm.patchValue({
         comuna: res.comunaId
       })
@@ -165,7 +167,7 @@ export class Paso2DatosPersonalesComponent implements OnInit, AfterViewInit {
     let value = null;
 
     console.log(event)
-    if(event.value == null) {
+    if (event.value == null) {
       value = event;
     } else {
       value = event.value;

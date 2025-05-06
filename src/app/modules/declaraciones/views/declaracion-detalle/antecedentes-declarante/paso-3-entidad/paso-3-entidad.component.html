@@ -30,18 +30,14 @@
           <mat-form-field appearance="outline" class="w-100">
             <mat-label>Cargo o Función</mat-label>
             <mat-select formControlName="cargoFuncion">
-              <mat-option *ngFor="let c of cargos" [value]="c.id"> {{ c.nombre }} </mat-option>
+              <mat-option *ngFor="let c of cargos" [value]="c.nombre"> {{ c.nombre }} </mat-option>
             </mat-select>
           </mat-form-field>
         </div>
 
         <div class="col-md-2">
           <mat-form-field appearance="outline" class="w-100">
-            <mat-label>Fecha de Asunción en el cargo</mat-label>
-
-            <!-- Agrega un elemento datepicker de angular material -->
-
-            
+            <mat-label>Fecha de Asunción en el cargo</mat-label>            
             <input matInput type="date" formControlName="fechaAsuncion" />
           </mat-form-field>
         </div>

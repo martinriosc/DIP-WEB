@@ -105,7 +105,7 @@ export class Paso3EntidadComponent implements OnInit, AfterViewInit {
         console.log(response)
         this.entidadForm.patchValue({
           servicio: response.data.ServPublicoId,
-          cargoFuncion: response.data.cargo,
+          cargoFuncion: response.data.cargoNombre,
           tipoSujeto: response.data.sujetoObligado,
           subnumeral: response.data.subNumeral,
           grado: response.data.ServGradoId,

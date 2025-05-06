@@ -17,9 +17,12 @@ import { ContratoService } from 'src/app/modules/declaraciones/services/contrato
 import { DeclaracionHelperService } from 'src/app/modules/declaraciones/services/declaracion-helper.service';
 
 interface MandatoEspecial {
-  tipoMandato: string;
-  notaria: string;
+  tipo: string;
+  descripcion: string;
   fecha: string;
+  notaria: string;
+  mandatario: string;
+  estado: string;
 }
 
 @Component({
@@ -32,8 +35,6 @@ export class Paso12MandatoEspecialComponent implements OnInit {
   @ViewChild('mandatoModal') mandatoModal!: TemplateRef<any>;
 
   tieneMandato = 'no';
-
-
   mandatoForm!: FormGroup;
   editMode = false;
   currentItem: MandatoEspecial | null = null;
@@ -41,7 +42,6 @@ export class Paso12MandatoEspecialComponent implements OnInit {
 
   private activeDeclId!: string;
   contratos: any[] = [];
-
 
   declaracionId: number = 1319527;    //1319527
   declaranteId: number = 2882000;
@@ -52,7 +52,7 @@ export class Paso12MandatoEspecialComponent implements OnInit {
     private validador: ValidadorDeclaracionService,
     private stepperState: StepperStatusService,
     private _contratos: ContratoService,
-    private _declaracionHelper: DeclaracionHelperService
+    private _declaracionHelper: DeclaracionHelperService,
   ) { }
 
   ngOnInit(): void {
@@ -106,7 +106,7 @@ export class Paso12MandatoEspecialComponent implements OnInit {
     // }
   }
 
-  /** Cambia el radio “¿Tiene mandato?” */
+  /** Cambia el radio "¿Tiene mandato?" */
   onTieneMandatoChange(value: string): void {
     this.tieneMandato = value;
     // const key = 'paso12';
@@ -146,38 +146,38 @@ export class Paso12MandatoEspecialComponent implements OnInit {
   /** Inicializa o reinicia el formulario */
   private buildForm(item?: MandatoEspecial): void {
     this.mandatoForm = this.fb.group({
-      tipoMandato: [item?.tipoMandato || 'ESPECIAL', Validators.required],
-      notaria: [item?.notaria || '', Validators.required],
-      fecha: [item?.fecha || '', Validators.required]
+      tipo: [item?.tipo || ''],
+      descripcion: [item?.descripcion || ''],
+      fecha: [item?.fecha || ''],
+      notaria: [item?.notaria || ''],
+      mandatario: [item?.mandatario || ''],
+      estado: [item?.estado || 'Activo']
     });
   }
 
-  /** Guarda o actualiza desde la modal */
-  saveMandato(dialogRef: MatDialogRef<any>): void {
-    // const key = 'paso12';
-    // const path = ['declaraciones', this.activeDeclId, key];
+  /** Guarda o actualiza un mandato */
+  saveMandato(dialogRef: any): void {
+    const key = 'paso12';
+    const path = ['declaraciones', this.activeDeclId, key];
 
-    // if (this.mandatoForm.invalid) {
-    //   this.validador.markIncomplete(key);
-    //   this.stepperState.markStepIncomplete(path);
-    //   return;
-    // }
+    if (this.mandatoForm.invalid) {
+      this.validador.markIncomplete(key);
+      this.stepperState.markStepIncomplete(path);
+      return;
+    }
 
-    // const data = this.mandatoForm.value as MandatoEspecial;
-    // if (this.editMode && this.currentItem) {
-    //   const idx = this.mandatosData.indexOf(this.currentItem);
-    //   if (idx >= 0) {
-    //     this.mandatosData[idx] = data;
-    //   }
-    // } else {
-    //   this.mandatosData.push(data);
-    // }
+    const m = this.mandatoForm.value as MandatoEspecial;
+    if (this.editMode && this.currentItem) {
+      const idx = this.contratos.indexOf(this.currentItem);
+      if (idx >= 0) this.contratos[idx] = m;
+    } else {
+      this.contratos.push(m);
+    }
+    dialogRef.close();
 
-    // // si hay al menos uno, marcamos completo
-    // this.validador.markComplete(key);
-    // this.stepperState.markStepCompleted(path);
-
-    // dialogRef.close();
+    // Marca completo si hay al menos uno
+    this.validador.markComplete(key);
+    this.stepperState.markStepCompleted(path);
   }
 
   /** Elimina un mandato */

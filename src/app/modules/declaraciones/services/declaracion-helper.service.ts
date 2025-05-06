@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, map, Subject } from 'rxjs';
+import { BehaviorSubject, forkJoin, map, Subject } from 'rxjs';
 import { StepData } from './validador-declaracion.service';
 import { DeclaracionService } from './declaracion.service';
 
@@ -22,6 +22,8 @@ export interface Declaracion {
   relacion: string;
   completed: boolean;
   intereses: Step[];
+  esDeclarante: boolean;
+  idDeclarante: number;
 }
 
 export interface FormState {
@@ -228,6 +230,179 @@ export const initialState: any = {
 };
 
 
+/* ╔═ Tablas de mapeo ─────────────────────────────────────────── */
+const MAIN_STEP: Record<string, string> = {
+  tabPnlActividadesProfesionales : 'paso5',
+  tabPnlBienesInmuebles          : 'paso6',
+  tabPnlAguasConcesiones         : 'paso7',
+  tabPnlVehiculosBienMueble      : 'paso8',
+  tabPnlComunidades              : 'paso9',
+  tabPnlValoresInstrumentos      : 'paso10',
+  tabPnlValoresObligatorios      : 'paso11',
+  tabPnlContratosAdministracion  : 'paso12',
+  tabPnlPasivos                  : 'paso13',
+  tabPnlOtraFuente               : 'paso14',
+  tabOtrosBienes                 : 'paso15',
+  tabOtrosAntecedentes           : 'paso16'
+};
+
+const SUB_STEP: Record<string, Record<string, string>> = {
+  paso5: {
+    'Actividades en que haya participado'        : 'paso5-1',
+    'Actividades que realiza o en que participa' : 'paso5-2',
+    'Actividades Cónyuge o Conviviente Civil'    : 'paso5-3'
+  },
+  paso6: {
+    'Bienes Inmuebles en Chile'    : 'paso6-1',
+    'Bienes Inmuebles Extranjero'  : 'paso6-2'
+  },
+  paso7: {
+    'Derechos de aprovechamiento de aguas': 'paso7-1',
+    'Concesiones'                         : 'paso7-2'
+  },
+  paso8: {
+    'Vehículos Motorizados Livianos y Pesados': 'paso8-1',
+    'Aeronaves'                              : 'paso8-2',
+    'Naves o Artefactos Navales'             : 'paso8-3',
+    'Bienes Muebles registrables'            : 'paso8-4'
+  },
+  paso9: {
+    'Derechos o acciones en Chile'         : 'paso9-1',
+    'Derechos o acciones en el Extranjero' : 'paso9-2'
+  },
+  paso10: {
+    'Instrumento o Valor transable en Chile'        : 'paso10-1',
+    'Instrumento o Valor transable en el Extranjero': 'paso10-2'
+  },
+  paso11: {
+    'Cuentas y/o Libretas de Ahorro'  : 'paso11-1',
+    'Ahorro Previsional Voluntario'   : 'paso11-2',
+    'Depósitos a Plazo'               : 'paso11-3',
+    'Seguros'                         : 'paso11-4'
+  },
+  paso13: {
+    'Deudas por pensión de alimentos' : 'paso13-1',
+    'Pasivos'                         : 'paso13-2'
+  }
+};
+
+/* Flags que vienen de obtenerRegistro → paso principal o subpaso a habilitar */
+const FLAG_MAP = {
+  actividadesIndividuales   : 'paso5-1',
+  actividadesDependientes   : 'paso5-2',
+  bienesInmuebles           : 'paso6',
+  bienesInmueblesExtranjero : 'paso6-2',
+  aguas                     : 'paso7-1',
+  concesiones               : 'paso7-2',
+  vehiculos                 : 'paso8-1',
+  aeronaves                 : 'paso8-2',
+  naves                     : 'paso8-3',
+  bienMueble                : 'paso8-4',
+  sociedades                : 'paso9-1',
+  sociedadesExtranjero      : 'paso9-2',
+  instrumento               : 'paso10-1',
+  instrumentoExtranjero     : 'paso10-2',
+  contratos                 : 'paso12',
+  pasivos                   : 'paso13',
+  otraFuente                : 'paso14',
+  otrosBienes               : 'paso15',
+  otrosAntecedentes         : 'paso16'
+} as const;
+
+function buildFormState(api: any, flags: any): FormState {
+
+  const state: FormState = structuredClone(initialState);
+
+  /* Agrupar ítems por persona -------------------------------- */
+  const grupos = new Map<number, any[]>();
+  api.items.forEach((it: any) => {
+    (grupos.get(it.idDeclarante) ?? grupos.set(it.idDeclarante, []).get(it.idDeclarante)!)
+      .push(it);
+  });
+
+  /* Crear declaraciones dinámicamente ------------------------ */
+  state.declaraciones = Array.from(grupos.entries()).map(([idDecl, lista], idx) => {
+
+    /* 2.1 Cuáles pasos/sub‑pasos llegaron realmente */
+    const pasoRecibido = new Set<string>();
+    lista.forEach(it => {
+      const p = MAIN_STEP[it.idMenu];
+      const s = SUB_STEP[p]?.[it.item.trim()];
+      pasoRecibido.add(p);
+      if (s) { pasoRecibido.add(s); }
+    });
+
+    /* 2.2 Partir de plantilla y **quitar** lo que no llegó (salvo declarante) */
+    const plantilla = structuredClone(initialState.declaraciones[0]).intereses;
+    const intereses = plantilla
+      .filter((st:any) => lista[0].esDeclarante || pasoRecibido.has(st.key))
+      .map((st:any) => {
+        st.subSteps = st.subSteps.filter((ss:any) =>
+          lista[0].esDeclarante || pasoRecibido.has(ss.key)
+        );
+        return st;
+      });
+
+    /* 2.3 Completar datos, enabled/completed, flags, burbujeo */
+    const first = lista[0];
+    intereses.forEach((st:any) => {              // set completado / enabled
+      const itemsStep = lista.filter(it => {
+        const p = MAIN_STEP[it.idMenu];
+        const s = SUB_STEP[p]?.[it.item.trim()];
+        return st.key === (s ?? p) || st.key === p;
+      });
+      /* padre: si todos hijos "No Tiene" ⇒ disabled */
+      if (st.subSteps.length) {
+        st.enabled = st.subSteps.some((c:any) => {
+          const i = itemsStep.find(it => {
+            const s = SUB_STEP[MAIN_STEP[it.idMenu]]?.[it.item.trim()];
+            return s === c.key;
+          });
+          return i ? i.tiene !== 'No Tiene' : true;
+        });
+      } else {
+        const src = itemsStep[0];
+        if (src) {
+          st.enabled   = src.tiene !== 'No Tiene';
+          st.completed = !src.incompleto;
+          st.status    = st.completed ? 'completed' :
+                         src.incompleto ? 'incomplete' : 'pending';
+        }
+      }
+    });
+
+    applyFlags(intereses, flags);
+    bubbleCompletion(intereses);
+
+    return <Declaracion>{
+      id          : `decl-${idx + 1}`,
+      declara     : first.nombreDeclarante.trim(),
+      relacion    : first.tipo.startsWith('Declarante') ? '' :
+                    first.tipo.startsWith('Cónyuge')    ? 'Cónyuge' :
+                    'Persona Relacionada',
+      idDeclarante: idDecl,
+      esDeclarante: !!first.esDeclarante,   // <<── NUEVO
+      completed   : intereses.every((p:any) => p.completed),
+      intereses
+    };
+  });
+
+  state.activeDeclaracionId = state.declaraciones[0]?.id ?? '';
+  return state;
+}
+
+/* Aplica flags de habilitación/inhabilitación --------------- */
+function applyFlags(intereses: Step[], flags: any): void {
+  Object.entries(FLAG_MAP).forEach(([flagKey, stepKey]) => {
+    const step = findStep(intereses, stepKey);
+    if (step && flagKey in flags) {
+      step.enabled = !!flags[flagKey as keyof typeof FLAG_MAP];
+    }
+  });
+}
+
+
+
 
 /* ╔═ Helpers PUROS (sin Subjects) ─────────────────────────────── */
 const structured = <T>(obj: T) => structuredClone(obj) as T;
@@ -301,40 +476,44 @@ export class DeclaracionHelperService {
     private _declaracion: DeclaracionService
   ) {
     this.getDeclaracionesFlag(2882000)
+    forkJoin([
+      this._declaracion.confirmarDatos(1319527),
+      this._declaracion.obtenerRegistro(2882000)
+    ]).subscribe({
+      next: ([api, flags]) => {
+        console.log(api)
+        /* Convertimos y alimentamos el estado global */
+        const nuevoState = buildFormState(api, flags);
+        this._state$.next(nuevoState);         // <-- el stepper ya usa este BehaviorSubject
+
+        console.log(nuevoState)
+      },
+      error: err => console.error(err)
+    });
    }
 
 
   ngOnInit(): void {
     // this.getDeclaracionesFlag(1319527)
   }
+
+
+  getConfirmacionDatos(){
+    this._declaracion.confirmarDatos(1319527).subscribe({
+      next: (res: any) => {
+        console.log(res)
+      },
+      error: (err) => {
+        console.log(err);
+      }
+      
+    })
+  }
   getDeclaracionesFlag(declaranteId: number) {
     this._declaracion.obtenerRegistro(declaranteId).subscribe({
       next: (res) => {
         this.setDeclaracionesFlagSubject(res)
-
-      //   {
-      //     "id": 1319488,
-      //     "actividadesIndividuales": false,
-      //     "actividadesDependientes": false,
-      //     "bienesInmuebles": true,
-      //     "bienesInmueblesExtranjero": false,
-      //     "aguas": false,
-      //     "concesiones": false,
-      //     "vehiculos": true,
-      //     "aeronaves": true,
-      //     "naves": false,
-      //     "bienMueble": false,
-      //     "sociedades": true,
-      //     "sociedadesExtranjero": false,
-      //     "instrumento": false,
-      //     "instrumentoExtranjero": false,
-      //     "contratos": false,
-      //     "pasivos": false,
-      //     "otraFuente": false,
-      //     "otrosBienes": false,
-      //     "otrosAntecedentes": false
-      // }
-
+        this.getConfirmacionDatos()
       },
       error: (err) => {
         console.log(err);
