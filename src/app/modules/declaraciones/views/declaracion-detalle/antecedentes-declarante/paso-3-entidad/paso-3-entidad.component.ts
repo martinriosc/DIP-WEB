@@ -14,6 +14,7 @@ import { DatosLaboralesService } from 'src/app/modules/declaraciones/services/da
 import { SubnumeralService } from 'src/app/modules/declaraciones/services/subnumeral.service';
 import { ServicioAdminService } from 'src/app/modules/administracion/services/servicio-admin.service';
 import { DeclaracionService } from 'src/app/modules/declaraciones/services/declaracion.service';
+import { DeclaracionHelperService } from 'src/app/modules/declaraciones/services/declaracion-helper.service';
 
 @Component({
   selector: 'app-paso-3-entidad',
@@ -46,8 +47,7 @@ export class Paso3EntidadComponent implements OnInit, AfterViewInit {
 
 
   constructor(
-    private validador: ValidadorDeclaracionService,
-    private stepperState: StepperStatusService,
+    private _declaracionHelper: DeclaracionHelperService,
     private _datosLaborales: DatosLaboralesService,
     private _servicio: ServicioService,
     private _sujetoObligado: SujetoObligadoService,
@@ -101,8 +101,9 @@ export class Paso3EntidadComponent implements OnInit, AfterViewInit {
     //1319527
 
     this._datosLaborales.getDatosLaborales(1319527).subscribe({
+
       next: (response) => {
-        console.log(response)
+        
         this.entidadForm.patchValue({
           servicio: response.data.ServPublicoId,
           cargoFuncion: response.data.cargoNombre,
@@ -192,7 +193,7 @@ export class Paso3EntidadComponent implements OnInit, AfterViewInit {
   loadCargos() {
     this._admin.listarCargos(this.servicioId).subscribe({
       next: (response: any) => {
-        console.log(response)
+        
         this.cargos = response.data;
       },
       error: (error) => {
@@ -215,7 +216,7 @@ export class Paso3EntidadComponent implements OnInit, AfterViewInit {
   loadRegiones() {
     this._localidad.getRegiones().subscribe({
       next: (response: any) => {
-        console.log(response)
+        
         this.regiones = response;
       },
       error: (error) => {
@@ -293,7 +294,6 @@ export class Paso3EntidadComponent implements OnInit, AfterViewInit {
   // }
 
   onChangeRemuneracion(event: any) {
-    console.log(event);
     this.entidadForm.controls['remuneracionTipo'].setValue(event);
   }
 
@@ -316,7 +316,6 @@ export class Paso3EntidadComponent implements OnInit, AfterViewInit {
   }
 
   onChangeSubnumeral(event: any) {
-    console.log(event.value);
   }
 
   loadMonedas() {
@@ -346,14 +345,10 @@ export class Paso3EntidadComponent implements OnInit, AfterViewInit {
   /** Guardar + avanzar */
   onSubmit(): void {
     if (this.entidadForm.valid) {
-      // Asegura la marca en ambos servicios
-      this.validador.markComplete('paso3');
-      this.stepperState.markStepCompleted(['declarante', 'paso3']);
-      // Avanza al siguiente step (escuchado por DualStepperComponent)
-      this.stepperState.nextStep();
+      this._declaracionHelper.markStepCompleted(['declarante', 'paso3']);
+      this._declaracionHelper.nextStep();
     } else {
-      this.validador.markIncomplete('paso3');
-      this.stepperState.markStepIncomplete(['declarante', 'paso3']);
+      this._declaracionHelper.markStepIncomplete(['declarante', 'paso3']);
     }
   }
 }

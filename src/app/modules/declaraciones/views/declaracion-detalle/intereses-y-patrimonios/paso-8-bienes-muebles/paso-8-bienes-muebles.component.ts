@@ -102,8 +102,6 @@ export class Paso8BienesMueblesComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private dialog: MatDialog,
-    private stepperState: StepperStatusService,
-    private validador: ValidadorDeclaracionService,
     private _bienMueble: BienMuebleService,
     private _inmueble: InmuebleService,
     private _declaracionHelper: DeclaracionHelperService
@@ -111,7 +109,7 @@ export class Paso8BienesMueblesComponent implements OnInit {
 
   ngOnInit(): void {
     // Recupera el ID de declaración activa
-    this.stepperState.activeId$.subscribe(id => this.activeDeclId = id);
+    this._declaracionHelper.activeId$.subscribe(id => this.activeDeclId = id);
     // Inicializa todos los formularios de modal
     this.buildVehiculoForm();
     this.buildAeronaveForm();
@@ -129,10 +127,10 @@ export class Paso8BienesMueblesComponent implements OnInit {
     this.loadRegistro();
   }
 
-  
-  loadRegistro(){
+
+  loadRegistro() {
     this._declaracionHelper.declaracionesFlag$.subscribe(data => {
-      console.log(data)
+      
       this.tieneVehiculos = data.vehiculos ? 'si' : 'no';
       this.tieneAeronaves = data.aeronaves ? 'si' : 'no';
       this.tieneNaves = data.naves ? 'si' : 'no';
@@ -143,8 +141,8 @@ export class Paso8BienesMueblesComponent implements OnInit {
   loadBienes() {
     this._bienMueble.listarVehiculos([1], this.declaranteId).subscribe({
       next: (res: any) => {
-        console.log(res)
-        if(res.length > 0){
+        
+        if (res.length > 0) {
           this.tieneVehiculos = 'si';
           this.vehiculosLivianos = res;
         }
@@ -156,8 +154,8 @@ export class Paso8BienesMueblesComponent implements OnInit {
 
     this._bienMueble.listarVehiculos([2], this.declaranteId).subscribe({
       next: (res: any) => {
-        console.log(res)
-        if(res.length > 0){
+        
+        if (res.length > 0) {
           this.tieneAeronaves = 'si';
           this.aeronaves = res;
         }
@@ -169,8 +167,8 @@ export class Paso8BienesMueblesComponent implements OnInit {
 
     this._bienMueble.listarVehiculos([3], this.declaranteId).subscribe({
       next: (res: any) => {
-        console.log(res)
-        if(res.length > 0){
+        
+        if (res.length > 0) {
           this.tieneNaves = 'si';
           this.naves = res;
         }
@@ -182,8 +180,8 @@ export class Paso8BienesMueblesComponent implements OnInit {
 
     this._bienMueble.listar(this.declaranteId).subscribe({
       next: (res: any) => {
-        console.log(res)
-        if(res.length > 0){
+        
+        if (res.length > 0) {
           this.tieneOtrosBienes = 'si';
           this.otrosBienes = res;
         }
@@ -193,25 +191,25 @@ export class Paso8BienesMueblesComponent implements OnInit {
       }
     })
 
-  
+
   }
 
-  loadTiposVehiculos(tipoVehiculo: number){
-this._bienMueble.listarAtributosVehiculo('vehiculoTipo', tipoVehiculo).subscribe({
-  next: (res: any) => {
-    console.log(res)
-    this.tiposVehiculos = res;
-  },
-  error: (err) => {
-    console.log(err);
-  }
-})
+  loadTiposVehiculos(tipoVehiculo: number) {
+    this._bienMueble.listarAtributosVehiculo('vehiculoTipo', tipoVehiculo).subscribe({
+      next: (res: any) => {
+        
+        this.tiposVehiculos = res;
+      },
+      error: (err) => {
+        console.log(err);
+      }
+    })
   }
 
-  loadMarcasVehiculos(tipoVehiculo: number){
+  loadMarcasVehiculos(tipoVehiculo: number) {
     this._bienMueble.listarAtributosVehiculo('vehiculoMarca', tipoVehiculo).subscribe({
       next: (res: any) => {
-        console.log(res)
+        
         this.marcasVehiculos = res;
       },
       error: (err) => {
@@ -220,10 +218,10 @@ this._bienMueble.listarAtributosVehiculo('vehiculoTipo', tipoVehiculo).subscribe
     })
   }
 
-  loadDesgravamen(tipoDesgravamen: string){
+  loadDesgravamen(tipoDesgravamen: string) {
     this._inmueble.listarAtributos('desgravamen', tipoDesgravamen).subscribe({
       next: (res: any) => {
-        console.log(res)
+        
         this.gravamenes = res;
       },
       error: (err) => {
@@ -237,21 +235,18 @@ this._bienMueble.listarAtributosVehiculo('vehiculoTipo', tipoVehiculo).subscribe
 
   /** Guarda y avanza */
   onSubmit(): void {
-    const ok =
-      (this.tieneVehiculos === 'si' && this.vehiculosData.length > 0) ||
-      (this.tieneAeronaves === 'si' && this.aeronavesData.length > 0) ||
-      (this.tieneNaves === 'si' && this.navesData.length > 0) ||
-      (this.tieneOtrosBienes === 'si' && this.otrosBienesData.length > 0) ||
-      (this.tieneVehiculos === 'no' && this.tieneAeronaves === 'no' && this.tieneNaves === 'no' && this.tieneOtrosBienes === 'no');
-
-    const key = 'paso8';
-    const path = ['declaraciones', this.activeDeclId, key];
+    const ok1 = this.tieneVehiculos === 'si' ? this.vehiculosLivianos.length > 0 : true;
+    const ok2 = this.tieneAeronaves === 'si' ? this.aeronaves.length > 0 : true;
+    const ok3 = this.tieneNaves === 'si' ? this.naves.length > 0 : true;
+    const ok4 = this.tieneOtrosBienes === 'si' ? this.otrosBienes.length > 0 : true;
+    const ok = ok1 && ok2 && ok3 && ok4;
 
     if (ok) {
-      this.markComplete(path, key);
-      this.stepperState.nextStep();
+      this._declaracionHelper.markStepCompleted(['declaraciones', 'paso8']);
+      this._declaracionHelper.nextStep();
     } else {
-      this.markIncomplete(path, key);
+      this._declaracionHelper.markStepIncomplete(['declaraciones', 'paso8']);
+      this._declaracionHelper.nextStep();
     }
   }
 
@@ -470,15 +465,11 @@ this._bienMueble.listarAtributosVehiculo('vehiculoTipo', tipoVehiculo).subscribe
     }
   }
 
-  // ─── Helpers para marcar paso ─────────────────────────────────────────────
-
   private markComplete(path: string[], key: string): void {
-    this.validador.markComplete(key);
-    this.stepperState.markStepCompleted(path);
+    this._declaracionHelper.markStepCompleted(path);
   }
 
   private markIncomplete(path: string[], key: string): void {
-    this.validador.markIncomplete(key);
-    this.stepperState.markStepIncomplete(path);
+    this._declaracionHelper.markStepIncomplete(path);
   }
 }

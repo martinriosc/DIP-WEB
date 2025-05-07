@@ -56,8 +56,6 @@ export class Paso15OtrosBienesComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private dialog: MatDialog,
-    private validador: ValidadorDeclaracionService,
-    private stepperState: StepperStatusService,
     private _otrosBienes: OtrosBienesService,
     private _comun: ComunService,
     private _declaracionHelper: DeclaracionHelperService
@@ -67,10 +65,9 @@ export class Paso15OtrosBienesComponent implements OnInit {
     // construye formulario inicial
     this.buildForm();
     // obtiene declaración activa
-    this.stepperState.activeId$.subscribe(id => this.activeDeclId = id);
+    this._declaracionHelper.activeId$.subscribe(id => this.activeDeclId = id);
     // opcional: marca inicialmente incompleto
-    this.validador.markIncomplete(this.key);
-    this.stepperState.markStepIncomplete(['declaraciones', this.activeDeclId, this.key]);
+    this._declaracionHelper.markStepIncomplete(['declaraciones', this.activeDeclId, this.key]);
 
     this.loadOtrosBienes();
     this.loadTipoBien();
@@ -83,7 +80,7 @@ export class Paso15OtrosBienesComponent implements OnInit {
   
   loadRegistro(){
     this._declaracionHelper.declaracionesFlag$.subscribe(data => {
-      console.log(data)
+      
       this.tieneOtrosBienes = data.otrosBienes ? 'si' : 'no';
     })
   }
@@ -116,15 +113,12 @@ export class Paso15OtrosBienesComponent implements OnInit {
       this.tieneOtrosBienes === 'no' ||
       (this.tieneOtrosBienes === 'si' && this.otrosBienes.length > 0);
 
-    const path = ['declaraciones', this.activeDeclId, this.key];
-
     if (ok) {
-      this.validador.markComplete(this.key);
-      this.stepperState.markStepCompleted(path);
-      this.stepperState.nextStep();
+      this._declaracionHelper.markStepCompleted(['declaraciones', 'paso15']);
+      this._declaracionHelper.nextStep();
     } else {
-      this.validador.markIncomplete(this.key);
-      this.stepperState.markStepIncomplete(path);
+      this._declaracionHelper.markStepIncomplete(['declaraciones', 'paso15']);
+      this._declaracionHelper.nextStep();
     }
   }
 
@@ -134,15 +128,12 @@ export class Paso15OtrosBienesComponent implements OnInit {
     const path = ['declaraciones', this.activeDeclId, this.key];
 
     if (value === 'no') {
-      this.validador.markComplete(this.key);
-      this.stepperState.markStepCompleted(path);
+      this._declaracionHelper.markStepCompleted(path);
     } else {
       if (this.otrosBienes.length > 0) {
-        this.validador.markComplete(this.key);
-        this.stepperState.markStepCompleted(path);
+        this._declaracionHelper.markStepCompleted(path);
       } else {
-        this.validador.markIncomplete(this.key);
-        this.stepperState.markStepIncomplete(path);
+        this._declaracionHelper.markStepIncomplete(path);
       }
     }
   }
@@ -181,8 +172,7 @@ export class Paso15OtrosBienesComponent implements OnInit {
     const path = ['declaraciones', this.activeDeclId, key];
 
     if (this.otrosBienesForm.invalid) {
-      this.validador.markIncomplete(key);
-      this.stepperState.markStepIncomplete(path);
+      this._declaracionHelper.markStepIncomplete(path);
       return;
     }
 
@@ -196,8 +186,7 @@ export class Paso15OtrosBienesComponent implements OnInit {
     dialogRef.close();
 
     // Marca completo si hay al menos uno
-    this.validador.markComplete(key);
-    this.stepperState.markStepCompleted(path);
+    this._declaracionHelper.markStepCompleted(path);
   }
 
   /** Elimina un bien y actualiza estado */
@@ -206,11 +195,9 @@ export class Paso15OtrosBienesComponent implements OnInit {
     this.otrosBienes = this.otrosBienes.filter(x => x !== item);
 
     if (this.otrosBienes.length > 0) {
-      this.validador.markComplete(this.key);
-      this.stepperState.markStepCompleted(path);
+      this._declaracionHelper.markStepCompleted(path);
     } else {
-      this.validador.markIncomplete(this.key);
-      this.stepperState.markStepIncomplete(path);
+      this._declaracionHelper.markStepIncomplete(path);
     }
   }
 }

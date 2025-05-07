@@ -14,8 +14,6 @@ import {
   MatDialogRef
 } from '@angular/material/dialog';
 
-import { ValidadorDeclaracionService } from '../../../../services/validador-declaracion.service';
-import { StepperStatusService }        from 'src/app/modules/declaraciones/services/stepper-status.service';
 import { OtrosAntecedentesService } from 'src/app/modules/declaraciones/services/otros-antecedentes.service';
 import { DeclaracionService } from 'src/app/modules/declaraciones/services/declaracion.service';
 import { DeclaracionHelperService } from 'src/app/modules/declaraciones/services/declaracion-helper.service';
@@ -54,8 +52,6 @@ export class Paso16AntecedentesComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private dialog: MatDialog,
-    private validador: ValidadorDeclaracionService,
-    private stepperState: StepperStatusService,
     private _otrosAntecedentes: OtrosAntecedentesService,
     private _declaracion: DeclaracionService,
     private _declaracionHelper: DeclaracionHelperService,
@@ -65,10 +61,9 @@ export class Paso16AntecedentesComponent implements OnInit {
     // Inicializa el formulario vacío
     this.buildForm();
     // Obtiene el ID de la declaración activa
-    this.stepperState.activeId$.subscribe(id => this.activeDeclId = id);
+    this._declaracionHelper.activeId$.subscribe(id => this.activeDeclId = id);
     // Marca inicialmente como incompleto
-    this.validador.markIncomplete(this.key);
-    this.stepperState.markStepIncomplete(
+    this._declaracionHelper.markStepIncomplete(
       ['declaraciones', this.activeDeclId, this.key]
     );
 
@@ -83,7 +78,7 @@ export class Paso16AntecedentesComponent implements OnInit {
   
   loadRegistro(){
     this._declaracionHelper.declaracionesFlag$.subscribe(data => {
-      console.log(data)
+      
       this.tieneAntecedentes = data.otrosAntecedentes ? 'si' : 'no';
     })
   }
@@ -91,7 +86,7 @@ export class Paso16AntecedentesComponent implements OnInit {
   loadOtrosAntecedentes() {
     this._otrosAntecedentes.listar(this.declaracionId).subscribe({
       next: (data:any) => {
-        console.log(data)
+        
         this.antecedentes = data;
       },
       error: (error) => {
@@ -106,15 +101,12 @@ export class Paso16AntecedentesComponent implements OnInit {
       this.tieneAntecedentes === 'no' ||
       (this.tieneAntecedentes === 'si' && this.antecedentes.length > 0);
 
-    const path = ['declaraciones', this.activeDeclId, this.key];
-
     if (ok) {
-      this.validador.markComplete(this.key);
-      this.stepperState.markStepCompleted(path);
-      this.stepperState.nextStep();
+      this._declaracionHelper.markStepCompleted(['declaraciones', 'paso16']);
+      this._declaracionHelper.nextStep();
     } else {
-      this.validador.markIncomplete(this.key);
-      this.stepperState.markStepIncomplete(path);
+      this._declaracionHelper.markStepIncomplete(['declaraciones', 'paso16']);
+      this._declaracionHelper.nextStep();
     }
   }
 
@@ -124,15 +116,12 @@ export class Paso16AntecedentesComponent implements OnInit {
     const path = ['declaraciones', this.activeDeclId, this.key];
 
     if (value === 'no') {
-      this.validador.markComplete(this.key);
-      this.stepperState.markStepCompleted(path);
+      this._declaracionHelper.markStepCompleted(path);
     } else {
       if (this.antecedentes.length > 0) {
-        this.validador.markComplete(this.key);
-        this.stepperState.markStepCompleted(path);
+        this._declaracionHelper.markStepCompleted(path);
       } else {
-        this.validador.markIncomplete(this.key);
-        this.stepperState.markStepIncomplete(path);
+        this._declaracionHelper.markStepIncomplete(path);
       }
     }
   }
@@ -170,8 +159,7 @@ export class Paso16AntecedentesComponent implements OnInit {
     const path = ['declaraciones', this.activeDeclId, key];
 
     if (this.antecedentesForm.invalid) {
-      this.validador.markIncomplete(key);
-      this.stepperState.markStepIncomplete(path);
+      this._declaracionHelper.markStepIncomplete(path);
       return;
     }
 
@@ -185,8 +173,7 @@ export class Paso16AntecedentesComponent implements OnInit {
     dialogRef.close();
 
     // Marca completo si hay al menos uno
-    this.validador.markComplete(key);
-    this.stepperState.markStepCompleted(path);
+    this._declaracionHelper.markStepCompleted(path);
   }
 
   /** Elimina un antecedente */
@@ -195,11 +182,9 @@ export class Paso16AntecedentesComponent implements OnInit {
 
     this.antecedentes = this.antecedentes.filter(x => x !== item);
     if (this.antecedentes.length > 0) {
-      this.validador.markComplete(this.key);
-      this.stepperState.markStepCompleted(path);
+      this._declaracionHelper.markStepCompleted(path);
     } else {
-      this.validador.markIncomplete(this.key);
-      this.stepperState.markStepIncomplete(path);
+      this._declaracionHelper.markStepIncomplete(path);
     }
   }
 }

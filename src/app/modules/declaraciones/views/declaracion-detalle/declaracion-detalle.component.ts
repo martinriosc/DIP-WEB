@@ -915,8 +915,6 @@ export class DeclaracionDetalleComponent implements OnInit {
     const currentForm = this.formGroups[i];
     const stepKey = this.stepsObj[i].key;
 
-    console.log('Guardando paso', i, stepKey);
-    console.log("curent form: ", currentForm);
 
     if (currentForm.valid && !this.validadorService.isComplete(stepKey)) {
       // Marcamos como completo

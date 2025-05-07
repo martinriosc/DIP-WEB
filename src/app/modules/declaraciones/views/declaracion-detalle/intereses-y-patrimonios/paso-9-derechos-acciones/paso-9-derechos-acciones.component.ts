@@ -66,8 +66,6 @@ export class Paso9DerechosAccionesComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private dialog: MatDialog,
-    private validador: ValidadorDeclaracionService,
-    private stepperState: StepperStatusService,
     private _comunidad: ComunidadValoresService,
     private _inmueble: InmuebleService,
     private _localidad: LocalidadService,
@@ -76,10 +74,9 @@ export class Paso9DerechosAccionesComponent implements OnInit {
 
   ngOnInit(): void {
     this.initForm();
-    this.stepperState.activeId$.subscribe(id => this.activeDeclId = id);
+    this._declaracionHelper.activeId$.subscribe(id => this.activeDeclId = id);
     const path = ['declaraciones', this.activeDeclId, 'paso9'];
-    this.validador.markIncomplete('paso9');
-    this.stepperState.markStepIncomplete(path);
+    this._declaracionHelper.markStepIncomplete(path);
 
     this.loadDerechosOAcciones();
     this.loadTitulos();
@@ -92,9 +89,9 @@ export class Paso9DerechosAccionesComponent implements OnInit {
   }
 
   
+
   loadRegistro(){
     this._declaracionHelper.declaracionesFlag$.subscribe(data => {
-      console.log(data)
       this.tieneDerechosChile = data.sociedades ? 'si' : 'no';
       this.tieneDerechosExtranjero = data.sociedadesExtranjero ? 'si' : 'no';
     })
@@ -104,7 +101,7 @@ export class Paso9DerechosAccionesComponent implements OnInit {
 
     this._comunidad.listar(1,this.declaranteId,false).subscribe({
       next: (res: any) => {
-        console.log(res)
+        
         this.derechosAccionesChile = res;
       },
       error: (err) => {
@@ -114,7 +111,7 @@ export class Paso9DerechosAccionesComponent implements OnInit {
     
     this._comunidad.listar(1,this.declaranteId,true).subscribe({
       next: (res: any) => {
-        console.log(res)
+        
         this.derechosAccionesExtranjero = res;
       },
       error: (err) => {
@@ -126,7 +123,7 @@ export class Paso9DerechosAccionesComponent implements OnInit {
   loadTitulos(){
     this._comunidad.listarTitulos().subscribe({
       next: (res: any) => {
-        console.log(res)
+        
         this.titulos = res;
       },
       error: (err) => {
@@ -138,7 +135,7 @@ export class Paso9DerechosAccionesComponent implements OnInit {
   loadDegravamen(tipoGravamen: string){
     this._inmueble.listarAtributos('degravamen', tipoGravamen).subscribe({
       next: (res: any) => {
-        console.log(res)
+        
         this.gravamenes = res;
       },
       error: (err) => {
@@ -150,7 +147,7 @@ export class Paso9DerechosAccionesComponent implements OnInit {
   loadPaises(){
     this._localidad.getPaisesExtranjeros().subscribe({
       next: (res: any) => {
-        console.log(res)
+        
         this.paises = res;
       },
       error: (err) => {
@@ -160,7 +157,6 @@ export class Paso9DerechosAccionesComponent implements OnInit {
   }
 
   onTieneDerechosChileChange(event: any) {
-    console.log(event);
     this.tieneDerechosChile = event;
   }
 
@@ -241,8 +237,7 @@ export class Paso9DerechosAccionesComponent implements OnInit {
   saveDialog(): void {
     const path = ['declaraciones', this.activeDeclId, 'paso9'];
     if (this.formDerechoAccion.invalid) {
-      this.validador.markIncomplete('paso9');
-      this.stepperState.markStepIncomplete(path);
+      this._declaracionHelper.markStepIncomplete(path);
       return;
     }
 
@@ -257,11 +252,9 @@ export class Paso9DerechosAccionesComponent implements OnInit {
     // si hay al menos uno, marcamos completo
     const ok = this.derechosAcciones.length > 0;
     if (ok) {
-      this.validador.markComplete('paso9');
-      this.stepperState.markStepCompleted(path);
+      this._declaracionHelper.markStepCompleted(path);
     } else {
-      this.validador.markIncomplete('paso9');
-      this.stepperState.markStepIncomplete(path);
+      this._declaracionHelper.markStepIncomplete(path);
     }
 
     this.closeDialog();
@@ -273,26 +266,24 @@ export class Paso9DerechosAccionesComponent implements OnInit {
     this.derechosAcciones.splice(index, 1);
     const ok = this.derechosAcciones.length > 0;
     if (ok) {
-      this.validador.markComplete('paso9');
-      this.stepperState.markStepCompleted(path);
+      this._declaracionHelper.markStepCompleted(path);
     } else {
-      this.validador.markIncomplete('paso9');
-      this.stepperState.markStepIncomplete(path);
+      this._declaracionHelper.markStepIncomplete(path);
     }
   }
 
   /** guarda y avanza al siguiente paso */
   onSubmit(): void {
-    const path = ['declaraciones', this.activeDeclId, 'paso9'];
-    // asumimos válido si al menos hay uno o la lógica que estimes
-    const ok = this.derechosAcciones.length > 0;
+    const ok1 = this.tieneDerechosChile === 'si' ? this.derechosAccionesChile.length > 0 : true;
+    const ok2 = this.tieneDerechosExtranjero === 'si' ? this.derechosAccionesExtranjero.length > 0 : true;
+    const ok = ok1 && ok2;
+
     if (ok) {
-      this.validador.markComplete('paso9');
-      this.stepperState.markStepCompleted(path);
-      this.stepperState.nextStep();
+      this._declaracionHelper.markStepCompleted(['declaraciones', 'paso9']);
+      this._declaracionHelper.nextStep();
     } else {
-      this.validador.markIncomplete('paso9');
-      this.stepperState.markStepIncomplete(path);
+      this._declaracionHelper.markStepIncomplete(['declaraciones', 'paso9']);
+      this._declaracionHelper.nextStep();
     }
   }
 }

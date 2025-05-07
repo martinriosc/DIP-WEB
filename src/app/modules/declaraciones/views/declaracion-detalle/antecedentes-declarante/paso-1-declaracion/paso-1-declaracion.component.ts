@@ -29,8 +29,6 @@ export class Paso1DeclaracionComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private validador: ValidadorDeclaracionService,
-    private stepperState: StepperStatusService,
     private _declaracion: DeclaracionService,
     private _localidad: LocalidadService,
     private _declaracionHelper: DeclaracionHelperService,
@@ -55,11 +53,9 @@ export class Paso1DeclaracionComponent implements OnInit {
   ngAfterViewInit(): void {
     this.formDeclaracion.statusChanges.subscribe(status => {
       if (status === 'VALID') {
-        this.validador.markComplete('paso1');
-        this.stepperState.markStepCompleted(['declarante', 'paso1']);
+        this._declaracionHelper.markStepCompleted(['declarante', 'paso1']);
       } else {
-        this.validador.markIncomplete('paso1');
-        this.stepperState.markStepIncomplete(['declarante', 'paso1']);
+        this._declaracionHelper.markStepIncomplete(['declarante', 'paso1']);
       }
     });
   }
@@ -67,8 +63,6 @@ export class Paso1DeclaracionComponent implements OnInit {
 
 
   loadDeclaracion() {
-
-    //1319527
     const id = this._declaracionHelper.declaracionId;
     this._declaracion.getDeclaracion(1319527).subscribe({
       next: (response: any) => {
@@ -155,14 +149,10 @@ export class Paso1DeclaracionComponent implements OnInit {
 
   onSubmit(): void {
     if (this.formDeclaracion.valid) {
-      // ya quedó marcado por statusChanges, pero aseguramos:
-      this.validador.markComplete('paso1');
-      this.stepperState.markStepCompleted(['declarante', 'paso1']);
-      // avanzamos al siguiente paso
-      this.stepperState.nextStep();
+      this._declaracionHelper.markStepCompleted(['declarante', 'paso1']);
+      this._declaracionHelper.nextStep();
     } else {
-      this.validador.markIncomplete('paso1');
-      this.stepperState.markStepIncomplete(['declarante', 'paso1']);
+      this._declaracionHelper.markStepIncomplete(['declarante', 'paso1']);
     }
   }
 }

@@ -63,8 +63,6 @@ export class Paso5ActividadesComponent {
   constructor(
     private fb: FormBuilder,
     private dialog: MatDialog,
-    private stepperState: StepperStatusService,
-    private validadorDeclaracionService: ValidadorDeclaracionService,
     private _declaracionHelper: DeclaracionHelperService,
     private _actividad: ActividadProfesionalService,
     private _comun: ComunService,
@@ -76,7 +74,7 @@ export class Paso5ActividadesComponent {
     this.buildForm('12meses');
     this.buildForm('realiza');
     this.buildForm('conyuge');
-    this.stepperState.activeId$.subscribe(id => this.activeDeclId = id);
+    this._declaracionHelper.activeId$.subscribe(id => this.activeDeclId = id);
 
     this.loadTipoActivdad();
     this.loadActividadesProfesionales();
@@ -94,7 +92,7 @@ export class Paso5ActividadesComponent {
 
   loadRegistro() {
     this._declaracionHelper.declaracionesFlag$.subscribe(data => {
-      console.log(data)
+      
       this.actividadesUltimos12Meses = data.actividadesIndividuales ? 'si' : 'no';
       this.actividadesQueRealiza = data.actividadesGremiales ? 'si' : 'no';
       this.actividadesConyuge = data.actividadesDependiente ? 'si' : 'no';
@@ -221,7 +219,17 @@ export class Paso5ActividadesComponent {
 
 
   onSubmit(): void {
-
+    const ok1 = this.actividadesUltimos12Meses ? this.actividades12Meses.length > 0 : true;
+    const ok2 = this.actividadesQueRealiza ? this.actividadesRealiza.length > 0 : true;
+    const ok3 = this.actividadesConyuge ? this.actividadesConyugeData.length > 0 : true;
+    const ok = ok1 && ok2 && ok3;
+    if (ok) {
+      this._declaracionHelper.markStepCompleted(['declaraciones', 'paso5']);
+      this._declaracionHelper.nextStep();
+    } else {
+      this._declaracionHelper.markStepIncomplete(['declaraciones', 'paso5']);
+      this._declaracionHelper.nextStep();
+    }
   }
 
   openAddModal(tipo: string): void {
@@ -273,8 +281,7 @@ export class Paso5ActividadesComponent {
         this.actividades12Meses.push(formValue);
       }
       dialogRef.close();
-      this.validadorDeclaracionService.markComplete('paso5');
-      this.stepperState.markStepCompleted(['declaraciones', this.activeDeclId, 'paso5']);
+      this._declaracionHelper.markStepCompleted(['declaraciones', this.activeDeclId, 'paso5']);
         
       } else if(tipo == 'realiza'){
         const formValue = this.actividadesRealizaForm.value as any;
@@ -285,8 +292,7 @@ export class Paso5ActividadesComponent {
           this.actividadesRealiza.push(formValue);
         }
         dialogRef.close();
-        this.validadorDeclaracionService.markComplete('paso5');
-        this.stepperState.markStepCompleted(['declaraciones', this.activeDeclId, 'paso5']);
+        this._declaracionHelper.markStepCompleted(['declaraciones', this.activeDeclId, 'paso5']);
       } else if(tipo == 'conyuge'){
         const formValue = this.actividadesConyugeForm.value as any;
         if(this.editConyugeMode && this.currentConyugeItem){
@@ -296,8 +302,7 @@ export class Paso5ActividadesComponent {
           this.actividadesConyugeData.push(formValue);
         }
         dialogRef.close();
-        this.validadorDeclaracionService.markComplete('paso5');
-        this.stepperState.markStepCompleted(['declaraciones', this.activeDeclId, 'paso5']);
+        this._declaracionHelper.markStepCompleted(['declaraciones', this.activeDeclId, 'paso5']);
     }
   }
 

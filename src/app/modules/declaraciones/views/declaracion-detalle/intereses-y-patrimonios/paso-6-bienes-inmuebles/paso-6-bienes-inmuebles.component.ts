@@ -79,8 +79,6 @@ export class Paso6BienesInmueblesComponent implements OnInit, AfterViewInit {
   constructor(
     private fb: FormBuilder,
     private dialog: MatDialog,
-    private stepperState: StepperStatusService,
-    private validador: ValidadorDeclaracionService,
     private _inmueble: InmuebleService,
     private _localidad: LocalidadService,
     private _moneda: MonedaService,
@@ -110,7 +108,7 @@ export class Paso6BienesInmueblesComponent implements OnInit, AfterViewInit {
   
   loadRegistro(){
     this._declaracionHelper.declaracionesFlag$.subscribe(data => {
-      console.log(data)
+      
       this.tieneExtranjero = data.bienesInmueblesExtranjero ? 'si' : 'no';
       this.tieneChile = data.bienesInmuebles ? 'si' : 'no';
     })
@@ -121,7 +119,7 @@ export class Paso6BienesInmueblesComponent implements OnInit, AfterViewInit {
   loadBienesInmuebles() {
     this._inmueble.listarBienesInmuebles(this.declaranteId).subscribe({
       next: (res:any) => {
-        console.log(res);
+        
           this.bienesChile = res;
         
       },
@@ -134,7 +132,7 @@ export class Paso6BienesInmueblesComponent implements OnInit, AfterViewInit {
   loadBienesInmueblesExtranjero() {
     this._inmueble.listarBienesInmueblesExtranjero(this.declaranteId).subscribe({
       next: (res:any) => {
-        console.log(res);
+        
         this.bienesExtranjero = res;
       },
       error: (err) => {
@@ -146,7 +144,7 @@ export class Paso6BienesInmueblesComponent implements OnInit, AfterViewInit {
   loadRegiones(){
     this._localidad.getRegiones().subscribe({
       next: (response:any) => {
-        console.log(response)
+        
         this.regiones = response;
       },
       error: (error) => {
@@ -158,7 +156,7 @@ export class Paso6BienesInmueblesComponent implements OnInit, AfterViewInit {
   loadComunas(){
     this._localidad.getComunasPorRegion(this.bienChileForm.value.region).subscribe({
       next: (response:any) => {
-        console.log(response)
+        
         this.comunas = response;
       },
       error: (error) => {
@@ -170,7 +168,7 @@ export class Paso6BienesInmueblesComponent implements OnInit, AfterViewInit {
   loadConservadorBienes(){
     this._inmueble.listarAtributos('conservador').subscribe({
       next: (res:any) => {
-        console.log(res);
+        
         this.conservadoresBienes = res;
       },
       error: (err) => {
@@ -182,7 +180,7 @@ export class Paso6BienesInmueblesComponent implements OnInit, AfterViewInit {
   loadClasesPropiedad(){
     this._inmueble.listarAtributos('clase').subscribe({
       next: (res:any) => {
-        console.log(res);
+        
         this.clasesPropiedad = res;
         this.formasPropiedad = res;
       },
@@ -195,7 +193,7 @@ export class Paso6BienesInmueblesComponent implements OnInit, AfterViewInit {
   loadPaises(){
     this._localidad.getPaisesExtranjeros().subscribe({
       next: (response:any) => {
-        console.log(response)
+        
         this.paises = response;
       },
       error: (error) => {
@@ -207,7 +205,7 @@ export class Paso6BienesInmueblesComponent implements OnInit, AfterViewInit {
   loadMonedas(){
     this._moneda.listar().subscribe({
       next: (response) => {
-        console.log(response)
+        
         this.monedas = response.data;
       },
       error: (error) => {
@@ -219,16 +217,16 @@ export class Paso6BienesInmueblesComponent implements OnInit, AfterViewInit {
 
 
   onSubmit(): void {
- 
-    // if (ok) {
-    //   this.validador.markComplete(key);
-    //   this.stepperState.markStepCompleted(path);
-    //   // Avanza al siguiente paso
-    //   this.stepperState.nextStep();
-    // } else {
-    //   this.validador.markIncomplete(key);
-    //   this.stepperState.markStepIncomplete(path);
-    // }
+    const ok1 = this.tieneChile ? this.bienesChile.length > 0 : true;
+    const ok2 = this.tieneExtranjero ? this.bienesExtranjero.length > 0 : true; 
+    const ok = ok1 && ok2;
+    if (ok) {
+      this._declaracionHelper.markStepCompleted(['declaraciones', 'paso6']);
+      this._declaracionHelper.nextStep();
+    } else {
+      this._declaracionHelper.markStepIncomplete(['declaraciones', 'paso6']);
+      this._declaracionHelper.nextStep();
+    }
   }
 
 

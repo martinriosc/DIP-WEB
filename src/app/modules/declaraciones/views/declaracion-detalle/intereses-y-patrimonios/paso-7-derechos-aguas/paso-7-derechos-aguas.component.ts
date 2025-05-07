@@ -57,8 +57,6 @@ export class Paso7DerechosAguasComponent implements OnInit, AfterViewInit {
   constructor(
     private fb: FormBuilder,
     private dialog: MatDialog,
-    private validador: ValidadorDeclaracionService,
-    private stepperState: StepperStatusService,
     private _aguas: AguasService,
     private _localidad: LocalidadService,
     private _comun: ComunService,
@@ -66,7 +64,7 @@ export class Paso7DerechosAguasComponent implements OnInit, AfterViewInit {
   ) { }
 
   ngOnInit(): void {
-    this.stepperState.activeId$.subscribe(id => this.activeDeclId = id);
+    this._declaracionHelper.activeId$.subscribe(id => this.activeDeclId = id);
     this.buildForm();
 
     this.loadAguas();
@@ -87,7 +85,6 @@ export class Paso7DerechosAguasComponent implements OnInit, AfterViewInit {
   
   loadRegistro(){
     this._declaracionHelper.declaracionesFlag$.subscribe(data => {
-      console.log(data)
       this.tieneDerechosAguas = data.aguas ? 'si' : 'no';
       this.tieneConcesiones = data.concesiones ? 'si' : 'no';
     })
@@ -96,7 +93,7 @@ export class Paso7DerechosAguasComponent implements OnInit, AfterViewInit {
   loadAguas() {
     this._aguas.listar('aprovechamiento', this.declaranteId).subscribe({
       next: (response: any) => {
-        console.log(response)
+        
         if (response.length > 0) {
           this.derechosAguasAprovechamiento = response;
         }
@@ -108,7 +105,7 @@ export class Paso7DerechosAguasComponent implements OnInit, AfterViewInit {
 
     this._aguas.listar('concesiones', this.declaranteId).subscribe({
       next: (response: any) => {
-        console.log(response)
+        
 
         if (response.length > 0) {
           this.derechosAguasConcesion = response;
@@ -124,7 +121,7 @@ export class Paso7DerechosAguasComponent implements OnInit, AfterViewInit {
   loadEntidadesEmisoras() {
     this._aguas.listarEntidadesLike('').pipe().subscribe({
       next: (response: any) => {
-        console.log(response)
+        
         this.entidadesEmisoras = response;
       },
       error: (error) => {
@@ -136,7 +133,7 @@ export class Paso7DerechosAguasComponent implements OnInit, AfterViewInit {
   loadTiposDerecho() {
     this._aguas.listarAtributos('tipoDerecho').pipe().subscribe({
       next: (response: any) => {
-        console.log(response)
+        
         this.tiposDerecho = response;
       },
       error: (error) => {
@@ -148,7 +145,7 @@ export class Paso7DerechosAguasComponent implements OnInit, AfterViewInit {
   loadNaturalezaAgua() {
     this._aguas.listarNaturaleza().pipe().subscribe({
       next: (response: any) => {
-        console.log(response)
+        
         this.naturalezaAgua = response;
       },
       error: (error) => {
@@ -160,7 +157,7 @@ export class Paso7DerechosAguasComponent implements OnInit, AfterViewInit {
   loadRegiones() {
     this._localidad.getRegiones().subscribe({
       next: (response: any) => {
-        console.log(response)
+        
         this.regiones = response;
       },
       error: (error) => {
@@ -172,7 +169,7 @@ export class Paso7DerechosAguasComponent implements OnInit, AfterViewInit {
   loadActos() {
     this._aguas.listarAtributos('actoAdministrativo').pipe().subscribe({
       next: (response: any) => {
-        console.log(response)
+        
         this.actos = response;
       },
       error: (error) => {
@@ -184,7 +181,7 @@ export class Paso7DerechosAguasComponent implements OnInit, AfterViewInit {
   loadServiciosEmisores() {
     this._comun.listarEntity('', 'ServicioEmisor').pipe().subscribe({
       next: (response: any) => {
-        console.log(response)
+        
         this.serviciosEmisores = response;
       },
       error: (error) => {
@@ -196,7 +193,7 @@ export class Paso7DerechosAguasComponent implements OnInit, AfterViewInit {
   loadTipos(){
     this._comun.listarEntity('', 'TipoConcesion').pipe().subscribe({
       next: (response: any) => {
-        console.log(response)
+        
         this.tipos = response;
       },
       error: (error) => {
@@ -212,17 +209,12 @@ export class Paso7DerechosAguasComponent implements OnInit, AfterViewInit {
       (this.tieneDerechosAguas === 'si' && this.derechosAguasData.length > 0) ||
       this.tieneDerechosAguas === 'no';
 
-    const key = 'paso7';
-    const path = ['declaraciones', this.activeDeclId, key];
-
     if (ok) {
-      this.validador.markComplete(key);
-      this.stepperState.markStepCompleted(path);
-      // Avanzar al siguiente paso
-      this.stepperState.nextStep();
+      this._declaracionHelper.markStepCompleted(['declaraciones', 'paso7']);
+      this._declaracionHelper.nextStep();
     } else {
-      this.validador.markIncomplete(key);
-      this.stepperState.markStepIncomplete(path);
+      this._declaracionHelper.markStepIncomplete(['declaraciones', 'paso7']);
+      this._declaracionHelper.nextStep();
     }
   }
 
@@ -265,8 +257,7 @@ export class Paso7DerechosAguasComponent implements OnInit, AfterViewInit {
       // Marca paso como completo ahora que hay al menos un registro
       const key = 'paso7';
       const path = ['declaraciones', this.activeDeclId, key];
-      this.validador.markComplete(key);
-      this.stepperState.markStepCompleted(path);
+      this._declaracionHelper.markStepCompleted(path);
     }
   }
 
@@ -277,8 +268,7 @@ export class Paso7DerechosAguasComponent implements OnInit, AfterViewInit {
     if (this.tieneDerechosAguas === 'si' && this.derechosAguasData.length === 0) {
       const key = 'paso7';
       const path = ['declaraciones', this.activeDeclId, key];
-      this.validador.markIncomplete(key);
-      this.stepperState.markStepIncomplete(path);
+      this._declaracionHelper.markStepIncomplete(path);
     }
   }
 
@@ -288,9 +278,7 @@ export class Paso7DerechosAguasComponent implements OnInit, AfterViewInit {
     const key = 'paso7';
     const path = ['declaraciones', this.activeDeclId, key];
     if (value === 'no') {
-      // Si no aplica, lo marcamos como completo automáticamente
-      this.validador.markComplete(key);
-      this.stepperState.markStepCompleted(path);
+      this._declaracionHelper.markStepCompleted(path);
     }
   }
 

@@ -205,8 +205,7 @@ export class StepperStatusService {
   private readonly nextStepSubject = new Subject<void>();
   readonly nextStep$ = this.nextStepSubject.asObservable();
   nextStep(): void {
-    console.log('nextStep is called');
-    console.log(this._state$.getValue());
+
     this.nextStepSubject.next();
   }
 
@@ -218,12 +217,10 @@ export class StepperStatusService {
   declaraciones$ = this.state$.pipe(map(s => s.declaraciones));
   globalProgress$ = this.state$.pipe(map(this.calcGlobalProgress));
 
-  /** progreso solo Declarante */
   declProgress$ = this.state$.pipe(map(s => {
     const arr = s.declarante.filter(p => p.enabled);
     return arr.length ? arr.filter(p => p.completed).length/arr.length : 0;
   }));
-  /** progreso solo Intereses */
   intProgress$ = this.state$.pipe(map(s => {
     const d = s.declaraciones.find(x => x.id===s.activeDeclaracionId);
     if (!d) { return 0; }

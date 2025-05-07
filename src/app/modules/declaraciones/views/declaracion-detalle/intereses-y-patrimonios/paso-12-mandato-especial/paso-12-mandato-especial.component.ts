@@ -49,8 +49,6 @@ export class Paso12MandatoEspecialComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private dialog: MatDialog,
-    private validador: ValidadorDeclaracionService,
-    private stepperState: StepperStatusService,
     private _contratos: ContratoService,
     private _declaracionHelper: DeclaracionHelperService,
   ) { }
@@ -59,7 +57,7 @@ export class Paso12MandatoEspecialComponent implements OnInit {
     // inicializamos el formulario
     this.buildForm();
     // obtenemos el id de la declaración activa
-    this.stepperState.activeId$.subscribe(id => this.activeDeclId = id);
+    this._declaracionHelper.activeId$.subscribe(id => this.activeDeclId = id);
     this.loadContratos()
   }
 
@@ -70,7 +68,6 @@ export class Paso12MandatoEspecialComponent implements OnInit {
   
   loadRegistro(){
     this._declaracionHelper.declaracionesFlag$.subscribe(data => {
-      console.log(data)
       this.tieneMandato = data.contratos ? 'si' : 'no';
     })
   }
@@ -78,7 +75,6 @@ export class Paso12MandatoEspecialComponent implements OnInit {
   loadContratos() {
     this._contratos.listar(this.declaranteId).subscribe({
       next: (res: any) => {
-        console.log(res)
         this.contratos = res;
       },
       error: (err) => {
@@ -89,21 +85,15 @@ export class Paso12MandatoEspecialComponent implements OnInit {
 
   /** Maneja Guardar/Siguiente */
   onSubmit(): void {
-    // const ok =
-    //   this.tieneMandato === 'no' ||
-    //   (this.tieneMandato === 'si' && this.mandatosData.length > 0);
+    const ok = this.tieneMandato === 'si' ? this.mandatoForm.valid : true;
 
-    // const key = 'paso12';
-    // const path = ['declaraciones', this.activeDeclId, key];
-
-    // if (ok) {
-    //   this.validador.markComplete(key);
-    //   this.stepperState.markStepCompleted(path);
-    //   this.stepperState.nextStep();
-    // } else {
-    //   this.validador.markIncomplete(key);
-    //   this.stepperState.markStepIncomplete(path);
-    // }
+    if (ok) {
+      this._declaracionHelper.markStepCompleted(['declaraciones', 'paso12']);
+      this._declaracionHelper.nextStep();
+    } else {
+      this._declaracionHelper.markStepIncomplete(['declaraciones', 'paso12']);
+      this._declaracionHelper.nextStep();
+    }
   }
 
   /** Cambia el radio "¿Tiene mandato?" */
@@ -161,8 +151,7 @@ export class Paso12MandatoEspecialComponent implements OnInit {
     const path = ['declaraciones', this.activeDeclId, key];
 
     if (this.mandatoForm.invalid) {
-      this.validador.markIncomplete(key);
-      this.stepperState.markStepIncomplete(path);
+      this._declaracionHelper.markStepIncomplete(path);
       return;
     }
 
@@ -174,10 +163,7 @@ export class Paso12MandatoEspecialComponent implements OnInit {
       this.contratos.push(m);
     }
     dialogRef.close();
-
-    // Marca completo si hay al menos uno
-    this.validador.markComplete(key);
-    this.stepperState.markStepCompleted(path);
+    this._declaracionHelper.markStepCompleted(path);
   }
 
   /** Elimina un mandato */

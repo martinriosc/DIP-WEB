@@ -9,6 +9,7 @@ import { MatStepper } from '@angular/material/stepper';
 import { LocalidadService } from 'src/app/modules/declaraciones/services/localidad.service';
 import { RegimenPatrimonialService } from 'src/app/modules/declaraciones/services/regimen-patrimonial.service';
 import { DeclaranteService } from 'src/app/modules/declaraciones/services/declarante.service';
+import { DeclaracionHelperService } from 'src/app/modules/declaraciones/services/declaracion-helper.service';
 
 @Component({
   selector: 'app-paso-2-datos-personales',
@@ -32,8 +33,7 @@ export class Paso2DatosPersonalesComponent implements OnInit, AfterViewInit {
 
   constructor(
     private fb: FormBuilder,
-    private validador: ValidadorDeclaracionService,
-    private stepperState: StepperStatusService,
+    private _declaracionHelper: DeclaracionHelperService,
     private _declarante: DeclaranteService,
     private _profesion: ProfesionService,
     private _localidad: LocalidadService,
@@ -82,11 +82,9 @@ export class Paso2DatosPersonalesComponent implements OnInit, AfterViewInit {
     // Escucha validez y marca complete/incomplete
     this.datosPersonalesForm.statusChanges.subscribe(status => {
       if (status === 'VALID') {
-        this.validador.markComplete('paso2');
-        this.stepperState.markStepCompleted(['declarante', 'paso2']);
+        this._declaracionHelper.markStepCompleted(['declarante', 'paso2']);
       } else {
-        this.validador.markIncomplete('paso2');
-        this.stepperState.markStepIncomplete(['declarante', 'paso2']);
+        this._declaracionHelper.markStepIncomplete(['declarante', 'paso2']);
       }
     });
   }
@@ -116,7 +114,6 @@ export class Paso2DatosPersonalesComponent implements OnInit, AfterViewInit {
         declaraConyuge: res.cygForm ? 'si' : 'no',
       })
       this.onChangeRegion();
-      console.log(res)
       this.onChangeEstadoCivil(res.estadoCivil);
       this.datosPersonalesForm.patchValue({
         comuna: res.comunaId
@@ -127,7 +124,6 @@ export class Paso2DatosPersonalesComponent implements OnInit, AfterViewInit {
   loadProfesiones() {
     this._profesion.listar().subscribe({
       next: (response: any) => {
-        console.log(response)
         this.profesiones = response;
 
       },
@@ -140,7 +136,6 @@ export class Paso2DatosPersonalesComponent implements OnInit, AfterViewInit {
   loadRegimenes() {
     this._regimen.listar().subscribe({
       next: (response: any) => {
-        console.log(response)
         this.regimenes = response;
 
       },
@@ -153,7 +148,6 @@ export class Paso2DatosPersonalesComponent implements OnInit, AfterViewInit {
   loadEstadosCiviles() {
     this._estadoCivil.listar().subscribe({
       next: (response: any) => {
-        console.log(response)
         this.estadosCiviles = response;
 
       },
@@ -166,7 +160,6 @@ export class Paso2DatosPersonalesComponent implements OnInit, AfterViewInit {
   onChangeEstadoCivil(event: any) {
     let value = null;
 
-    console.log(event)
     if (event.value == null) {
       value = event;
     } else {
@@ -201,7 +194,6 @@ export class Paso2DatosPersonalesComponent implements OnInit, AfterViewInit {
   }
 
   onChangeNacionalidad(event: any) {
-    console.log(event.value);
     if (this.datosPersonalesForm.value.lugarReside == 'chile') {
       this.loadRegiones();
     } else {
@@ -212,7 +204,6 @@ export class Paso2DatosPersonalesComponent implements OnInit, AfterViewInit {
   loadRegiones() {
     this._localidad.getRegiones().subscribe({
       next: (response: any) => {
-        console.log(response)
         this.regiones = response;
 
       },
@@ -225,7 +216,6 @@ export class Paso2DatosPersonalesComponent implements OnInit, AfterViewInit {
   onChangeRegion() {
     this._localidad.getComunasPorRegion(this.datosPersonalesForm.value.region).subscribe({
       next: (response: any) => {
-        console.log(response)
         this.comunas = response;
 
       },
@@ -239,7 +229,6 @@ export class Paso2DatosPersonalesComponent implements OnInit, AfterViewInit {
   loadPaises() {
     this._localidad.getPaisesExtranjeros().subscribe({
       next: (response: any) => {
-        console.log(response)
         this.paises = response;
 
       },
@@ -254,13 +243,10 @@ export class Paso2DatosPersonalesComponent implements OnInit, AfterViewInit {
   onSubmit(): void {
     if (this.datosPersonalesForm.valid) {
       // Aseguramos la marca en ambos servicios
-      this.validador.markComplete('paso2');
-      this.stepperState.markStepCompleted(['declarante', 'paso2']);
-      // Dispara el avance en DualStepperComponent
-      this.stepperState.nextStep();
+      this._declaracionHelper.markStepCompleted(['declarante', 'paso2']);
+      this._declaracionHelper.nextStep();
     } else {
-      this.validador.markIncomplete('paso2');
-      this.stepperState.markStepIncomplete(['declarante', 'paso2']);
+      this._declaracionHelper.markStepIncomplete(['declarante', 'paso2']);
     }
   }
 }

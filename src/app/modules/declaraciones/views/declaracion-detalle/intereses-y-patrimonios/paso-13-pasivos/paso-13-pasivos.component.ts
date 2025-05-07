@@ -60,8 +60,6 @@ export class Paso13PasivosComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private dialog: MatDialog,
-    private validador: ValidadorDeclaracionService,
-    private stepperState: StepperStatusService,
     private _pasivos: PasivosService,
     private _pensiones: PensionesService,
     private _servicioPublico: ServicioService,
@@ -72,7 +70,7 @@ export class Paso13PasivosComponent implements OnInit {
     // Inicializa el formulario vacío
     this.buildForm();
     // Recupera el ID de la declaración activa
-    this.stepperState.activeId$.subscribe(id => this.activeDeclId = id);
+    this._declaracionHelper.activeId$.subscribe(id => this.activeDeclId = id);
 
     this.loadDeudas();
     this.loadDeudasMayor100UTM();
@@ -87,7 +85,6 @@ export class Paso13PasivosComponent implements OnInit {
   
   loadRegistro(){
     this._declaracionHelper.declaracionesFlag$.subscribe(data => {
-      console.log(data)
       this.tienePasivos = data.pasivos ? 'si' : 'no';
       this.tieneDeudaPension = data.pensiones ? 'si' : 'no';
     })
@@ -96,7 +93,7 @@ export class Paso13PasivosComponent implements OnInit {
   loadDeudas(){
     this._pasivos.listar(this.declaranteId).subscribe({
       next: (res: any) => {
-        console.log(res)
+        
         this.deduasPensionAlimento = res;
       },
       error: (err) => {
@@ -108,7 +105,7 @@ export class Paso13PasivosComponent implements OnInit {
   loadDeudasMayor100UTM(){
     this._pensiones.listar(this.declaranteId).subscribe({
       next: (res: any) => {
-        console.log(res)
+        
         this.deudasMayor100UTM = res;
       },
       error: (err) => {
@@ -119,7 +116,7 @@ export class Paso13PasivosComponent implements OnInit {
   loadTipoObligacion(){
     this._servicioPublico.listarServiciosPublicos("tipoObligacion").subscribe({
       next: (res: any) => {
-        console.log(res)
+        
         this.tipoObligacion = res;
       },
       error: (err) => {
@@ -138,20 +135,14 @@ export class Paso13PasivosComponent implements OnInit {
 
   /** Maneja Guardar/Siguiente */
   onSubmit(): void {
-    const ok =
-      this.tienePasivos === 'no' ||
-      (this.tienePasivos === 'si' && this.pasivosData.length > 0);
-
-    const key  = 'paso13';
-    const path = ['declaraciones', this.activeDeclId, key];
+    const ok = this.tienePasivos === 'si' ? this.pasivoForm.valid : true;
 
     if (ok) {
-      this.validador.markComplete(key);
-      this.stepperState.markStepCompleted(path);
-      this.stepperState.nextStep();
+      this._declaracionHelper.markStepCompleted(['declaraciones', 'paso13']);
+      this._declaracionHelper.nextStep();
     } else {
-      this.validador.markIncomplete(key);
-      this.stepperState.markStepIncomplete(path);
+      this._declaracionHelper.markStepIncomplete(['declaraciones', 'paso13']);
+      this._declaracionHelper.nextStep();
     }
   }
 
@@ -188,8 +179,7 @@ export class Paso13PasivosComponent implements OnInit {
     const path = ['declaraciones', this.activeDeclId, key];
 
     if (this.pasivoForm.invalid) {
-      this.validador.markIncomplete(key);
-      this.stepperState.markStepIncomplete(path);
+      this._declaracionHelper.markStepIncomplete(path);
       return;
     }
 
@@ -203,8 +193,7 @@ export class Paso13PasivosComponent implements OnInit {
     dialogRef.close();
 
     // Marca completo si hay al menos un pasivo
-    this.validador.markComplete(key);
-    this.stepperState.markStepCompleted(path);
+    this._declaracionHelper.markStepCompleted(path);
   }
 
   /** Elimina un pasivo */
@@ -214,11 +203,9 @@ export class Paso13PasivosComponent implements OnInit {
 
     this.pasivosData = this.pasivosData.filter(x => x !== item);
     if (this.pasivosData.length > 0) {
-      this.validador.markComplete(key);
-      this.stepperState.markStepCompleted(path);
+      this._declaracionHelper.markStepCompleted(path);
     } else {
-      this.validador.markIncomplete(key);
-      this.stepperState.markStepIncomplete(path);
+      this._declaracionHelper.markStepIncomplete(path);
     }
   }
 }

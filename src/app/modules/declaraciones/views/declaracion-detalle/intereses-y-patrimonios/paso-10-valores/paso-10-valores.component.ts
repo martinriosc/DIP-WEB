@@ -58,8 +58,6 @@ export class Paso10ValoresComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private dialog: MatDialog,
-    private validador: ValidadorDeclaracionService,
-    private stepperState: StepperStatusService,
     private _comunidad: ComunidadValoresService,
     private _moneda : MonedaService,
     private _inmueble: InmuebleService,
@@ -71,7 +69,7 @@ export class Paso10ValoresComponent implements OnInit {
     // Construye el formulario vacío
     this.buildForm();
     // Obtiene la declaración activa
-    this.stepperState.activeId$.subscribe(id => this.activeDeclId = id);
+    this._declaracionHelper.activeId$.subscribe(id => this.activeDeclId = id);
 
     this.loadValores();
     this.loadPaises();
@@ -88,7 +86,6 @@ export class Paso10ValoresComponent implements OnInit {
   
   loadRegistro(){
     this._declaracionHelper.declaracionesFlag$.subscribe(data => {
-      console.log(data)
       this.tieneValoresChile = data.instrumento ? 'si' : 'no';
       this.tieneValoresExtranjero = data.instrumentoExtranjero ? 'si' : 'no';
     })
@@ -98,7 +95,7 @@ export class Paso10ValoresComponent implements OnInit {
   loadValores(){
     this._comunidad.listar(3,this.declaranteId,false).subscribe({
       next: (res: any) => {
-        console.log(res)
+        
         this.valoresChile = res;
       },
       error: (err) => {
@@ -108,7 +105,7 @@ export class Paso10ValoresComponent implements OnInit {
 
     this._comunidad.listar(3,this.declaranteId,true).subscribe({
       next: (res: any) => {
-        console.log(res)
+        
         this.valoresExtranjero = res;
       },
       error: (err) => {
@@ -120,7 +117,7 @@ export class Paso10ValoresComponent implements OnInit {
   loadPaises(){
     this._localidad.getPaisesExtranjeros().subscribe({
       next: (res: any) => {
-        console.log(res)
+        
         this.paises = res;
       },
       error: (err) => {
@@ -132,7 +129,7 @@ export class Paso10ValoresComponent implements OnInit {
   loadMonedas(){
     this._moneda.listar().subscribe({
       next: (res: any) => {
-        console.log(res)
+        
         this.monedas = res;
       },
       error: (err) => {
@@ -144,7 +141,7 @@ export class Paso10ValoresComponent implements OnInit {
   loadTitulos(){
     this._comunidad.listarTitulos().subscribe({
       next: (res: any) => {
-        console.log(res)
+        
         this.titulos = res;
       },
       error: (err) => {
@@ -156,7 +153,7 @@ export class Paso10ValoresComponent implements OnInit {
   loadGravamenes(tipoGravamen: string){
     this._inmueble.listarAtributos('degravamen', tipoGravamen).subscribe({
       next: (res: any) => {
-        console.log(res)
+        
         this.gravamenes = res;
       },
       error: (err) => {
@@ -167,21 +164,17 @@ export class Paso10ValoresComponent implements OnInit {
 
   /** Guarda y avanza al siguiente paso */
   onSubmit(): void {
-    // const ok =
-    //   this.tieneValores === 'no' ||
-    //   (this.tieneValores === 'si' && this.valoresData.length > 0);
+    const ok1 = this.tieneValoresChile === 'si' ? this.valoresChile.length > 0 : true;
+    const ok2 = this.tieneValoresExtranjero === 'si' ? this.valoresExtranjero.length > 0 : true;
+    const ok = ok1 && ok2;
 
-    // const key  = 'paso10';
-    // const path = ['declaraciones', this.activeDeclId, key];
-
-    // if (ok) {
-    //   this.validador.markComplete(key);
-    //   this.stepperState.markStepCompleted(path);
-    //   this.stepperState.nextStep();
-    // } else {
-    //   this.validador.markIncomplete(key);
-    //   this.stepperState.markStepIncomplete(path);
-    // }
+    if (ok) {
+      this._declaracionHelper.markStepCompleted(['declaraciones', 'paso10']);
+      this._declaracionHelper.nextStep();
+    } else {
+      this._declaracionHelper.markStepIncomplete(['declaraciones', 'paso10']);
+      this._declaracionHelper.nextStep();
+    }
   }
 
   /** Abre modal para agregar */

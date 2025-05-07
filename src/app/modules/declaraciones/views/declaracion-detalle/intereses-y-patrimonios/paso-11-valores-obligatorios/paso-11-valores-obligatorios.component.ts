@@ -74,8 +74,6 @@ export class Paso11ValoresObligatoriosComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private dialog: MatDialog,
-    private validador: ValidadorDeclaracionService,
-    private stepperState: StepperStatusService,
     private _valoresObligatorios: ValoresObligatoriosService,
     private _localidad: LocalidadService,
     private _moneda: MonedaService,
@@ -87,7 +85,7 @@ export class Paso11ValoresObligatoriosComponent implements OnInit {
     // Construye el formulario inicial vacío
     this.buildForm();
     // Obtiene la declaración activa
-    this.stepperState.activeId$.subscribe(id => this.activeDeclId = id);
+    this._declaracionHelper.activeId$.subscribe(id => this.activeDeclId = id);
 
     this.loadValores();
     this.loadPaises();
@@ -104,7 +102,7 @@ export class Paso11ValoresObligatoriosComponent implements OnInit {
   
   loadRegistro(){
     this._declaracionHelper.declaracionesFlag$.subscribe(data => {
-      console.log(data)
+      
       this.tieneCuentasLibretas = data.cuentas ? 'si' : 'no';
       this.tieneAhorrosPrevisionales = data.ahorros ? 'si' : 'no';
       this.tieneDepositosPlazo = data.depositos ? 'si' : 'no';
@@ -116,7 +114,7 @@ export class Paso11ValoresObligatoriosComponent implements OnInit {
   loadValores(){
     this._valoresObligatorios.listar(this.declaranteId, 1).subscribe({
       next: (res: any) => {
-        console.log(res)
+        
         this.cuentasLibretas = res;
       },
       error: (err) => {
@@ -126,7 +124,7 @@ export class Paso11ValoresObligatoriosComponent implements OnInit {
 
     this._valoresObligatorios.listar(this.declaranteId, 2).subscribe({
       next: (res: any) => {
-        console.log(res)
+        
         this.ahorrosPrevisionales = res;
       },
       error: (err) => {
@@ -136,7 +134,7 @@ export class Paso11ValoresObligatoriosComponent implements OnInit {
 
     this._valoresObligatorios.listar(this.declaranteId, 3).subscribe({
       next: (res: any) => {
-        console.log(res)
+        
         this.depositosPlazo = res;
       },
       error: (err) => {
@@ -146,7 +144,7 @@ export class Paso11ValoresObligatoriosComponent implements OnInit {
 
     this._valoresObligatorios.listar(this.declaranteId, 4).subscribe({
       next: (res: any) => {
-        console.log(res)
+        
         this.seguros = res;
       },
       error: (err) => {
@@ -158,7 +156,7 @@ export class Paso11ValoresObligatoriosComponent implements OnInit {
   loadTiposInstrumentos(tipoInstrumento: number){
     this._valoresObligatorios.listarTipoInstrumento(tipoInstrumento).subscribe({
       next: (res: any) => {
-        console.log(res)
+        
         this.tipoInstrumentos = res;
       },
       error: (err) => {
@@ -170,7 +168,7 @@ export class Paso11ValoresObligatoriosComponent implements OnInit {
   loadPaises(){
     this._localidad.getPaisesExtranjeros().subscribe({
       next: (res: any) => {
-        console.log(res)
+        
         this.paises = res;
       },
       error: (err) => {
@@ -182,7 +180,7 @@ export class Paso11ValoresObligatoriosComponent implements OnInit {
   loadMonedas(){
     this._moneda.listar().subscribe({
       next: (res: any) => {
-        console.log(res)
+        
         this.monedas = res;
       },
       error: (err) => {
@@ -194,7 +192,7 @@ export class Paso11ValoresObligatoriosComponent implements OnInit {
   loadGravamen(tipoGravamen: string) {
     this._inmueble.listarAtributos('desgravamen', tipoGravamen).subscribe({
       next: (res: any) => {
-        console.log(res)
+        
         this.gravamenes = res;
       },
       error: (err) => {
@@ -205,20 +203,17 @@ export class Paso11ValoresObligatoriosComponent implements OnInit {
 
   /** Maneja el click Guardar/Siguiente */
   onSubmit(): void {
-    const ok =
-      this.tieneValoresObligatorios === 'no' ||
-      (this.tieneValoresObligatorios === 'si' && this.valoresObligatoriosData.length > 0);
-
-    const key  = 'paso11';
-    const path = ['declaraciones', this.activeDeclId, key];
-
+    const ok1 = this.tieneCuentasLibretas === 'si' ? this.cuentasLibretas.length > 0 : true;
+    const ok2 = this.tieneAhorrosPrevisionales === 'si' ? this.ahorrosPrevisionales.length > 0 : true;
+    const ok3 = this.tieneDepositosPlazo === 'si' ? this.depositosPlazo.length > 0 : true;
+    const ok4 = this.tieneSeguros === 'si' ? this.seguros.length > 0 : true;
+    const ok = ok1 && ok2 && ok3 && ok4;
     if (ok) {
-      this.validador.markComplete(key);
-      this.stepperState.markStepCompleted(path);
-      this.stepperState.nextStep();
+      this._declaracionHelper.markStepCompleted(['declaraciones', 'paso11']);
+      this._declaracionHelper.nextStep();
     } else {
-      this.validador.markIncomplete(key);
-      this.stepperState.markStepIncomplete(path);
+      this._declaracionHelper.markStepIncomplete(['declaraciones', 'paso11']);
+      this._declaracionHelper.nextStep();
     }
   }
 
@@ -314,8 +309,7 @@ export class Paso11ValoresObligatoriosComponent implements OnInit {
     const path = ['declaraciones', this.activeDeclId, key];
 
     if (this.valorForm.invalid) {
-      this.validador.markIncomplete(key);
-      this.stepperState.markStepIncomplete(path);
+      this._declaracionHelper.markStepIncomplete(path);
       return;
     }
 
@@ -327,9 +321,7 @@ export class Paso11ValoresObligatoriosComponent implements OnInit {
       this.valoresObligatoriosData.push(data);
     }
 
-    // marca completo si hay al menos un registro
-    this.validador.markComplete(key);
-    this.stepperState.markStepCompleted(path);
+    this._declaracionHelper.markStepCompleted(path);
 
     dialogRef.close();
   }
@@ -341,11 +333,9 @@ export class Paso11ValoresObligatoriosComponent implements OnInit {
 
     this.valoresObligatoriosData = this.valoresObligatoriosData.filter(x => x !== item);
     if (this.valoresObligatoriosData.length > 0) {
-      this.validador.markComplete(key);
-      this.stepperState.markStepCompleted(path);
+      this._declaracionHelper.markStepCompleted(path);
     } else {
-      this.validador.markIncomplete(key);
-      this.stepperState.markStepIncomplete(path);
+      this._declaracionHelper.markStepIncomplete(path);
     }
   }
 

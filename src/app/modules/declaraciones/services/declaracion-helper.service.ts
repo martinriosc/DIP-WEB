@@ -2,6 +2,9 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, forkJoin, map, Subject } from 'rxjs';
 import { StepData } from './validador-declaracion.service';
 import { DeclaracionService } from './declaracion.service';
+import { DatosLaboralesService } from './datos-laborales.service';
+import { DeclaranteService } from './declarante.service';
+import { PersonaRelacionadaService } from './persona-relacionada.service';
 
 
 /* ╔═ Interfaces de Dominio ────────────────────────────────────── */
@@ -21,6 +24,7 @@ export interface Declaracion {
   declara: string;
   relacion: string;
   completed: boolean;
+  aplica: boolean;
   intereses: Step[];
   esDeclarante: boolean;
   idDeclarante: number;
@@ -232,81 +236,82 @@ export const initialState: any = {
 
 /* ╔═ Tablas de mapeo ─────────────────────────────────────────── */
 const MAIN_STEP: Record<string, string> = {
-  tabPnlActividadesProfesionales : 'paso5',
-  tabPnlBienesInmuebles          : 'paso6',
-  tabPnlAguasConcesiones         : 'paso7',
-  tabPnlVehiculosBienMueble      : 'paso8',
-  tabPnlComunidades              : 'paso9',
-  tabPnlValoresInstrumentos      : 'paso10',
-  tabPnlValoresObligatorios      : 'paso11',
-  tabPnlContratosAdministracion  : 'paso12',
-  tabPnlPasivos                  : 'paso13',
-  tabPnlOtraFuente               : 'paso14',
-  tabOtrosBienes                 : 'paso15',
-  tabOtrosAntecedentes           : 'paso16'
+  tabPnlActividadesProfesionales: 'paso5',
+  tabPnlBienesInmuebles: 'paso6',
+  tabPnlAguasConcesiones: 'paso7',
+  tabPnlVehiculosBienMueble: 'paso8',
+  tabPnlComunidades: 'paso9',
+  tabPnlValoresInstrumentos: 'paso10',
+  tabPnlValoresObligatorios: 'paso11',
+  tabPnlContratosAdministracion: 'paso12',
+  tabPnlPasivos: 'paso13',
+  tabPnlOtraFuente: 'paso14',
+  tabOtrosBienes: 'paso15',
+  tabOtrosAntecedentes: 'paso16'
 };
 
 const SUB_STEP: Record<string, Record<string, string>> = {
   paso5: {
-    'Actividades en que haya participado'        : 'paso5-1',
-    'Actividades que realiza o en que participa' : 'paso5-2',
-    'Actividades Cónyuge o Conviviente Civil'    : 'paso5-3'
+    'Actividades en que haya participado': 'paso5-1',
+    'Actividades que realiza o en que participa': 'paso5-2',
+    'Actividades Cónyuge o Conviviente Civil': 'paso5-3'
   },
   paso6: {
-    'Bienes Inmuebles en Chile'    : 'paso6-1',
-    'Bienes Inmuebles Extranjero'  : 'paso6-2'
+    'Bienes Inmuebles en Chile': 'paso6-1',
+    'Bienes Inmuebles Extranjero': 'paso6-2'
   },
   paso7: {
     'Derechos de aprovechamiento de aguas': 'paso7-1',
-    'Concesiones'                         : 'paso7-2'
+    'Concesiones': 'paso7-2'
   },
   paso8: {
     'Vehículos Motorizados Livianos y Pesados': 'paso8-1',
-    'Aeronaves'                              : 'paso8-2',
-    'Naves o Artefactos Navales'             : 'paso8-3',
-    'Bienes Muebles registrables'            : 'paso8-4'
+    'Aeronaves': 'paso8-2',
+    'Naves o Artefactos Navales': 'paso8-3',
+    'Bienes Muebles registrables': 'paso8-4'
   },
   paso9: {
-    'Derechos o acciones en Chile'         : 'paso9-1',
-    'Derechos o acciones en el Extranjero' : 'paso9-2'
+    'Derechos o acciones en Chile': 'paso9-1',
+    'Derechos o acciones en el Extranjero': 'paso9-2'
   },
   paso10: {
-    'Instrumento o Valor transable en Chile'        : 'paso10-1',
+    'Instrumento o Valor transable en Chile': 'paso10-1',
     'Instrumento o Valor transable en el Extranjero': 'paso10-2'
   },
   paso11: {
-    'Cuentas y/o Libretas de Ahorro'  : 'paso11-1',
-    'Ahorro Previsional Voluntario'   : 'paso11-2',
-    'Depósitos a Plazo'               : 'paso11-3',
-    'Seguros'                         : 'paso11-4'
+    'Cuentas y/o Libretas de Ahorro': 'paso11-1',
+    'Ahorro Previsional Voluntario': 'paso11-2',
+    'Depósitos a Plazo': 'paso11-3',
+    'Seguros': 'paso11-4'
   },
   paso13: {
-    'Deudas por pensión de alimentos' : 'paso13-1',
-    'Pasivos'                         : 'paso13-2'
+    'Deudas por pensión de alimentos': 'paso13-1',
+    'Pasivos': 'paso13-2'
   }
 };
 
+
 /* Flags que vienen de obtenerRegistro → paso principal o subpaso a habilitar */
 const FLAG_MAP = {
-  actividadesIndividuales   : 'paso5-1',
-  actividadesDependientes   : 'paso5-2',
-  bienesInmuebles           : 'paso6',
-  bienesInmueblesExtranjero : 'paso6-2',
-  aguas                     : 'paso7-1',
-  concesiones               : 'paso7-2',
-  vehiculos                 : 'paso8-1',
-  aeronaves                 : 'paso8-2',
-  naves                     : 'paso8-3',
-  bienMueble                : 'paso8-4',
-  sociedades                : 'paso9-1',
-  sociedadesExtranjero      : 'paso9-2',
-  instrumento               : 'paso10-1',
-  instrumentoExtranjero     : 'paso10-2',
-  contratos                 : 'paso12',
-  pasivos                   : 'paso13',
-  otraFuente                : 'paso14',
-  otrosBienes               : 'paso15',
-  otrosAntecedentes         : 'paso16'
+  actividadesIndividuales: 'paso5-1',
+  actividadesDependientes: 'paso5-2',
+  bienesInmuebles: 'paso6',
+  bienesInmueblesExtranjero: 'paso6-2',
+  aguas: 'paso7-1',
+  concesiones: 'paso7-2',
+  vehiculos: 'paso8-1',
+  aeronaves: 'paso8-2',
+  naves: 'paso8-3',
+  bienMueble: 'paso8-4',
+  sociedades: 'paso9-1',
+  sociedadesExtranjero: 'paso9-2',
+  instrumento: 'paso10-1',
+  instrumentoExtranjero: 'paso10-2',
+  contratos: 'paso12',
+  pasivos: 'paso13',
+  otraFuente: 'paso14',
+  otrosBienes: 'paso15',
+  otrosAntecedentes: 'paso16'
 } as const;
 
 function buildFormState(api: any, flags: any): FormState {
@@ -335,9 +340,9 @@ function buildFormState(api: any, flags: any): FormState {
     /* 2.2 Partir de plantilla y **quitar** lo que no llegó (salvo declarante) */
     const plantilla = structuredClone(initialState.declaraciones[0]).intereses;
     const intereses = plantilla
-      .filter((st:any) => lista[0].esDeclarante || pasoRecibido.has(st.key))
-      .map((st:any) => {
-        st.subSteps = st.subSteps.filter((ss:any) =>
+      .filter((st: any) => lista[0].esDeclarante || pasoRecibido.has(st.key))
+      .map((st: any) => {
+        st.subSteps = st.subSteps.filter((ss: any) =>
           lista[0].esDeclarante || pasoRecibido.has(ss.key)
         );
         return st;
@@ -345,28 +350,42 @@ function buildFormState(api: any, flags: any): FormState {
 
     /* 2.3 Completar datos, enabled/completed, flags, burbujeo */
     const first = lista[0];
-    intereses.forEach((st:any) => {              // set completado / enabled
+
+    intereses.forEach((st: any) => {
       const itemsStep = lista.filter(it => {
         const p = MAIN_STEP[it.idMenu];
         const s = SUB_STEP[p]?.[it.item.trim()];
         return st.key === (s ?? p) || st.key === p;
       });
-      /* padre: si todos hijos "No Tiene" ⇒ disabled */
+
       if (st.subSteps.length) {
-        st.enabled = st.subSteps.some((c:any) => {
+        // ─── ACTUALIZAR CADA SUB‑STEP ──────────────────────────────
+        st.subSteps.forEach((c: any) => {
           const i = itemsStep.find(it => {
             const s = SUB_STEP[MAIN_STEP[it.idMenu]]?.[it.item.trim()];
             return s === c.key;
           });
-          return i ? i.tiene !== 'No Tiene' : true;
+
+          if (i) {
+            c.enabled = i.tiene !== 'No Tiene';
+            c.completed = !i.incompleto;
+            c.status = c.completed ? 'completed'
+              : i.incompleto ? 'incomplete' : 'pending';
+          } else {
+            // sub‑paso no llegó en los datos → deshabilitado
+            c.enabled = false;
+          }
         });
+
+        /* padre habilitado si AL MENOS un hijo habilitado            */
+        st.enabled = st.subSteps.some((c: any) => c.enabled);
       } else {
         const src = itemsStep[0];
         if (src) {
-          st.enabled   = src.tiene !== 'No Tiene';
+          st.enabled = src.tiene !== 'No Tiene';
           st.completed = !src.incompleto;
-          st.status    = st.completed ? 'completed' :
-                         src.incompleto ? 'incomplete' : 'pending';
+          st.status = st.completed ? 'completed'
+            : src.incompleto ? 'incomplete' : 'pending';
         }
       }
     });
@@ -375,14 +394,14 @@ function buildFormState(api: any, flags: any): FormState {
     bubbleCompletion(intereses);
 
     return <Declaracion>{
-      id          : `decl-${idx + 1}`,
-      declara     : first.nombreDeclarante.trim(),
-      relacion    : first.tipo.startsWith('Declarante') ? '' :
-                    first.tipo.startsWith('Cónyuge')    ? 'Cónyuge' :
-                    'Persona Relacionada',
+      id: `decl-${idx + 1}`,
+      declara: first.nombreDeclarante.trim(),
+      relacion: first.tipo.startsWith('Declarante') ? '' :
+        first.tipo.startsWith('Cónyuge') ? 'Cónyuge' :
+          'Persona Relacionada',
       idDeclarante: idDecl,
       esDeclarante: !!first.esDeclarante,   // <<── NUEVO
-      completed   : intereses.every((p:any) => p.completed),
+      completed: intereses.every((p: any) => p.completed),
       intereses
     };
   });
@@ -434,6 +453,7 @@ function bubbleCompletion(steps: Step[]): void {
 })
 export class DeclaracionHelperService {
 
+
   private activeDeclaracionSubject = new BehaviorSubject<any>(null);
   public activeDeclaracion$ = this.activeDeclaracionSubject.asObservable();
 
@@ -446,6 +466,8 @@ export class DeclaracionHelperService {
 
   private declaracionesFlagSubject = new BehaviorSubject<any>(null);
   declaracionesFlag$ = this.declaracionesFlagSubject.asObservable();
+
+  
 
 
   setDeclaracionId(value: number) {
@@ -473,24 +495,84 @@ export class DeclaracionHelperService {
   }
 
   constructor(
-    private _declaracion: DeclaracionService
+    private _declaracion: DeclaracionService,
+    private _declarante: DeclaranteService,
+    private _datosLaborales: DatosLaboralesService,
+    private _personaRelacionada: PersonaRelacionadaService,
   ) {
-    this.getDeclaracionesFlag(2882000)
+
+
     forkJoin([
       this._declaracion.confirmarDatos(1319527),
       this._declaracion.obtenerRegistro(2882000)
     ]).subscribe({
-      next: ([api, flags]) => {
-        console.log(api)
-        /* Convertimos y alimentamos el estado global */
-        const nuevoState = buildFormState(api, flags);
-        this._state$.next(nuevoState);         // <-- el stepper ya usa este BehaviorSubject
+      next: ([confirm, registro]: any) => {
+        console.log(confirm)
+        console.log(registro)
 
+        this.declaracionesFlagSubject.next(registro);
+
+
+        const nuevoState = buildFormState(confirm, registro);
         console.log(nuevoState)
+
+        this.validarPasosDeclarante(2882000, 1319527);
+        this._state$.next(nuevoState);
       },
       error: err => console.error(err)
     });
-   }
+  }
+
+
+
+  validarPasosDeclarante(declaranteId: number, declaracionId: number) {
+    this._declaracion.obtenerRegistro(declaranteId).subscribe({
+      next: (res) => {
+        console.log(res)
+        if (res) {
+          this.markStepCompleted(['declarante', 'paso1'])
+        }
+      }
+    })
+
+    this._declarante.getDatosDeclarante(declaracionId).subscribe({
+      next: (res) => {
+        console.log(res)
+
+        if (res) {
+          this.markStepCompleted(['declarante', 'paso2'])
+        }
+      }
+    })
+
+    this._datosLaborales.getDatosLaborales(declaracionId).subscribe({
+      next: (res) => {
+        console.log(res)
+
+        if (res) {
+          this.markStepCompleted(['declarante', 'paso3'])
+        }
+      }
+    })
+
+    this._declaracion.obtenerAplica(declaracionId).subscribe({
+      next: (res) => {
+        console.log(res)
+
+        if (res) {
+          this._personaRelacionada.listar(declaracionId).subscribe({
+            next: (res: any) => {
+              if (res.length > 0) {
+                this.markStepCompleted(['declarante', 'paso4'])
+              }
+            }
+          })
+        } else {
+          this.markStepCompleted(['declarante', 'paso4'])
+        }
+      }
+    })
+  }
 
 
   ngOnInit(): void {
@@ -498,7 +580,7 @@ export class DeclaracionHelperService {
   }
 
 
-  getConfirmacionDatos(){
+  getConfirmacionDatos() {
     this._declaracion.confirmarDatos(1319527).subscribe({
       next: (res: any) => {
         console.log(res)
@@ -506,7 +588,7 @@ export class DeclaracionHelperService {
       error: (err) => {
         console.log(err);
       }
-      
+
     })
   }
   getDeclaracionesFlag(declaranteId: number) {
@@ -521,14 +603,55 @@ export class DeclaracionHelperService {
     })
   }
 
+  private readonly currentStepKeySubject = new BehaviorSubject<string>('paso1');
+  readonly currentStepKey$ = this.currentStepKeySubject.asObservable();
+
+  /** El stepper (o cualquier componente) debe llamar a esto
+   *  cada vez que cambia manualmente de pestaña               */
+  setCurrentStep(key: string): void {
+    if (this.currentStepKeySubject.value !== key) {      // ← NUEVO
+      this.currentStepKeySubject.next(key);
+    }
+  }
   /* ───── Fuente de verdad ───── */
   private readonly _state$ = new BehaviorSubject<FormState>(structured(initialState));
   readonly state$ = this._state$.asObservable();
+  
 
   /* ───── Eventos (“siguiente paso”) ───── */
   private readonly nextStepSubject = new Subject<void>();
   readonly nextStep$ = this.nextStepSubject.asObservable();
-  nextStep(): void { this.nextStepSubject.next(); }
+
+
+  activeDeclaranteName$ = this.state$.pipe(
+    map(st => st.declaraciones
+                   .find(d => d.id === st.activeDeclaracionId)
+                   ?.declara ?? '')
+  );
+
+  nextStep(): void {
+
+    const st        = this._state$.value;
+    const activeKey = this.currentStepKeySubject.value;
+  
+    const rootDecl = st.declarante .filter(p => p.enabled).sort((a,b)=>a.order-b.order);
+    const rootInt  = (
+        st.declaraciones.find(d => d.id === st.activeDeclaracionId)
+          ?.intereses ?? []
+      ).filter(p => p.enabled).sort((a,b)=>a.order-b.order);
+  
+    const sequence = [...rootDecl, ...rootInt];
+  
+    const idx  = sequence.findIndex(p => p.key === activeKey);
+    const next = idx >= 0 ? sequence[idx + 1] : undefined;
+    if (!next) { return; }
+  
+    const inDecl = rootDecl.some(p => p.key === next.key);
+    this.blockSubject.next(inDecl ? 'decl' : 'int');
+  
+    this.currentStepKeySubject.next(next.key);
+    this.nextStepSubject.next();
+  }
 
   /* ───── Bloque activo: decl | int ───── */
   private readonly blockSubject = new BehaviorSubject<'decl' | 'int'>('decl');

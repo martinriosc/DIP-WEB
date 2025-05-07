@@ -12,7 +12,7 @@ import {
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 
 import { ValidadorDeclaracionService } from '../../../../services/validador-declaracion.service';
-import { StepperStatusService }        from 'src/app/modules/declaraciones/services/stepper-status.service';
+import { StepperStatusService } from 'src/app/modules/declaraciones/services/stepper-status.service';
 import { DeclaracionHelperService } from 'src/app/modules/declaraciones/services/declaracion-helper.service';
 import { OtraFuenteService } from 'src/app/modules/declaraciones/services/otra-fuente.service';
 
@@ -51,21 +51,18 @@ export class Paso14FuenteConflictoComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private dialog: MatDialog,
-    private validador: ValidadorDeclaracionService,
-    private stepperState: StepperStatusService,
     private _otraFuente: OtraFuenteService,
     private _declaracionHelper: DeclaracionHelperService
-  ) {}
+  ) { }
 
 
   ngOnInit(): void {
     // inicializa el form
     this.buildForm();
     // obtiene id de declaración activa
-    this.stepperState.activeId$.subscribe(id => this.activeDeclId = id);
+    this._declaracionHelper.activeId$.subscribe(id => this.activeDeclId = id);
     // opcional: marca inicialmente incompleto
-    this.validador.markIncomplete(this.key);
-    this.stepperState.markStepIncomplete(['declaraciones', this.activeDeclId, this.key]);
+    this._declaracionHelper.markStepIncomplete(['declaraciones', this.activeDeclId, this.key]);
 
 
     this.loadOtrasFuentes();
@@ -75,10 +72,10 @@ export class Paso14FuenteConflictoComponent implements OnInit {
     this.loadRegistro();
   }
 
-  
-  loadRegistro(){
+
+  loadRegistro() {
     this._declaracionHelper.declaracionesFlag$.subscribe(data => {
-      console.log(data)
+      
       this.tieneFuenteConflicto = data.otraFuente ? 'si' : 'no';
     })
   }
@@ -87,7 +84,7 @@ export class Paso14FuenteConflictoComponent implements OnInit {
   loadOtrasFuentes() {
     this._otraFuente.listar(this.declaranteId).subscribe({
       next: (res: any) => {
-        console.log(res)
+        
         this.otrasFuentes = res;
       },
       error: (err) => {
@@ -101,15 +98,12 @@ export class Paso14FuenteConflictoComponent implements OnInit {
       this.tieneFuenteConflicto === 'no' ||
       (this.tieneFuenteConflicto === 'si' && this.otrasFuentes.length > 0);
 
-    const path = ['declaraciones', this.activeDeclId, this.key];
-
     if (ok) {
-      this.validador.markComplete(this.key);
-      this.stepperState.markStepCompleted(path);
-      this.stepperState.nextStep();
+      this._declaracionHelper.markStepCompleted(['declaraciones', 'paso14']);
+      this._declaracionHelper.nextStep();
     } else {
-      this.validador.markIncomplete(this.key);
-      this.stepperState.markStepIncomplete(path);
+      this._declaracionHelper.markStepIncomplete(['declaraciones', 'paso14']);
+      this._declaracionHelper.nextStep();
     }
   }
 
@@ -119,15 +113,12 @@ export class Paso14FuenteConflictoComponent implements OnInit {
     const path = ['declaraciones', this.activeDeclId, this.key];
 
     if (value === 'no') {
-      this.validador.markComplete(this.key);
-      this.stepperState.markStepCompleted(path);
+      this._declaracionHelper.markStepCompleted(path);
     } else {
       if (this.otrasFuentes.length > 0) {
-        this.validador.markComplete(this.key);
-        this.stepperState.markStepCompleted(path);
+        this._declaracionHelper.markStepCompleted(path);
       } else {
-        this.validador.markIncomplete(this.key);
-        this.stepperState.markStepIncomplete(path);
+        this._declaracionHelper.markStepIncomplete(path);
       }
     }
   }
@@ -165,8 +156,7 @@ export class Paso14FuenteConflictoComponent implements OnInit {
     const path = ['declaraciones', this.activeDeclId, key];
 
     if (this.conflictoForm.invalid) {
-      this.validador.markIncomplete(key);
-      this.stepperState.markStepIncomplete(path);
+      this._declaracionHelper.markStepIncomplete(path);
       return;
     }
 
@@ -180,8 +170,7 @@ export class Paso14FuenteConflictoComponent implements OnInit {
     dialogRef.close();
 
     // Marca completo si hay al menos uno
-    this.validador.markComplete(key);
-    this.stepperState.markStepCompleted(path);
+    this._declaracionHelper.markStepCompleted(path);
   }
 
   /** Elimina un registro */
@@ -189,11 +178,9 @@ export class Paso14FuenteConflictoComponent implements OnInit {
     const path = ['declaraciones', this.activeDeclId, this.key];
     this.conflictos = this.conflictos.filter(x => x !== item);
     if (this.conflictos.length > 0) {
-      this.validador.markComplete(this.key);
-      this.stepperState.markStepCompleted(path);
+      this._declaracionHelper.markStepCompleted(path);
     } else {
-      this.validador.markIncomplete(this.key);
-      this.stepperState.markStepIncomplete(path);
+      this._declaracionHelper.markStepIncomplete(path);
     }
   }
 }

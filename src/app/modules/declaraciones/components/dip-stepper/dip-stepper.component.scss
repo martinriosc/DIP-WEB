@@ -8,9 +8,6 @@
   background: #1976d2;
   color: #fff;
 }
-.done {
-  color: #2e7d32;
-}
 .number {
   color: #2e62a7;
 }
@@ -129,4 +126,29 @@ mat-tab-group {
   display: flex; justify-content: center;
   align-items: center;
   z-index: 1000;
+}
+
+/* Paso activo */
+.custom-stepper .mat-step-header.active-step,
+.custom-stepper .mat-step-header.mat-active {
+  background: #e8f1ff;
+}
+
+/* Iconos de estado */
+// .step-icon.done     { color: #28a745; }   // verde ✓
+.step-icon.warning  { color: #dc3545; }   // rojo ⚠️
+
+/* Números de paso */
+.step-number {
+  font-weight: 600;
+}
+
+/* Forzar scroll suave cuando se centra */
+.stepper-wrapper {
+  scroll-behavior: smooth;
+}
+
+.custom-stepper .mat-step-header.mat-active {
+  background: #e0f0ff;
+  border-radius: 4px;
 }
