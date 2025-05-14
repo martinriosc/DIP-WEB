@@ -1,0 +1,164 @@
+.card {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 24px;
+
+  .card-header {
+    padding: 24px;
+    border-bottom: 1px solid #e0e0e0;
+
+    .card-title {
+      font-size: 24px;
+      font-weight: 500;
+      margin: 0;
+      color: #333;
+    }
+
+    .card-subtitle {
+      font-size: 14px;
+      color: #666;
+      margin: 8px 0 0;
+    }
+  }
+
+  .card-body {
+    padding: 24px;
+
+    .section {
+      margin-bottom: 32px;
+
+      h4 {
+        font-size: 18px;
+        font-weight: 500;
+        margin: 0 0 16px;
+        color: #333;
+      }
+
+      .form-group {
+        margin-bottom: 24px;
+
+        label {
+          display: block;
+          font-size: 14px;
+          font-weight: 500;
+          margin-bottom: 8px;
+          color: #333;
+        }
+
+        .radio-group {
+          display: flex;
+          gap: 16px;
+
+          mat-radio-button {
+            margin-right: 16px;
+          }
+        }
+      }
+
+      .table-container {
+        margin-top: 16px;
+
+        .table-actions {
+          display: flex;
+          justify-content: flex-end;
+          margin-bottom: 16px;
+
+          button {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+          }
+        }
+
+        table {
+          width: 100%;
+
+          th {
+            font-weight: 500;
+            color: #333;
+            background: #f5f5f5;
+          }
+
+          td {
+            color: #666;
+          }
+
+          .mat-column-acciones {
+            width: 100px;
+            text-align: center;
+
+            button {
+              margin: 0 4px;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .card-footer {
+    padding: 16px 24px;
+    border-top: 1px solid #e0e0e0;
+    display: flex;
+    justify-content: flex-end;
+  }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  border-bottom: 1px solid #e0e0e0;
+
+  h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 500;
+  }
+}
+
+.modal-body {
+  padding: 24px;
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+
+    mat-form-field {
+      width: 100%;
+    }
+
+    mat-checkbox {
+      margin-top: 8px;
+    }
+  }
+}
+
+.modal-footer {
+  padding: 16px 24px;
+  border-top: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.fila-incompleta {
+  background-color: #fff3e0;
+}
+
+// Estilos para los iconos
+img[alt="Editar"],
+img[alt="Eliminar"] {
+  width: 20px;
+  height: 20px;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+
+  &:hover {
+    opacity: 1;
+  }
+}

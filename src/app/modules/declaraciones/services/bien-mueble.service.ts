@@ -1,4 +1,4 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiResponse } from '../../auth/models/ApiResponse';
@@ -16,7 +16,7 @@ export class BienMuebleService {
   /**
    * Lista los vehículos con paginación
    */
-  listarVehiculos(tipo: number[], declaranteId: number, page: number = 1, start: number = 0, limit: number = 25): Observable<ApiResponse> {
+  listarVehiculos(tipo: any, declaranteId: number, page: number = 1, start: number = 0, limit: number = 25): Observable<ApiResponse> {
     const params = new HttpParams()
       .set('tipo', JSON.stringify(tipo))
       .set('declaranteId', declaranteId.toString())
@@ -61,5 +61,31 @@ export class BienMuebleService {
       params,
       withCredentials: true 
     });
+  }
+
+   guardar(dto: any, declaranteId: number) {
+    const body = new HttpParams()
+      .set('data', JSON.stringify(dto))
+      .set('declaranteId', declaranteId.toString());
+
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+    });
+
+    // El servlet único procesa vehículos, aeronaves, naves y otros
+    return this.http.post(
+      `${this.apiUrl}/pr/service/bienmueble/vehiculo/guardar`,
+      body.toString(),
+      { headers, withCredentials: true }
+    );
+  }
+  
+  
+  eliminar(id: number) {
+
+    return this.http.get(
+      `${this.apiUrl}/pr/service/bienmueble/vehiculo/eliminar?id=${id}`,
+      { withCredentials: true }
+    );
   }
 } 

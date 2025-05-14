@@ -7,6 +7,132 @@
 
   <hr class="separador" />
 
+  <fieldset class="m-3 border p-3" *ngIf="datosDeclarante">
+    <legend class="h6 fw-bold mb-2">Datos de la Declaración</legend>
+
+    <div class="row g-2">
+      <div class="col-md-12 col-lg-12">
+        <label class="form-label">Tipo de declaración</label>
+        <input class="form-control form-control-sm" [value]="datosDeclarante.tipoDeclaracion" readonly>
+      </div>
+
+      <div class="col-md-6 col-lg-4">
+        <label class="form-label">Lugar donde se realiza</label>
+        <input class="form-control form-control-sm" [value]="datosDeclarante.lugarDeclaracion" readonly>
+      </div>
+
+      <div class="col-md-6 col-lg-5">
+        <label class="form-label">Región</label>
+        <input class="form-control form-control-sm" [value]="datosDeclarante.region" readonly>
+      </div>
+
+      <div class="col-md-6 col-lg-3">
+        <label class="form-label">Comuna</label>
+        <input class="form-control form-control-sm" [value]="datosDeclarante.comuna" readonly>
+      </div>
+    </div>
+  </fieldset>
+
+  <!-- ░░░ DATOS DEL DECLARANTE ░░░ -->
+  <fieldset class="m-3 border p-3" *ngIf="datosDeclarante">
+    <legend class="h6 fw-bold mb-2">Datos del Declarante</legend>
+
+    <div class="row g-2">
+      <div class="col-md-4 col-lg-2">
+        <label class="form-label">R.U.N.</label>
+        <input class="form-control form-control-sm" [value]="datosDeclarante.rut" readonly>
+      </div>
+
+      <div class="col-md-4 col-lg-4">
+        <label class="form-label">Nombres</label>
+        <input class="form-control form-control-sm" [value]="datosDeclarante.nombres" readonly>
+      </div>
+
+      <div class="col-md-4 col-lg-3">
+        <label class="form-label">Apellido Paterno</label>
+        <input class="form-control form-control-sm" [value]="datosDeclarante.apellidoPaterno" readonly>
+      </div>
+
+      <div class="col-md-4 col-lg-3">
+        <label class="form-label">Apellido Materno</label>
+        <input class="form-control form-control-sm" [value]="datosDeclarante.apellidoMaterno" readonly>
+      </div>
+
+      <div class="col-md-8 col-lg-5">
+        <label class="form-label">Profesión / Oficio</label>
+        <input class="form-control form-control-sm" [value]="datosDeclarante.profesion" readonly>
+      </div>
+
+      <div class="col-md-8 col-lg-7">
+        <label class="form-label">Domicilio Particular</label>
+        <input class="form-control form-control-sm" [value]="datosDeclarante.direccion" readonly>
+      </div>
+
+      <div class="col-md-4 col-lg-5">
+        <label class="form-label">Estado Civil</label>
+        <input class="form-control form-control-sm" [value]="datosDeclarante.estadoCivil" readonly>
+      </div>
+
+      <div class="col-md-4 col-lg-7">
+        <label class="form-label">Régimen Patrimonial</label>
+        <input class="form-control form-control-sm" [value]="datosDeclarante.regimenPatrimonial" readonly>
+      </div>
+    </div>
+  </fieldset>
+
+  <!-- ░░░ DATOS DE LA ENTIDAD ░░░ -->
+  <fieldset class="m-3 border p-3" *ngIf="datosDeclarante">
+    <legend class="h6 fw-bold mb-2">Datos de la Entidad</legend>
+
+    <div class="row g-2">
+      <div class="col-md-6 col-lg-7">
+        <label class="form-label">Servicio / Entidad</label>
+        <input class="form-control form-control-sm" [value]="datosDeclarante.servicio" readonly>
+      </div>
+
+      <div class="col-md-3 col-lg-4">
+        <label class="form-label">Cargo o Función</label>
+        <input class="form-control form-control-sm" [value]="datosDeclarante.cargo" readonly>
+      </div>
+
+      <div class="col-md-3 col-lg-1">
+        <label class="form-label">Grado</label>
+        <input class="form-control form-control-sm" [value]="datosDeclarante.grado" readonly>
+      </div>
+
+      <div class="col-md-3 col-lg-3">
+        <label class="form-label">Fecha Asunción Cargo</label>
+        <input class="form-control form-control-sm" [value]="datosDeclarante.fechaAsuncion" readonly>
+      </div>
+
+      <div class="col-md-3 col-lg-3">
+        <label class="form-label">Lugar de Desempeño</label>
+        <input class="form-control form-control-sm" [value]="datosDeclarante.lugarDesempeno" readonly>
+      </div>
+
+      <div class="col-md-4 col-lg-4">
+        <label class="form-label">Región</label>
+        <input class="form-control form-control-sm" [value]="datosDeclarante.regionDesempeno" readonly>
+      </div>
+
+      <div class="col-md-4 col-lg-2">
+        <label class="form-label">Comuna</label>
+        <input class="form-control form-control-sm" [value]="datosDeclarante.comunaDesempeno" readonly>
+      </div>
+
+      <div class="col-12">
+        <label class="form-label">Sujeto Obligado</label>
+        <input class="form-control form-control-sm" [value]="datosDeclarante.sujetoObligado" readonly>
+      </div>
+    </div>
+  </fieldset>
+
+  <!-- ░░░ PERSONAS RELACIONADAS ░░░ -->
+  <fieldset class="m-3 border p-3 text-center" *ngIf="datosDeclarante">
+    <legend class="h6 fw-bold mb-2 text-center">Personas Relacionadas</legend>
+    <input class="form-control form-control-sm w-100 text-center" [value]="tienePersonasRelacionadas" readonly>
+  </fieldset>
+
   <!-- Acordeones por declarante -->
   <mat-accordion multi class="mb-4">
     <mat-expansion-panel *ngFor="let decl of declaraciones" [expanded]="true">
@@ -66,7 +192,7 @@
 
   <!-- Checkbox + botón -->
   <p *ngIf="!advertencias.length">
-    Todos los pasos están completos. Marca la casilla y presiona “Finalizar”.
+    Todos los pasos están completos. Marca la casilla y presiona "Finalizar".
   </p>
 
   <div class="form-check mb-3" *ngIf="!advertencias.length">

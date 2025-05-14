@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiResponse } from '../../auth/models/ApiResponse';
@@ -16,32 +16,44 @@ export class AguasService {
   /**
    * Obtiene los atributos de aguas según el tipo
    */
-  listarAtributos(tipo: string): Observable<ApiResponse> {
-    return this.http.get<ApiResponse>(`${this.apiUrl}/pr/service/aguas/atributo/listar?tipo=${tipo}`, { withCredentials: true });
+  listarAtributos(tipo: string): Observable<any> {
+ 
+    return this.http.get<any>(`${this.apiUrl}/pr/service/aguas/atributo/listar?tipo=${tipo}`,{ withCredentials: true });
   }
 
-  /**
-   * Guarda información de aguas o concesiones
-   */
-  guardar(data: any, declaranteId: number): Observable<ApiResponse> {
-    const formData = new FormData();
-    formData.append('data', JSON.stringify(data));
-    formData.append('declaranteId', declaranteId.toString());
-    
-    return this.http.post<ApiResponse>(`${this.apiUrl}/pr/service/aguas/guardar`, formData, { withCredentials: true });
+  private postLegacy(data: any, declaranteId: number) {
+    const body = new HttpParams()
+      .set('data', JSON.stringify(data))
+      .set('declaranteId', declaranteId.toString());
+
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+    });
+
+    return this.http.post(
+      `${this.apiUrl}/pr/service/aguas/guardar`,
+      body.toString(),
+      { headers, withCredentials: true }
+    );
+  }
+
+  /* ---------- DERECHOS ---------- */
+  guardarDerecho(dto: any, declaranteId: number) {
+    const payload = { ...dto, formId: '1' };
+    return this.postLegacy(payload, declaranteId);
+  }
+
+  /* ---------- CONCESIONES ---------- */
+  guardarConcesion(dto: any, declaranteId: number) {
+    const payload = { ...dto, formId: '2' };
+    return this.postLegacy(payload, declaranteId);
   }
 
   /**
    * Lista los derechos de aguas o concesiones
    */
-  listar(tipo: string, declaranteId: number, controlador: boolean = false, idDerecho?: number): Observable<ApiResponse> {
-    let url = `${this.apiUrl}/pr/service/aguas/listar?tipo=${tipo}&declaranteId=${declaranteId}&controlador=${controlador}`;
-    
-    if (idDerecho) {
-      url += `&idDerecho=${idDerecho}`;
-    }
-    
-    return this.http.get<ApiResponse>(url, { withCredentials: true });
+  listar(tipo: string, declaranteId: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/pr/service/aguas/listar?tipo=${tipo}&declaranteId=${declaranteId}&controlador=false&page=1&start=0&limit=25`, { withCredentials: true });
   }
 
   /**
@@ -54,14 +66,16 @@ export class AguasService {
   /**
    * Busca entidades por nombre
    */
-  listarEntidadesLike(query: string, start: number = 0, limit: number = 10): Observable<ApiResponse> {
-    return this.http.get<ApiResponse>(`${this.apiUrl}/pr/service/aguas/listarEntidadesLike?query=${query}&start=${start}&limit=${limit}`, { withCredentials: true });
+  listarEntidadesLike(term: string): Observable<any> {
+    return this.http.get(`${this.apiUrl}/pr/service/aguas/listarEntidadesLike`, { withCredentials: true });
   }
 
   /**
    * Lista los tipos de naturaleza
    */
-  listarNaturaleza(): Observable<ApiResponse> {
-    return this.http.get<ApiResponse>(`${this.apiUrl}/pr/service/aguas/listarNaturaleza`, { withCredentials: true });
+  listarNaturaleza(): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/pr/service/aguas/listarNaturaleza`, { withCredentials: true });
   }
+
+
 } 

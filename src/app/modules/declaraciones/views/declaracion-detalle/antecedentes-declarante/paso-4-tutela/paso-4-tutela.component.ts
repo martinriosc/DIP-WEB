@@ -1,17 +1,30 @@
 import { Component, Optional, SkipSelf, TemplateRef, ViewChild } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
-import { ValidadorDeclaracionService } from '../../../../services/validador-declaracion.service';
 import { MatStepper } from '@angular/material/stepper';
-import { StepperStatusService } from 'src/app/modules/declaraciones/services/stepper-status.service';
 import { PersonaRelacionadaService } from 'src/app/modules/declaraciones/services/persona-relacionada.service';
 import { DeclaracionService } from 'src/app/modules/declaraciones/services/declaracion.service';
 import { DeclaracionHelperService } from 'src/app/modules/declaraciones/services/declaracion-helper.service';
+import { ToastrService } from 'ngx-toastr';
+
+import Swal from 'sweetalert2';
 
 interface Tutela {
   run: string;
   tipoRelacion: string;
   nombres: string;
+  apellidoPaterno: string;
+  apellidoMaterno: string;
+}
+
+interface ParentescoCat { id: number; nombre: string; }
+
+interface Pariente {
+  id: string;
+  parentescoId: number;
+  parentesco?: string;   // nombre descriptivo
+  rut: string;
+  nombre: string;
   apellidoPaterno: string;
   apellidoMaterno: string;
 }
@@ -26,13 +39,14 @@ export class Paso4TutelaComponent {
   tieneHijosTutela: boolean = false;
 
   data: Tutela[] = [];
-
+  parentescos: ParentescoCat[] = [];
   @ViewChild('tutelaModal') tutelaModal!: TemplateRef<any>;
   tutelaForm!: FormGroup;
   editMode = false;
-  currentItem: Tutela | null = null;
+  currentItem: any;
 
-  declaracionId: number = 1319527;
+  declaracionId: number = this._declaracionHelper.declaracionId;
+  declaranteId: number = this._declaracionHelper.declaranteId;
 
   constructor(
     private fb: FormBuilder,
@@ -40,7 +54,7 @@ export class Paso4TutelaComponent {
     private _declaracion: DeclaracionService,
     private _personaRelacionada: PersonaRelacionadaService,
     private _declaracionHelper: DeclaracionHelperService,
-    @Optional() @SkipSelf() private stepper?: MatStepper
+    private _toastr: ToastrService
   ) { }
 
 
@@ -50,10 +64,10 @@ export class Paso4TutelaComponent {
     this.obtenerAplica();
   }
 
-  obtenerAplica(){
+  obtenerAplica() {
     this._declaracion.obtenerAplica(this.declaracionId).subscribe({
       next: (response) => {
-        
+
         this.tieneHijosTutela = response.data
       },
       error: (error) => {
@@ -65,7 +79,7 @@ export class Paso4TutelaComponent {
   loadPersonasRelacionadas(): void {
     this._personaRelacionada.listar(this.declaracionId).subscribe({
       next: (response: any) => {
-        
+
         this.data = response;
       },
       error: (error) => {
@@ -77,8 +91,8 @@ export class Paso4TutelaComponent {
   loadParentescos(): void {
     this._personaRelacionada.listarParentescos(1).subscribe({
       next: (response: any) => {
-        
-        this.data = response;
+
+        this.parentescos = response;
       },
       error: (error) => {
         console.error('Error al cargar personas relacionadas:', error);
@@ -89,16 +103,20 @@ export class Paso4TutelaComponent {
 
 
   buildForm(item?: any) {
+    const p = item || { parentescoId: '', rut: '', nombre: '', apellidoPaterno: '', apellidoMaterno: ''};
     this.tutelaForm = this.fb.group({
-      run: [item?.rut || ''],
-      tipoRelacion: [item?.tipoRelacion || 'PATRIA POTESTAD'],
-      nombres: [item?.nombre || ''],
-      apellidoPaterno: [item?.apellidoPaterno || ''],
-      apellidoMaterno: [item?.apellidoMaterno || '']
+      parentescoId: [p?.parentescoId || '', Validators.required],
+      rut: [p?.rut || '', Validators.required],
+      nombre: [p?.nombre || '', Validators.required],
+      apellidoPaterno: [p?.apellidoPaterno || '', Validators.required],
+      apellidoMaterno: [p?.apellidoMaterno || '', Validators.required]
     });
   }
 
   onSubmit(): void {
+
+
+
     const ok = this.tieneHijosTutela ? this.data.length > 0 : true;
     if (ok) {
       this._declaracionHelper.markStepCompleted(['declarante', 'paso4']);
@@ -112,7 +130,8 @@ export class Paso4TutelaComponent {
   openAddModal() {
     this.buildForm();
     this.editMode = false;
-    this.dialog.open(this.tutelaModal, { width: '850px' });
+    this.currentItem = null;
+    this.dialog.open(this.tutelaModal, { width: '700px' });
   }
 
   /** Abrir modal para Editar */
@@ -120,37 +139,88 @@ export class Paso4TutelaComponent {
     this.buildForm(item);
     this.editMode = true;
     this.currentItem = item;
-    this.dialog.open(this.tutelaModal, { width: '850px' });
+    this.dialog.open(this.tutelaModal, { width: '700px' });
   }
 
-  /** Guardar Cambios en el modal */
-  saveHijo(dialogRef: any) {
-    if (this.tutelaForm.valid) {
-      const formValue = this.tutelaForm.value as Tutela;
-      if (this.editMode && this.currentItem) {
-        const idx = this.data.indexOf(this.currentItem);
-        if (idx >= 0) this.data[idx] = formValue;
-      } else {
-        this.data.push(formValue);
+    refreshLista(): void {
+    this._personaRelacionada.listar(this.declaracionId).subscribe({
+      next: (r:any) => (this.data = r || []),
+      error: () => console.error('Error listando parientes')
+    });
+  }
+
+  saveHijo(ref: any): void {
+    if (this.tutelaForm.invalid) return;
+
+    const form = this.tutelaForm.value;
+    const payload: Pariente = {
+      id: this.editMode && this.currentItem ? this.currentItem.id : '',
+      parentescoId: form.parentescoId,
+      rut: form.rut,
+      nombre: form.nombre,
+      apellidoPaterno: form.apellidoPaterno,
+      apellidoMaterno: form.apellidoMaterno
+    };
+
+    this._personaRelacionada.guardar(payload, this.declaracionId).subscribe({
+      next: r => {
+        if (r.success) {
+          this._toastr.success('Pariente guardado');
+          ref.close();
+          this.refreshLista();
+          this.tieneHijosTutela = true;
+          this._declaracionHelper.markStepCompleted(['declarante', 'paso4']);
+        } else {
+          this._toastr.error('No se pudo guardar');
+        }
+      },
+      error: () => this._toastr.error('Error al guardar')
+    });
+  }
+
+  eliminarHijo(p: Pariente): void {
+    if (!p.id) return;
+
+    Swal.fire({
+      title: 'Eliminar pariente',
+      text: 'Estas seguro de eliminar el pariente?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Si',
+      cancelButtonText: 'No'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this._personaRelacionada.eliminar(p.id).subscribe({
+          next: r => {
+            if (r.success) {
+              this._toastr.success('Pariente eliminado');
+              this.refreshLista();
+              if (this.data.length === 0) {
+                this._declaracionHelper.markStepIncomplete(['declarante', 'paso4']);
+              }
+            } else {
+              this._toastr.error('No se pudo eliminar');
+            }
+          },
+          error: () => this._toastr.error('Error al eliminar')
+        });
       }
-      dialogRef.close();
+    })
+    
+  }
+
+  /* ---------------------- CONTROLES DE STEP ---------------------- */
+
+  onTieneHijosChange(v: boolean): void {
+    this.tieneHijosTutela = v;
+    if (!v) {
       this._declaracionHelper.markStepCompleted(['declarante', 'paso4']);
     }
   }
 
-  /** Eliminar un registro de hijos/tutela */
-  eliminarHijo(item: Tutela) {
-    this.data = this.data.filter(d => d !== item);
-    if (this.tieneHijosTutela && this.data.length === 0) {
-      this._declaracionHelper.markStepIncomplete(['declarante', 'paso4']);
-    }
-  }
+  /* ---------------------- HELPERS ---------------------- */
 
-  /** Maneja cambio en “¿Tiene hijos/tutela?” */
-  onTieneHijosChange(value: boolean) {
-    this.tieneHijosTutela = value;
-    if (!value) {
-      this._declaracionHelper.markStepCompleted(['declarante', 'paso4']);
-    }
+  parentescoNombre(id: number): string {
+    return this.parentescos.find(p => p.id === id)?.nombre || '';
   }
 }

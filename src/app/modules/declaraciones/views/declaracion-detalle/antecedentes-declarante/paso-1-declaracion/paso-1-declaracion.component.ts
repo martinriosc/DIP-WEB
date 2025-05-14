@@ -1,12 +1,13 @@
 import { Component, OnInit, Optional, SkipSelf } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ValidadorDeclaracionService } from '../../../../services/validador-declaracion.service';
 import { MatStepper } from '@angular/material/stepper';
-import { StepperStatusService } from 'src/app/modules/declaraciones/services/stepper-status.service';
 import { DeclaracionService } from 'src/app/modules/declaraciones/services/declaracion.service';
 import { LocalidadService } from 'src/app/modules/declaraciones/services/localidad.service';
 import { DeclaracionHelperService } from 'src/app/modules/declaraciones/services/declaracion-helper.service';
-
+import Swal from 'sweetalert2';
+import { ToastrService } from 'ngx-toastr';
+import { NgxSpinner, NgxSpinnerService } from 'ngx-spinner';
+import { Router } from '@angular/router';
 @Component({
   selector: 'app-paso-1-declaracion',
   standalone: false,
@@ -14,6 +15,8 @@ import { DeclaracionHelperService } from 'src/app/modules/declaraciones/services
   styleUrls: ['./paso-1-declaracion.component.scss']
 })
 export class Paso1DeclaracionComponent implements OnInit {
+
+  isNueva: boolean = false;
   formDeclaracion!: FormGroup;
 
 
@@ -24,15 +27,17 @@ export class Paso1DeclaracionComponent implements OnInit {
   paises: any = [];
   ciudades: any = [];
 
-  declaracionId: number = 0;
-  declaranteId: number = 0;
+  declaracionId: number = this._declaracionHelper.declaracionId;
+  declaranteId: number = this._declaracionHelper.declaranteId;
 
   constructor(
     private fb: FormBuilder,
+    private _router: Router,
     private _declaracion: DeclaracionService,
     private _localidad: LocalidadService,
     private _declaracionHelper: DeclaracionHelperService,
-    @Optional() @SkipSelf() private stepper?: MatStepper
+    private _toastr: ToastrService,
+    private _spinner: NgxSpinnerService
   ) {
     this.formDeclaracion = this.fb.group({
       tipo: ['', Validators.required],
@@ -51,6 +56,8 @@ export class Paso1DeclaracionComponent implements OnInit {
   }
 
   ngAfterViewInit(): void {
+   
+
     this.formDeclaracion.statusChanges.subscribe(status => {
       if (status === 'VALID') {
         this._declaracionHelper.markStepCompleted(['declarante', 'paso1']);
@@ -63,28 +70,36 @@ export class Paso1DeclaracionComponent implements OnInit {
 
 
   loadDeclaracion() {
-    const id = this._declaracionHelper.declaracionId;
-    this._declaracion.getDeclaracion(1319527).subscribe({
-      next: (response: any) => {
-        if (response) {
-          this.formDeclaracion.patchValue({
-            tipo: response.tipoDeclaracion,
-            periodo: response.periodo,
-            lugar: response.rbLugarDeclaracion ? 'Chile' : 'Extranjero',
-            region: response.region
-          });
 
-          this.onChangeRegion();
 
-          this.formDeclaracion.patchValue({
-            comuna: response.comuna
-          })
+    if (this.declaracionId == 0 && this.declaranteId != 0) {
+      this.isNueva = true;
+    } else if (this.declaracionId == 0 && this.declaranteId == 0) {
+      this._router.navigate(['declaraciones']);
+    } else {
+      this._declaracion.getDeclaracion(this.declaracionId).subscribe({
+        next: (response: any) => {
+          if (response) {
+            this.formDeclaracion.patchValue({
+              tipo: response.tipoDeclaracion,
+              periodo: response.periodo,
+              lugar: response.rbLugarDeclaracion ? 'Chile' : 'Extranjero',
+              region: response.region
+            });
+
+            this.onChangeRegion();
+
+            this.formDeclaracion.patchValue({
+              comuna: response.comuna
+            })
+
+          }
+        },
+        error: (error) => {
+          console.error('Error al cargar declaración:', error);
         }
-      },
-      error: (error) => {
-        console.error('Error al cargar declaración:', error);
-      }
-    })
+      })
+    }
   }
 
   loadTipoDeclaracion() {
@@ -148,11 +163,53 @@ export class Paso1DeclaracionComponent implements OnInit {
 
 
   onSubmit(): void {
+    this._spinner.show();
     if (this.formDeclaracion.valid) {
-      this._declaracionHelper.markStepCompleted(['declarante', 'paso1']);
-      this._declaracionHelper.nextStep();
+      let obj: any = {
+        ciudad: this.formDeclaracion.value.ciudad,
+        comuna: this.formDeclaracion.value.comuna,
+        pais: this.formDeclaracion.value.pais,
+        region: this.formDeclaracion.value.region,
+        periodo: this.formDeclaracion.value.periodo,
+        rbLugarDeclaracion: this.formDeclaracion.value.lugar == 'Chile' ? true : false,
+        tipoDeclaracion: this.formDeclaracion.value.tipo
+      }
+      if (this.isNueva) {
+        obj = {
+          declaracionId: this.declaracionId,
+          ...obj,
+
+        }
+      }
+
+      console.log(obj)
+
+
+      this._declaracion.guardarDeclaracion(obj).subscribe({
+        next: (response) => {
+          console.log(response)
+          if (response.success) {
+            this._toastr.success('Datos de la Declaración guardados correctamente');
+            this._declaracionHelper.markStepCompleted(['declarante', 'paso1']);
+            this._declaracionHelper.nextStep();
+          } else {
+            this._toastr.error('Error al guardar Datos de la Declaración');
+            this._declaracionHelper.markStepIncomplete(['declarante', 'paso1']);
+          }
+          this._spinner.hide();
+        },
+        error: (error) => {
+          this._declaracionHelper.markStepIncomplete(['declarante', 'paso1']);
+          console.error('Error al guardar declaración:', error);
+          this._spinner.hide();
+
+        }
+      })
     } else {
+      this._toastr.warning('Completa los campos obligatorios');
       this._declaracionHelper.markStepIncomplete(['declarante', 'paso1']);
+      this._spinner.hide();
+
     }
   }
 }

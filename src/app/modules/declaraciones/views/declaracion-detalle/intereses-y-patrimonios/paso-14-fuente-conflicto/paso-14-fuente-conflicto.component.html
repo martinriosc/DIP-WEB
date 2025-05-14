@@ -12,71 +12,80 @@
   <div class="contenido-form">
 
     <div class="border p-3 mb-3">
+      <div class="container-fluid">
 
-      <div class="row mb-3 align-items-center">
-        <div class="col-md-4 fw-bold etiqueta">¿Desea declarar otra posible fuente de conflicto de intereses? </div>
-        <div class="col-md-7 text-end">
-          <mat-radio-group [value]="tieneFuenteConflicto" (change)="onTieneConflictoChange($event.value)"
-            name="conflictoRadio">
-            <mat-radio-button value="si" class="me-4">Sí</mat-radio-button>
-            <mat-radio-button value="no">No</mat-radio-button>
-          </mat-radio-group>
-        </div>
-      </div>
-
-      <div *ngIf="tieneFuenteConflicto === 'si'">
-        <div class="row mb-3">
-          <div class="col-md-12 text-end">
-            <button mat-raised-button color="primary" (click)="openAddModal()">
-              Agregar Fuente
-            </button>
+        <div class="row mb-3 align-items-center">
+          <div class="col-md-4 fw-bold etiqueta">¿Tiene otras fuentes de conflicto de intereses?
+          </div>
+          <div class="col-md-7 text-end">
+            <mat-radio-group [(ngModel)]="tieneFuenteConflicto" name="conflictoRadio"
+              (change)="onTieneFuenteConflictoChange($event.value)">
+              <mat-radio-button value="si" class="me-4">Sí</mat-radio-button>
+              <mat-radio-button value="no">No</mat-radio-button>
+            </mat-radio-group>
           </div>
         </div>
+        <div class="row">
+          <div class="col-12">
 
-        <table mat-table [dataSource]="otrasFuentes" class="w-100 mat-elevation-z8">
 
-          <!-- Potencial Fuente -->
-          <ng-container matColumnDef="potencialFuente">
-            <th mat-header-cell *matHeaderCellDef>Potencial fuente de conflicto</th>
-            <td mat-cell *matCellDef="let f">
-              {{ f.potencialFuente }}
-            </td>
-          </ng-container>
 
-          <!-- Observaciones -->
-          <ng-container matColumnDef="observaciones">
-            <th mat-header-cell *matHeaderCellDef>Observaciones</th>
-            <td mat-cell *matCellDef="let f">
-              {{ f.observaciones }}
-            </td>
-          </ng-container>
+            <div *ngIf="tieneFuenteConflicto === 'si'">
+              <div class="row mb-3">
+                <div class="col-md-12 text-end">
+                  <button mat-raised-button color="primary" (click)="openAddModal()">
+                    Agregar Fuente
+                  </button>
+                </div>
+              </div>
 
-          <!-- Estado -->
-          <ng-container matColumnDef="estado">
-            <th mat-header-cell *matHeaderCellDef>Estado</th>
-            <td mat-cell *matCellDef="let f">
-              {{ f.estado }}
-            </td>
-          </ng-container>
+              <table mat-table [dataSource]="otrasFuentes" class="w-100 mat-elevation-z8">
+                <!-- Fuente de Conflicto -->
+                <ng-container matColumnDef="fuenteConflicto" appResizableColumn>
+                  <th mat-header-cell *matHeaderCellDef>Potencial Fuente de Conflicto</th>
+                  <td mat-cell *matCellDef="let f">
+                    {{ f.fuenteConflicto }}
+                  </td>
+                </ng-container>
 
-          <!-- Acciones -->
-          <ng-container matColumnDef="acciones">
-            <th mat-header-cell *matHeaderCellDef>Acciones</th>
-            <td mat-cell *matCellDef="let f">
-              <button mat-icon-button color="accent" (click)="openEditModal(f)">
-                <mat-icon>edit</mat-icon>
-              </button>
-              <button mat-icon-button color="warn" (click)="eliminarFuente(f)">
-                <mat-icon>delete</mat-icon>
-              </button>
-            </td>
-          </ng-container>
+                <!-- Observaciones -->
+                <ng-container matColumnDef="observaciones" appResizableColumn>
+                  <th mat-header-cell *matHeaderCellDef>Observaciones</th>
+                  <td mat-cell *matCellDef="let f">
+                    {{ f.observaciones }}
+                  </td>
+                </ng-container>
 
-          <tr mat-header-row *matHeaderRowDef="['potencialFuente','observaciones','estado','acciones']"></tr>
-          <tr mat-row *matRowDef="let row; columns: ['potencialFuente','observaciones','estado','acciones'];"></tr>
-        </table>
+                <!-- Estado -->
+                <ng-container matColumnDef="estado" appResizableColumn>
+                  <th mat-header-cell *matHeaderCellDef>Estado</th>
+                  <td mat-cell *matCellDef="let item">{{ !item.borrador ? 'COMPLETO' : 'INCOMPLETO' }}</td>
+                </ng-container>
+
+                <!-- Acciones -->
+                <ng-container matColumnDef="acciones">
+                  <th mat-header-cell *matHeaderCellDef>Acciones</th>
+                  <td mat-cell *matCellDef="let f">
+                    <button mat-icon-button color="accent" (click)="openEditModal(f)">
+                      <img src="assets/icons/icon-btn-tabla_editar.svg" alt="Editar">
+                    </button>
+                    <button mat-icon-button color="warn" (click)="eliminarFuente(f)">
+                      <img src="assets/icons/icon-btn-tabla_eliminar.svg" alt="Eliminar">
+                    </button>
+                  </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;"
+                  [ngClass]="{'fila-incompleta': row.borrador}"></tr>
+              </table>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
+
+
 
   </div>
   <!-- Botón Guardar -->
@@ -87,54 +96,27 @@
   </mat-card-actions>
 </mat-card>
 
-<!-- Modal inline -->
-<ng-template #conflictoModal let-dialogRef>
-  <h2 mat-dialog-title>
-    {{ editMode ? 'Editar Fuente de Conflicto' : 'Agregar Fuente de Conflicto' }}
-  </h2>
-
+<!-- Modal de Fuente de Conflicto -->
+<ng-template #conflictoModal>
+  <h2 mat-dialog-title>{{ editMode ? 'Editar' : 'Agregar' }} Fuente de Conflicto</h2>
   <mat-dialog-content>
-    <form [formGroup]="conflictoForm">
-      <!-- Tipo -->
-      <mat-form-field appearance="fill" class="w-100 mb-3">
-        <mat-label>Tipo</mat-label>
-        <input matInput formControlName="tipo" />
+    <form [formGroup]="conflictoForm" class="d-flex flex-column gap-3">
+      <mat-form-field>
+        <mat-label>Potencial Fuente de Conflicto</mat-label>
+        <input matInput formControlName="fuenteConflicto">
+
       </mat-form-field>
 
-      <!-- Descripción -->
-      <mat-form-field appearance="fill" class="w-100 mb-3">
-        <mat-label>Descripción</mat-label>
-        <textarea matInput formControlName="descripcion" rows="3"></textarea>
-      </mat-form-field>
-
-      <!-- Fecha -->
-      <mat-form-field appearance="fill" class="w-100 mb-3">
-        <mat-label>Fecha</mat-label>
-        <input matInput formControlName="fecha" [matDatepicker]="picker" />
-        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-        <mat-datepicker #picker></mat-datepicker>
-      </mat-form-field>
-
-      <!-- Observaciones -->
-      <mat-form-field appearance="fill" class="w-100 mb-3">
+      <mat-form-field>
         <mat-label>Observaciones</mat-label>
         <textarea matInput formControlName="observaciones" rows="3"></textarea>
       </mat-form-field>
 
-      <!-- Estado -->
-      <mat-form-field appearance="fill" class="w-100 mb-3">
-        <mat-label>Estado</mat-label>
-        <mat-select formControlName="estado">
-          <mat-option value="Activo">Activo</mat-option>
-          <mat-option value="Inactivo">Inactivo</mat-option>
-        </mat-select>
-      </mat-form-field>
     </form>
   </mat-dialog-content>
-
   <mat-dialog-actions align="end">
-    <button mat-button (click)="dialogRef.close()">Cancelar</button>
-    <button mat-raised-button color="primary" (click)="saveConflicto(dialogRef)">
+    <button mat-button (click)="closeDialog()">Cancelar</button>
+    <button mat-raised-button color="primary" (click)="saveFuente()">
       Guardar
     </button>
   </mat-dialog-actions>

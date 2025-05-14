@@ -1,4 +1,3 @@
-
 <mat-card class="tarjeta-declaracion">
 
   <!-- Encabezado -->
@@ -42,60 +41,60 @@
         </div>
       </div>
 
-      <table mat-table [dataSource]="vehiculosLivianos" class="w-100 mat-elevation-z8">
+      <table mat-table [dataSource]="vehiculosData" class="w-100 mat-elevation-z8">
 
         <!-- Tipo -->
-        <ng-container matColumnDef="tipo">
+        <ng-container matColumnDef="tipo" appResizableColumn>
           <th mat-header-cell *matHeaderCellDef>Tipo</th>
           <td mat-cell *matCellDef="let v"> {{ v.tipoMotorizado }} </td>
         </ng-container>
 
         <!-- Marca -->
-        <ng-container matColumnDef="marca">
+        <ng-container matColumnDef="marca" appResizableColumn>
           <th mat-header-cell *matHeaderCellDef>Marca</th>
           <td mat-cell *matCellDef="let v"> {{ v.marca }} </td>
         </ng-container>
 
         <!-- Modelo -->
-        <ng-container matColumnDef="modelo">
+        <ng-container matColumnDef="modelo" appResizableColumn>
           <th mat-header-cell *matHeaderCellDef>Modelo</th>
           <td mat-cell *matCellDef="let v"> {{ v.modelo }} </td>
         </ng-container>
 
         <!-- Año -->
-        <ng-container matColumnDef="anio">
+        <ng-container matColumnDef="anio" appResizableColumn>
           <th mat-header-cell *matHeaderCellDef>Año</th>
           <td mat-cell *matCellDef="let v"> {{ v.anio }} </td>
         </ng-container>
 
         <!-- Patente -->
-        <ng-container matColumnDef="patente">
+        <ng-container matColumnDef="patente" appResizableColumn>
           <th mat-header-cell *matHeaderCellDef>Patente</th>
           <td mat-cell *matCellDef="let v"> {{ v.patente }} </td>
         </ng-container>
 
         <!-- Nro Inscripción -->
-        <ng-container matColumnDef="nroInscripcion">
+        <ng-container matColumnDef="nroInscripcion" appResizableColumn>
           <th mat-header-cell *matHeaderCellDef>Nro Inscripción</th>
           <td mat-cell *matCellDef="let v"> {{ v.numeroInscripcion }} </td>
         </ng-container>
 
         <!-- Ano Inscripción -->
-        <ng-container matColumnDef="anoInscripcion">
+        <ng-container matColumnDef="anoInscripcion" appResizableColumn>
           <th mat-header-cell *matHeaderCellDef>Año Inscripción</th>
           <td mat-cell *matCellDef="let v"> {{ v.anioInscripcion }} </td>
         </ng-container>
 
         <!-- Avaluo Fiscal -->
-        <ng-container matColumnDef="avaluoFiscal">
+        <ng-container matColumnDef="avaluoFiscal" appResizableColumn>
           <th mat-header-cell *matHeaderCellDef>Avaluo Fiscal</th>
           <td mat-cell *matCellDef="let v"> {{ v.avaluoFiscal }} </td>
         </ng-container>
 
         <!-- Estado -->
-        <ng-container matColumnDef="estado">
+        <ng-container matColumnDef="estado" appResizableColumn>
           <th mat-header-cell *matHeaderCellDef>Estado</th>
-          <td mat-cell *matCellDef="let v"> {{ v.porcentaje == 100 ? 'Completo' : 'Incompleto' }} </td>
+          <td mat-cell *matCellDef="let v"> {{ !v.borrador ? 'COMPLETO' : 'INCOMPLETO' }} </td>
         </ng-container>
 
         <!-- Acciones -->
@@ -112,7 +111,7 @@
         </ng-container>
 
         <tr mat-header-row *matHeaderRowDef="['tipo','marca','modelo','anio','patente', 'nroInscripcion','anoInscripcion','avaluoFiscal','estado','accionesVeh']"></tr>
-        <tr mat-row *matRowDef="let row; columns: ['tipo','marca','modelo','anio','patente', 'nroInscripcion','anoInscripcion','avaluoFiscal','estado','accionesVeh'];"></tr>
+        <tr mat-row *matRowDef="let row; columns: ['tipo','marca','modelo','anio','patente', 'nroInscripcion','anoInscripcion','avaluoFiscal','estado','accionesVeh'];" [ngClass]="{'fila-incompleta':row.borrador}"></tr>
       </table>
     </div>
 
@@ -140,65 +139,65 @@
         </div>
       </div>
 
-      <table mat-table [dataSource]="aeronaves" class="w-100 mat-elevation-z8">
+      <table mat-table [dataSource]="aeronavesData" class="w-100 mat-elevation-z8">
         <!-- Tipo (avión, helicóptero, etc.) -->
-        <ng-container matColumnDef="tipo">
+        <ng-container matColumnDef="tipo" appResizableColumn>
           <th mat-header-cell *matHeaderCellDef>Tipo</th>
           <td mat-cell *matCellDef="let a"> {{ a.tipoMotorizado }} </td>
         </ng-container>
 
         <!-- Nombre -->
-        <ng-container matColumnDef="nombre">
+        <ng-container matColumnDef="nombre" appResizableColumn>
           <th mat-header-cell *matHeaderCellDef>Nombre</th>
           <td mat-cell *matCellDef="let a"> {{ a.nombre }} </td>
         </ng-container>
 
         <!-- Matricula -->
-        <ng-container matColumnDef="matricula">
+        <ng-container matColumnDef="matricula" appResizableColumn>
           <th mat-header-cell *matHeaderCellDef>Matricula</th>
           <td mat-cell *matCellDef="let a"> {{ a.matricula }} </td>
         </ng-container>
 
         <!-- Marca -->
-        <ng-container matColumnDef="marca">
+        <ng-container matColumnDef="marca" appResizableColumn>
           <th mat-header-cell *matHeaderCellDef>Marca</th>
           <td mat-cell *matCellDef="let a"> {{ a.marca }} </td>
         </ng-container>
 
         <!-- Modelo -->
-        <ng-container matColumnDef="modelo">
+        <ng-container matColumnDef="modelo" appResizableColumn>
           <th mat-header-cell *matHeaderCellDef>Modelo</th>
           <td mat-cell *matCellDef="let a"> {{ a.modelo }} </td>
         </ng-container>
 
         <!-- Año de Fabricacion -->
-        <ng-container matColumnDef="anoFabricacion">
+        <ng-container matColumnDef="anoFabricacion" appResizableColumn>
           <th mat-header-cell *matHeaderCellDef>Año de Fabricacion</th>
           <td mat-cell *matCellDef="let a"> {{ a.anioFabricacion }} </td>
         </ng-container>
 
         <!-- Nro Inscripcion -->        
-        <ng-container matColumnDef="nroInscripcion">
+        <ng-container matColumnDef="nroInscripcion" appResizableColumn>
           <th mat-header-cell *matHeaderCellDef>Nro Inscripción</th>
           <td mat-cell *matCellDef="let a"> {{ a.numeroInscripcion }} </td>
         </ng-container>
 
         <!-- Tasacion -->        
-        <ng-container matColumnDef="tasacion">
+        <ng-container matColumnDef="tasacion" appResizableColumn>
           <th mat-header-cell *matHeaderCellDef>Tasación</th>
           <td mat-cell *matCellDef="let a"> {{ a.tasacion }} </td>
         </ng-container>
 
         <!-- Gravamenes -->        
-        <ng-container matColumnDef="gravamenes">
+        <ng-container matColumnDef="gravamenes" appResizableColumn>
           <th mat-header-cell *matHeaderCellDef>Gravamenes</th>
           <td mat-cell *matCellDef="let a"> {{ a.gravamenes }} </td>
         </ng-container>
 
         <!-- Estado -->        
-        <ng-container matColumnDef="estado">
+        <ng-container matColumnDef="estado" appResizableColumn>
           <th mat-header-cell *matHeaderCellDef>Estado</th>
-          <td mat-cell *matCellDef="let a"> {{ a.porcentaje == 100 ? 'Completo' : 'Incompleto' }} </td>
+          <td mat-cell *matCellDef="let a"> {{ !a.borrador ? 'COMPLETO' : 'INCOMPLETO' }} </td>
         </ng-container>
 
         <!-- Acciones -->
@@ -215,7 +214,7 @@
         </ng-container>
 
         <tr mat-header-row *matHeaderRowDef="['tipo','nombre','matricula','marca','modelo','anoFabricacion','nroInscripcion', 'tasacion','gravamenes','estado','accionesAero']"></tr>
-        <tr mat-row *matRowDef="let row; columns: ['tipo','nombre','matricula','marca','modelo','anoFabricacion','nroInscripcion', 'tasacion','gravamenes','estado','accionesAero'];"></tr>
+        <tr mat-row *matRowDef="let row; columns: ['tipo','nombre','matricula','marca','modelo','anoFabricacion','nroInscripcion', 'tasacion','gravamenes','estado','accionesAero'];" [ngClass]="{'fila-incompleta':row.borrador}"></tr>
       </table>
     </div>
 
@@ -243,54 +242,54 @@
         </div>
       </div>
 
-      <table mat-table [dataSource]="naves" class="w-100 mat-elevation-z8">
+      <table mat-table [dataSource]="navesData" class="w-100 mat-elevation-z8">
 
         <!-- Tipo -->
-        <ng-container matColumnDef="tipo">
+        <ng-container matColumnDef="tipo" appResizableColumn>
           <th mat-header-cell *matHeaderCellDef>Tipo</th>
           <td mat-cell *matCellDef="let n"> {{ n.tipoMotorizado }} </td>
         </ng-container>
 
         <!-- Nombre -->
-        <ng-container matColumnDef="nombre">
+        <ng-container matColumnDef="nombre" appResizableColumn>
           <th mat-header-cell *matHeaderCellDef>Nombre</th>
           <td mat-cell *matCellDef="let n"> {{ n.nombre }} </td>
         </ng-container>
 
         <!-- Matricula -->
-        <ng-container matColumnDef="matricula">
+        <ng-container matColumnDef="matricula" appResizableColumn>
           <th mat-header-cell *matHeaderCellDef>Matricula</th>
           <td mat-cell *matCellDef="let n"> {{ n.matricula }} </td>
         </ng-container>
 
         <!-- Ano Fabricacion -->        
-        <ng-container matColumnDef="anoFabricacion">
+        <ng-container matColumnDef="anoFabricacion" appResizableColumn>
           <th mat-header-cell *matHeaderCellDef>Ano Fabricacion</th>
           <td mat-cell *matCellDef="let n"> {{ n.anioFabricacion }} </td>
         </ng-container>
 
         <!-- Nro Inscripcion -->        
-        <ng-container matColumnDef="nroInscripcion">
+        <ng-container matColumnDef="nroInscripcion" appResizableColumn>
           <th mat-header-cell *matHeaderCellDef>Nro Inscripción</th>          
           <td mat-cell *matCellDef="let n"> {{ n.numeroInscripcion }} </td>
         </ng-container>
 
         <!-- Tasación -->        
-        <ng-container matColumnDef="tasacion">
+        <ng-container matColumnDef="tasacion" appResizableColumn>
           <th mat-header-cell *matHeaderCellDef>Tasación</th>
           <td mat-cell *matCellDef="let n"> {{ n.tasacion }} </td>
         </ng-container>
 
         <!-- Gravamenes -->        
-        <ng-container matColumnDef="gravamenes">
+        <ng-container matColumnDef="gravamenes" appResizableColumn>
           <th mat-header-cell *matHeaderCellDef>Gravamenes</th>
           <td mat-cell *matCellDef="let n"> {{ n.gravamenes }} </td>
         </ng-container>
 
         <!-- Estado -->        
-        <ng-container matColumnDef="estado">
+        <ng-container matColumnDef="estado" appResizableColumn>
           <th mat-header-cell *matHeaderCellDef>Estado</th>
-          <td mat-cell *matCellDef="let n"> {{ n.porcentaje == 100 ? 'Completo' : 'Incompleto' }} </td>
+          <td mat-cell *matCellDef="let n"> {{ !n.borrador ? 'COMPLETO' : 'INCOMPLETO' }} </td>
         </ng-container>
 
         <!-- Acciones -->
@@ -307,7 +306,7 @@
         </ng-container>
 
         <tr mat-header-row *matHeaderRowDef="['tipo','nombre','matricula','anoFabricacion','nroInscripcion', 'tasacion','gravamenes','estado','accionesNave']"></tr>
-        <tr mat-row *matRowDef="let row; columns: ['tipo','nombre','matricula','anoFabricacion','nroInscripcion', 'tasacion','gravamenes','estado','accionesNave'];"></tr>
+        <tr mat-row *matRowDef="let row; columns: ['tipo','nombre','matricula','anoFabricacion','nroInscripcion', 'tasacion','gravamenes','estado','accionesNave'];" [ngClass]="{'fila-incompleta':row.borrador}"></tr>
       </table>
     </div>
 
@@ -335,42 +334,42 @@
         </div>
       </div>
 
-      <table mat-table [dataSource]="otrosBienes" class="w-100 mat-elevation-z8">
+      <table mat-table [dataSource]="otrosBienesData" class="w-100 mat-elevation-z8">
 
         <!-- Descripción -->
-        <ng-container matColumnDef="descripcion">
+        <ng-container matColumnDef="descripcion" appResizableColumn>
           <th mat-header-cell *matHeaderCellDef>Descripción</th>
           <td mat-cell *matCellDef="let o"> {{ o.descripcion }} </td>
         </ng-container>
 
         <!-- Nro Inscripcion -->        
-        <ng-container matColumnDef="nroInscripcion">
+        <ng-container matColumnDef="nroInscripcion" appResizableColumn>
           <th mat-header-cell *matHeaderCellDef>Nro Inscripción</th>          
           <td mat-cell *matCellDef="let o"> {{ o.numeroInscripcion }} </td>
         </ng-container>
 
         <!-- Ano Inscripcion -->        
-        <ng-container matColumnDef="anoInscripcion">
+        <ng-container matColumnDef="anoInscripcion" appResizableColumn>
           <th mat-header-cell *matHeaderCellDef>Ano Inscripción</th>          
           <td mat-cell *matCellDef="let o"> {{ o.anioInscripcion }} </td>
         </ng-container>
 
         <!-- Valor Comercial -->        
-        <ng-container matColumnDef="valorComercial">
+        <ng-container matColumnDef="valorComercial" appResizableColumn>
           <th mat-header-cell *matHeaderCellDef>Valor Comercial</th>          
           <td mat-cell *matCellDef="let o"> {{ o.valorComercial }} </td>
         </ng-container>
 
         <!-- Tipo Registro -->        
-        <ng-container matColumnDef="tipoRegistro">
+        <ng-container matColumnDef="tipoRegistro" appResizableColumn>
           <th mat-header-cell *matHeaderCellDef>Tipo Registro</th>          
           <td mat-cell *matCellDef="let o"> {{ o.tipoRegistro }} </td>
         </ng-container>
 
         <!-- Estado -->        
-        <ng-container matColumnDef="estado">
+        <ng-container matColumnDef="estado" appResizableColumn>
           <th mat-header-cell *matHeaderCellDef>Estado</th>          
-          <td mat-cell *matCellDef="let o"> {{ o.porcentaje == 100 ? 'Completo' : 'Incompleto' }} </td>
+          <td mat-cell *matCellDef="let o"> {{ !o.borrador ? 'COMPLETO' : 'INCOMPLETO' }} </td>
         </ng-container>
 
         <!-- Acciones -->
@@ -387,7 +386,7 @@
         </ng-container>
 
         <tr mat-header-row *matHeaderRowDef="['descripcion','nroInscripcion','anoInscripcion','valorComercial','tipoRegistro','estado','accionesOtro']"></tr>
-        <tr mat-row *matRowDef="let row; columns: ['descripcion','nroInscripcion','anoInscripcion','valorComercial','tipoRegistro','estado','accionesOtro'];"></tr>
+        <tr mat-row *matRowDef="let row; columns: ['descripcion','nroInscripcion','anoInscripcion','valorComercial','tipoRegistro','estado','accionesOtro']; " [ngClass]="{'fila-incompleta': row.borrador}"></tr>
       </table>
     </div>
   </div>
@@ -399,187 +398,353 @@
           </button>
         </mat-card-actions>
 </mat-card>
+<!-- VEHÍCULO -->
+<ng-template #vehiculoModal>
+  <h2 mat-dialog-title>{{ editVehiculo ? 'Editar Vehículo' : 'Nuevo Vehículo' }}</h2>
 
-<!-- ========================= MODALS ========================= -->
+  <mat-dialog-content class="pt-2">
+    <form [formGroup]="vehiculoForm" class="w-100">
 
-<!-- MODAL: Vehículo -->
-<ng-template #vehiculoModal let-dialogRef>
-  <h2 mat-dialog-title>
-    {{ editVehiculo ? 'Editar Vehículo' : 'Agregar Vehículo' }}
-  </h2>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Tipo de vehículo</mat-label>
+            <mat-select formControlName="tipoVehiculoId">
+              <mat-option *ngFor="let t of tiposVehiculo" [value]="t.id">{{ t.nombre }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
 
-  <mat-dialog-content>
-    <form [formGroup]="vehiculoForm">
-      <mat-form-field appearance="fill" class="w-100 mb-3">
-        <mat-label>Tipo</mat-label>
-        <mat-select formControlName="tipo">
-          <mat-option value="Liviano">Liviano</mat-option>
-          <mat-option value="Pesado">Pesado</mat-option>
-        </mat-select>
-      </mat-form-field>
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Marca</mat-label>
+            <mat-select formControlName="marcaId">
+              <mat-option *ngFor="let m of marcas" [value]="m.id">{{ m.nombre }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
 
-      <mat-form-field appearance="fill" class="w-100 mb-3">
-        <mat-label>Marca</mat-label>
-        <input matInput formControlName="marca" />
-      </mat-form-field>
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Modelo</mat-label>
+            <input matInput formControlName="modelo" />
+          </mat-form-field>
+        </div>
 
-      <mat-form-field appearance="fill" class="w-100 mb-3">
-        <mat-label>Modelo</mat-label>
-        <input matInput formControlName="modelo" />
-      </mat-form-field>
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Año fabricación</mat-label>
+            <input matInput formControlName="anio" />
+          </mat-form-field>
+        </div>
 
-      <mat-form-field appearance="fill" class="w-100 mb-3">
-        <mat-label>Año</mat-label>
-        <input matInput type="number" formControlName="anio" />
-      </mat-form-field>
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Placa patente</mat-label>
+            <input matInput formControlName="patente" />
+          </mat-form-field>
+        </div>
 
-      <mat-form-field appearance="fill" class="w-100 mb-3">
-        <mat-label>Patente</mat-label>
-        <input matInput formControlName="patente" />
-      </mat-form-field>
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Nº inscripción</mat-label>
+            <input matInput formControlName="numeroInscripcion" />
+          </mat-form-field>
+        </div>
 
-      <mat-form-field appearance="fill" class="w-100 mb-3">
-        <mat-label>Valor Aproximado</mat-label>
-        <input matInput type="number" formControlName="valor" />
-      </mat-form-field>
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Año inscripción</mat-label>
+            <input matInput formControlName="anioInscripcion" />
+          </mat-form-field>
+        </div>
+
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Avalúo fiscal</mat-label>
+            <input matInput formControlName="avaluoFiscal" />
+          </mat-form-field>
+        </div>
+
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Porcentaje propiedad</mat-label>
+            <input matInput formControlName="porcentaje" />
+          </mat-form-field>
+        </div>
+
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Gravámenes</mat-label>
+            <mat-select formControlName="gravamenId">
+              <mat-option *ngFor="let g of gravamenesVehiculo" [value]="g.id">{{ g.nombre }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="col-md-12">
+          <mat-checkbox formControlName="noPropietario">No soy propietario</mat-checkbox>
+        </div>
+      </div>
     </form>
   </mat-dialog-content>
 
   <mat-dialog-actions align="end">
-    <button mat-button (click)="dialogRef.close()">Cancelar</button>
-    <button mat-raised-button color="primary" (click)="saveVehiculo(dialogRef)">
-      Guardar
-    </button>
+    <button mat-stroked-button mat-dialog-close>Cancelar</button>
+    <button mat-raised-button color="primary" (click)="saveVehiculo()">Guardar</button>
   </mat-dialog-actions>
 </ng-template>
 
-<!-- MODAL: Aeronave -->
-<ng-template #aeronaveModal let-dialogRef>
-  <h2 mat-dialog-title>
-    {{ editAeronave ? 'Editar Aeronave' : 'Agregar Aeronave' }}
-  </h2>
+<!-- AERONAVE -->
+<ng-template #aeronaveModal>
+  <h2 mat-dialog-title>{{ editAeronave ? 'Editar Aeronave' : 'Nueva Aeronave' }}</h2>
 
-  <mat-dialog-content>
+  <mat-dialog-content class="pt-2">
     <form [formGroup]="aeronaveForm">
-      <mat-form-field appearance="fill" class="w-100 mb-3">
-        <mat-label>Tipo</mat-label>
-        <mat-select formControlName="tipo">
-          <mat-option value="Avión">Avión</mat-option>
-          <mat-option value="Helicóptero">Helicóptero</mat-option>
-        </mat-select>
-      </mat-form-field>
 
-      <mat-form-field appearance="fill" class="w-100 mb-3">
-        <mat-label>Marca</mat-label>
-        <input matInput formControlName="marca" />
-      </mat-form-field>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Tipo de aeronave</mat-label>
+            <mat-select formControlName="tipoVehiculoId">
+              <mat-option *ngFor="let t of tiposAeronave" [value]="t.id">{{ t.nombre }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
 
-      <mat-form-field appearance="fill" class="w-100 mb-3">
-        <mat-label>Modelo</mat-label>
-        <input matInput formControlName="modelo" />
-      </mat-form-field>
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Nombre</mat-label>
+            <input matInput formControlName="nombre" />
+          </mat-form-field>
+        </div>
 
-      <mat-form-field appearance="fill" class="w-100 mb-3">
-        <mat-label>Año</mat-label>
-        <input matInput type="number" formControlName="anio" />
-      </mat-form-field>
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Nº matrícula</mat-label>
+            <input matInput formControlName="patente" />
+          </mat-form-field>
+        </div>
 
-      <mat-form-field appearance="fill" class="w-100 mb-3">
-        <mat-label>Matrícula</mat-label>
-        <input matInput formControlName="matricula" />
-      </mat-form-field>
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Marca</mat-label>
+            <input matInput formControlName="marcaAeronave" />
+          </mat-form-field>
+        </div>
 
-      <mat-form-field appearance="fill" class="w-100 mb-3">
-        <mat-label>Valor Aproximado</mat-label>
-        <input matInput type="number" formControlName="valor" />
-      </mat-form-field>
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Modelo</mat-label>
+            <input matInput formControlName="modelo" />
+          </mat-form-field>
+        </div>
+
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Año fabricación</mat-label>
+            <input matInput formControlName="anio" />
+          </mat-form-field>
+        </div>
+
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Nº inscripción</mat-label>
+            <input matInput formControlName="numeroInscripcion" />
+          </mat-form-field>
+        </div>
+
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Año inscripción</mat-label>
+            <input matInput formControlName="anioInscripcion" />
+          </mat-form-field>
+        </div>
+
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Tasación</mat-label>
+            <input matInput formControlName="tasacion" />
+          </mat-form-field>
+        </div>
+
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Porcentaje propiedad</mat-label>
+            <input matInput formControlName="porcentaje" />
+          </mat-form-field>
+        </div>
+
+        <div class="col-md-12">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Gravámenes</mat-label>
+            <mat-select formControlName="gravamenId">
+              <mat-option *ngFor="let g of gravamenesAeronave" [value]="g.id">{{ g.nombre }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="col-md-12">
+          <mat-checkbox formControlName="noPropietario">No soy propietario</mat-checkbox>
+        </div>
+      </div>
     </form>
   </mat-dialog-content>
 
   <mat-dialog-actions align="end">
-    <button mat-button (click)="dialogRef.close()">Cancelar</button>
-    <button mat-raised-button color="primary" (click)="saveAeronave(dialogRef)">
-      Guardar
-    </button>
+    <button mat-stroked-button mat-dialog-close>Cancelar</button>
+    <button mat-raised-button color="primary" (click)="saveAeronave()">Guardar</button>
   </mat-dialog-actions>
 </ng-template>
 
-<!-- MODAL: Nave -->
-<ng-template #naveModal let-dialogRef>
-  <h2 mat-dialog-title>
-    {{ editNave ? 'Editar Nave' : 'Agregar Nave' }}
-  </h2>
+<!-- NAVE -->
+<ng-template #naveModal>
+  <h2 mat-dialog-title>{{ editNave ? 'Editar Nave' : 'Nueva Nave' }}</h2>
 
-  <mat-dialog-content>
+  <mat-dialog-content class="pt-2">
     <form [formGroup]="naveForm">
-      <mat-form-field appearance="fill" class="w-100 mb-3">
-        <mat-label>Tipo</mat-label>
-        <mat-select formControlName="tipo">
-          <mat-option value="Lancha">Lancha</mat-option>
-          <mat-option value="Yate">Yate</mat-option>
-          <mat-option value="Otro">Otro</mat-option>
-        </mat-select>
-      </mat-form-field>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Tipo</mat-label>
+            <mat-select formControlName="tipoVehiculoId">
+              <mat-option *ngFor="let t of tiposNave" [value]="t.id">{{ t.nombre }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
 
-      <mat-form-field appearance="fill" class="w-100 mb-3">
-        <mat-label>Registro</mat-label>
-        <input matInput formControlName="registro" />
-      </mat-form-field>
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Nombre</mat-label>
+            <input matInput formControlName="nombre" />
+          </mat-form-field>
+        </div>
 
-      <mat-form-field appearance="fill" class="w-100 mb-3">
-        <mat-label>Año</mat-label>
-        <input matInput type="number" formControlName="anio" />
-      </mat-form-field>
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Nº matrícula</mat-label>
+            <input matInput formControlName="patente" />
+          </mat-form-field>
+        </div>
 
-      <mat-form-field appearance="fill" class="w-100 mb-3">
-        <mat-label>Valor Aproximado</mat-label>
-        <input matInput type="number" formControlName="valor" />
-      </mat-form-field>
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Año fabricación</mat-label>
+            <input matInput formControlName="anio" />
+          </mat-form-field>
+        </div>
+
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Nº inscripción</mat-label>
+            <input matInput formControlName="numeroInscripcion" />
+          </mat-form-field>
+        </div>
+
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Año inscripción</mat-label>
+            <input matInput formControlName="anioInscripcion" />
+          </mat-form-field>
+        </div>
+
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Tasación</mat-label>
+            <input matInput formControlName="tasacion" />
+          </mat-form-field>
+        </div>
+
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Porcentaje propiedad</mat-label>
+            <input matInput formControlName="porcentaje" />
+          </mat-form-field>
+        </div>
+
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Gravámenes</mat-label>
+            <mat-select formControlName="gravamenId">
+              <mat-option *ngFor="let g of gravamenesNave" [value]="g.id">{{ g.nombre }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Tonelaje</mat-label>
+            <input matInput formControlName="tonelaje" />
+          </mat-form-field>
+        </div>
+
+        <div class="col-md-12">
+          <mat-checkbox formControlName="noPropietario">No soy propietario</mat-checkbox>
+        </div>
+      </div>
     </form>
   </mat-dialog-content>
 
   <mat-dialog-actions align="end">
-    <button mat-button (click)="dialogRef.close()">Cancelar</button>
-    <button mat-raised-button color="primary" (click)="saveNave(dialogRef)">
-      Guardar
-    </button>
+    <button mat-stroked-button mat-dialog-close>Cancelar</button>
+    <button mat-raised-button color="primary" (click)="saveNave()">Guardar</button>
   </mat-dialog-actions>
 </ng-template>
 
-<!-- MODAL: Otro Bien -->
-<ng-template #otroBienModal let-dialogRef>
-  <h2 mat-dialog-title>
-    {{ editOtroBien ? 'Editar Bien Registrado' : 'Agregar Bien Registrado' }}
-  </h2>
+<!-- OTRO BIEN -->
+<ng-template #otroBienModal>
+  <h2 mat-dialog-title>{{ editOtroBien ? 'Editar Bien Mueble' : 'Nuevo Bien Mueble' }}</h2>
 
-  <mat-dialog-content>
+  <mat-dialog-content class="pt-2">
     <form [formGroup]="otroBienForm">
-      <mat-form-field appearance="fill" class="w-100 mb-3">
-        <mat-label>Tipo</mat-label>
-        <mat-select formControlName="tipo">
-          <mat-option value="Maquinaria">Maquinaria</mat-option>
-          <mat-option value="Remolque">Remolque</mat-option>
-          <mat-option value="Casa Rodante">Casa Rodante</mat-option>
-          <mat-option value="Otro">Otro</mat-option>
-        </mat-select>
-      </mat-form-field>
+      <div class="row g-3">
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Descripción</mat-label>
+            <input matInput formControlName="descripcion" />
+          </mat-form-field>
+        </div>
 
-      <mat-form-field appearance="fill" class="w-100 mb-3">
-        <mat-label>Descripción</mat-label>
-        <input matInput formControlName="descripcion" />
-      </mat-form-field>
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Número</mat-label>
+            <input matInput formControlName="numero" />
+          </mat-form-field>
+        </div>
 
-      <mat-form-field appearance="fill" class="w-100 mb-3">
-        <mat-label>Valor Aproximado</mat-label>
-        <input matInput type="number" formControlName="valor" />
-      </mat-form-field>
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Año</mat-label>
+            <input matInput formControlName="anio" />
+          </mat-form-field>
+        </div>
+
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Valor</mat-label>
+            <input matInput formControlName="valor" />
+          </mat-form-field>
+        </div>
+
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Porcentaje propiedad</mat-label>
+            <input matInput formControlName="porcentaje" />
+          </mat-form-field>
+        </div>
+
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Tipo de registro</mat-label>
+            <input matInput formControlName="tipo" />
+          </mat-form-field>
+        </div>
+      </div>
     </form>
   </mat-dialog-content>
 
   <mat-dialog-actions align="end">
-    <button mat-button (click)="dialogRef.close()">Cancelar</button>
-    <button mat-raised-button color="primary" (click)="saveOtroBien(dialogRef)">
-      Guardar
-    </button>
+    <button mat-stroked-button mat-dialog-close>Cancelar</button>
+    <button mat-raised-button color="primary" (click)="saveOtroBien()">Guardar</button>
   </mat-dialog-actions>
 </ng-template>

@@ -14,13 +14,11 @@
   <!-- Contenido principal -->
   <div class="contenido-form">
     <!-- Pregunta "¿tieneMandato?" -->
-
     <div class="border p-3 mb-3">
-
       <div class="row mb-3 align-items-center">
         <div class="col-md-4 fw-bold etiqueta">Contratos</div>
         <div class="col-md-7 text-end">
-          <mat-radio-group [(ngModel)]="tieneMandato" name="mandatoRadio">
+          <mat-radio-group [(ngModel)]="tieneMandato" name="mandatoRadio" (change)="onTieneMandatoChange($event.value)">
             <mat-radio-button value="si" class="me-4">Sí</mat-radio-button>
             <mat-radio-button value="no">No</mat-radio-button>
           </mat-radio-group>
@@ -32,73 +30,68 @@
         <div class="row mb-3">
           <div class="col-md-12 text-end">
             <button mat-raised-button color="primary" (click)="openAddModal()">
-              Agregar Mandato
+              Agregar Contrato
             </button>
           </div>
         </div>
 
         <table mat-table [dataSource]="contratos" class="w-100 mat-elevation-z8">
-
-          <!-- Razon social -->
-          <ng-container matColumnDef="razonSocial">
+          <!-- Razón Social -->
+          <ng-container matColumnDef="razonSocial" appResizableColumn>
             <th mat-header-cell *matHeaderCellDef>Razón Social Mandatario</th>
-            <td mat-cell *matCellDef="let m">{{ m.razonSocial }}</td>
+            <td mat-cell *matCellDef="let c">{{ c.razonSocial }}</td>
           </ng-container>
 
-          <!-- Rut -->
-          <ng-container matColumnDef="rut">
-            <th mat-header-cell *matHeaderCellDef>RUT</th>
-            <td mat-cell *matCellDef="let m">{{ m.rut }}</td>
+          <!-- RUT -->
+          <ng-container matColumnDef="rut" appResizableColumn>
+            <th mat-header-cell *matHeaderCellDef>R.U.T.</th>
+            <td mat-cell *matCellDef="let c">{{ c.rut }}</td>
           </ng-container>
 
           <!-- Fecha de celebración -->
-          <ng-container matColumnDef="fechaCelebracion">
+          <ng-container matColumnDef="fechaCelebracion" appResizableColumn>
             <th mat-header-cell *matHeaderCellDef>Fecha de Celebración</th>
-            <td mat-cell *matCellDef="let m">{{ m.fechaCelebracion | date: 'dd/MM/yyyy' }}</td>
+            <td mat-cell *matCellDef="let c">{{ c.fechaCelebracion | date: 'dd/MM/yyyy' }}</td>
           </ng-container>
 
           <!-- Notaria -->
-          <ng-container matColumnDef="notaria">
+          <ng-container matColumnDef="notaria" appResizableColumn>
             <th mat-header-cell *matHeaderCellDef>Notaria o Consulado</th>
-            <td mat-cell *matCellDef="let m">{{ m.notaria }}</td>
+            <td mat-cell *matCellDef="let c">{{ c.notaria }}</td>
           </ng-container>
 
-          <!-- Valor comercial -->
-          <ng-container matColumnDef="valorComercial">
-            <th mat-header-cell *matHeaderCellDef>Valor Comercial Global de la Cartera de Actividad</th>
-            <td mat-cell *matCellDef="let m">{{ m.valorComercial }}</td>
+          <!-- Valor -->
+          <ng-container matColumnDef="valor" appResizableColumn>
+            <th mat-header-cell *matHeaderCellDef>Valor Comercial Global de la Cartera de Activos</th>
+            <td mat-cell *matCellDef="let c">{{ c.valor }}</td>
           </ng-container>
 
           <!-- Estado -->
-          <ng-container matColumnDef="estado">
+          <ng-container matColumnDef="estado" appResizableColumn>
             <th mat-header-cell *matHeaderCellDef>Estado</th>
-            <td mat-cell *matCellDef="let m">{{ m.porcentaje == 100 ? 'Completo' : 'Incompleto' }}</td>
+            <td mat-cell *matCellDef="let c">{{ !c.borrador ? 'COMPLETO' : 'INCOMPLETO' }}</td>
           </ng-container>
 
           <!-- Acciones -->
           <ng-container matColumnDef="acciones">
             <th mat-header-cell *matHeaderCellDef>Acciones</th>
-            <td mat-cell *matCellDef="let m">
-              <button mat-icon-button color="accent" (click)="openEditModal(m)">
-                <mat-icon>edit</mat-icon>
+            <td mat-cell *matCellDef="let c">
+              <button mat-icon-button color="accent" (click)="openEditModal(c)">
+                <img src="assets/icons/icon-btn-tabla_editar.svg" alt="Editar">
               </button>
-              <button mat-icon-button color="warn" (click)="eliminarMandato(m)">
-                <mat-icon>delete</mat-icon>
+              <button mat-icon-button color="warn" (click)="eliminarContrato(c)">
+                <img src="assets/icons/icon-btn-tabla_eliminar.svg" alt="Eliminar">
               </button>
             </td>
           </ng-container>
 
-          <tr mat-header-row
-            *matHeaderRowDef="['razonSocial','rut','fechaCelebracion','notaria','valorComercial','estado','acciones']">
-          </tr>
-          <tr mat-row
-            *matRowDef="let row; columns: ['razonSocial','rut','fechaCelebracion','notaria','valorComercial','estado','acciones'];">
-          </tr>
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"[ngClass]="{'fila-incompleta': row.borrador}"></tr>
         </table>
       </div>
     </div>
-
   </div>
+
   <!-- Botón Guardar -->
   <mat-card-actions class="acciones justify-content-end mt-3">
     <button mat-raised-button color="primary" type="submit" (click)="onSubmit()">
@@ -107,61 +100,65 @@
   </mat-card-actions>
 </mat-card>
 
-<!-- MODAL -->
-<ng-template #mandatoModal let-dialogRef>
+<!-- MODAL CONTRATO -->
+<ng-template #contratoModal let-dialogRef>
   <h2 mat-dialog-title>
-    {{ editMode ? 'Editar Mandato Especial' : 'Agregar Mandato Especial' }}
+    {{ editMode ? 'Editar Contrato' : 'Agregar Contrato' }}
   </h2>
 
   <mat-dialog-content>
-    <form [formGroup]="mandatoForm">
-      <!-- Tipo -->
+    <form [formGroup]="contratoForm">
+      <!-- Razón Social -->
       <mat-form-field appearance="fill" class="w-100 mb-3">
-        <mat-label>Tipo</mat-label>
-        <input matInput formControlName="tipo" />
+        <mat-label>Razón Social del Mandatario</mat-label>
+        <input matInput formControlName="razonSocial" />
+        <mat-error *ngIf="contratoForm.get('razonSocial')?.hasError('required')">
+          La razón social es requerida
+        </mat-error>
       </mat-form-field>
 
-      <!-- Descripción -->
+      <!-- RUT -->
       <mat-form-field appearance="fill" class="w-100 mb-3">
-        <mat-label>Descripción</mat-label>
-        <textarea matInput formControlName="descripcion" rows="3"></textarea>
+        <mat-label>R.U.T. del Mandatario</mat-label>
+        <input matInput formControlName="rut" />
+        <mat-error *ngIf="contratoForm.get('rut')?.hasError('required')">
+          El RUT es requerido
+        </mat-error>
       </mat-form-field>
 
-      <!-- Fecha -->
+      <!-- Fecha de Celebración -->
       <mat-form-field appearance="fill" class="w-100 mb-3">
-        <mat-label>Fecha</mat-label>
-        <input matInput formControlName="fecha" [matDatepicker]="picker" />
+        <mat-label>Fecha de Celebración</mat-label>
+        <input matInput formControlName="fechaCelebracion" [matDatepicker]="picker" />
         <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
         <mat-datepicker #picker></mat-datepicker>
+        <mat-error *ngIf="contratoForm.get('fechaCelebracion')?.hasError('required')">
+          La fecha de celebración es requerida
+        </mat-error>
       </mat-form-field>
 
-      <!-- Notaría -->
+      <!-- Notaria -->
       <mat-form-field appearance="fill" class="w-100 mb-3">
-        <mat-label>Notaría</mat-label>
+        <mat-label>Notaria o Consulado</mat-label>
         <input matInput formControlName="notaria" />
+        <mat-error *ngIf="contratoForm.get('notaria')?.hasError('required')">
+          La notaria es requerida
+        </mat-error>
       </mat-form-field>
 
-      <!-- Mandatario -->
+      <!-- Valor -->
       <mat-form-field appearance="fill" class="w-100 mb-3">
-        <mat-label>Mandatario</mat-label>
-        <input matInput formControlName="mandatario" />
-      </mat-form-field>
-
-      <!-- Estado -->
-      <mat-form-field appearance="fill" class="w-100 mb-3">
-        <mat-label>Estado</mat-label>
-        <mat-select formControlName="estado">
-          <mat-option value="Activo">Activo</mat-option>
-          <mat-option value="Inactivo">Inactivo</mat-option>
-        </mat-select>
+        <mat-label>Valor Comercial Global de la Cartera de Activos</mat-label>
+        <input matInput type="number" formControlName="valor" />
+        <mat-error *ngIf="contratoForm.get('valor')?.hasError('required')">
+          El valor es requerido
+        </mat-error>
       </mat-form-field>
     </form>
   </mat-dialog-content>
 
   <mat-dialog-actions align="end">
-    <button mat-button (click)="dialogRef.close()">Cancelar</button>
-    <button mat-raised-button color="primary" (click)="saveMandato(dialogRef)">
-      Guardar
-    </button>
+    <button mat-button (click)="closeDialog()">Cancelar</button>
+    <button mat-raised-button color="primary" (click)="saveContrato()">Guardar</button>
   </mat-dialog-actions>
 </ng-template>

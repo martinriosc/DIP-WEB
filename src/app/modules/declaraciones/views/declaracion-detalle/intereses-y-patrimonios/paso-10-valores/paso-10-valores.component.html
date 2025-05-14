@@ -18,7 +18,7 @@
       <div class="row mb-3 align-items-center">
         <div class="col-md-4 fw-bold etiqueta">Valores o instrumentos transables en Chile</div>
         <div class="col-md-7 text-end">
-          <mat-radio-group [(ngModel)]="tieneValoresChile" name="valoresRadio" (change)="onTieneValoresChileChange($event.value)">
+          <mat-radio-group [(ngModel)]="tieneValoresChile" name="valorChileRadio" (change)="onTieneValoresChileChange($event.value)">
             <mat-radio-button value="si" class="me-4">Tiene</mat-radio-button>
             <mat-radio-button value="no">No Tiene</mat-radio-button>
           </mat-radio-group>
@@ -28,7 +28,7 @@
       <div *ngIf="tieneValoresChile === 'si'">
         <div class="row mb-3">
           <div class="col-md-12 text-end">
-            <button mat-raised-button color="primary" (click)="openAddModal()">
+            <button mat-raised-button color="primary" (click)="openAddModal(false)">
               Agregar Valor
             </button>
           </div>
@@ -36,63 +36,62 @@
 
         <table mat-table [dataSource]="valoresChile" class="w-100 mat-elevation-z8">
           <!-- Título -->
-          <ng-container matColumnDef="titulo">
-            <th mat-header-cell *matHeaderCellDef>Título</th>
+          <ng-container matColumnDef="titulo" appResizableColumn>
+            <th mat-header-cell *matHeaderCellDef>Título o Documento</th>
             <td mat-cell *matCellDef="let v">{{ v.titulo }}</td>
           </ng-container>
 
           <!-- Razón Social -->
-          <ng-container matColumnDef="razonSocial">
-            <th mat-header-cell *matHeaderCellDef>Razón Social</th>
+          <ng-container matColumnDef="razonSocial" appResizableColumn>
+            <th mat-header-cell *matHeaderCellDef>Nombre o Razón Social del Emisor</th>
             <td mat-cell *matCellDef="let v">{{ v.razonSocial }}</td>
           </ng-container>
 
           <!-- Fecha de Adquisición -->
-          <ng-container matColumnDef="fechaAdquisicion">
+          <ng-container matColumnDef="fechaAdquisicion" appResizableColumn>
             <th mat-header-cell *matHeaderCellDef>Fecha de Adquisición</th>
             <td mat-cell *matCellDef="let v">{{ v.fechaAdquisicion | date: 'dd/MM/yyyy' }}</td>
           </ng-container>
 
           <!-- Cantidad -->
-          <ng-container matColumnDef="cantidad">
-            <th mat-header-cell *matHeaderCellDef>Cantidad</th>
+          <ng-container matColumnDef="cantidad" appResizableColumn>
+            <th mat-header-cell *matHeaderCellDef>Cantidad que representa</th>
             <td mat-cell *matCellDef="let v">{{ v.cantidad }}</td>
           </ng-container>
 
           <!-- Tipo de Moneda -->
-          <ng-container matColumnDef="tipoMoneda">
+          <ng-container matColumnDef="tipoMoneda" appResizableColumn>
             <th mat-header-cell *matHeaderCellDef>Tipo de Moneda</th>
             <td mat-cell *matCellDef="let v">{{ v.tipoMoneda }}</td>
           </ng-container>
 
           <!-- Valor Corriente -->
-          <ng-container matColumnDef="valorCorriente">
-            <th mat-header-cell *matHeaderCellDef>Valor Corriente</th>
+          <ng-container matColumnDef="valorCorriente" appResizableColumn>
+            <th mat-header-cell *matHeaderCellDef>Valor Corriente en Plaza</th>
             <td mat-cell *matCellDef="let v">{{ v.valorCorriente }}</td>
           </ng-container>
 
           <!-- Estado -->
-          <ng-container matColumnDef="estado">
+          <ng-container matColumnDef="estado" appResizableColumn>
             <th mat-header-cell *matHeaderCellDef>Estado</th>
-            <td mat-cell *matCellDef="let v">{{ v.porcentaje == 100 ? 'Completo' : 'Incompleto' }}</td>
+            <td mat-cell *matCellDef="let item">{{ !item.borrador ? 'COMPLETO' : 'INCOMPLETO' }}</td>
           </ng-container>
 
           <!-- Acciones -->
           <ng-container matColumnDef="acciones">
             <th mat-header-cell *matHeaderCellDef>Acciones</th>
             <td mat-cell *matCellDef="let v">
-              <button mat-icon-button color="accent" (click)="openEditModal(v)">
-                <mat-icon>edit</mat-icon>
+              <button mat-icon-button color="accent" (click)="openEditModal(v, false)">
+                <img src="assets/icons/icon-btn-tabla_editar.svg" alt="Editar">
               </button>
               <button mat-icon-button color="warn" (click)="eliminarValor(v)">
-                <mat-icon>delete</mat-icon>
+                <img src="assets/icons/icon-btn-tabla_eliminar.svg" alt="Eliminar">
               </button>
             </td>
           </ng-container>
 
-          <tr mat-header-row *matHeaderRowDef="['titulo','razonSocial','fechaAdquisicion','cantidad','tipoMoneda','valorCorriente','estado','acciones']"></tr>
-          <tr mat-row *matRowDef="let row; columns: ['titulo','razonSocial','fechaAdquisicion','cantidad','tipoMoneda','valorCorriente','estado','acciones'];">
-          </tr>
+          <tr mat-header-row *matHeaderRowDef="displayedColumnsChile"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumnsChile;" [ngClass]="{'fila-incompleta': row.borrador}"></tr>
         </table>
       </div>
     </div>
@@ -103,7 +102,7 @@
       <div class="row mb-3 align-items-center">
         <div class="col-md-4 fw-bold etiqueta">Valores o instrumentos transables en el Extranjero</div>
         <div class="col-md-7 text-end">
-          <mat-radio-group [(ngModel)]="tieneValoresExtranjero" name="valoresRadio" (change)="onTieneValoresExtranjeroChange($event.value)">
+          <mat-radio-group [(ngModel)]="tieneValoresExtranjero" name="valorExtranjeroRadio" (change)="onTieneValoresExtranjeroChange($event.value)">
             <mat-radio-button value="si" class="me-4">Tiene</mat-radio-button>
             <mat-radio-button value="no">No Tiene</mat-radio-button>
           </mat-radio-group>
@@ -113,7 +112,7 @@
       <div *ngIf="tieneValoresExtranjero === 'si'">
         <div class="row mb-3">
           <div class="col-md-12 text-end">
-            <button mat-raised-button color="primary" (click)="openAddModal()">
+            <button mat-raised-button color="primary" (click)="openAddModal(true)">
               Agregar Valor
             </button>
           </div>
@@ -122,69 +121,68 @@
         <table mat-table [dataSource]="valoresExtranjero" class="w-100 mat-elevation-z8">
 
           <!-- Título -->
-          <ng-container matColumnDef="titulo">
+          <ng-container matColumnDef="titulo" appResizableColumn>
             <th mat-header-cell *matHeaderCellDef>Título</th>
             <td mat-cell *matCellDef="let v">{{ v.titulo }}</td>
           </ng-container>
 
           <!-- Razon social -->
-          <ng-container matColumnDef="razonSocial">
-            <th mat-header-cell *matHeaderCellDef>Razón Social Mandatario</th>
+          <ng-container matColumnDef="razonSocial" appResizableColumn>
+            <th mat-header-cell *matHeaderCellDef>Nombre o Razón Social del Emisor</th>
             <td mat-cell *matCellDef="let v">{{ v.razonSocial }}</td>
           </ng-container>
 
           <!-- País -->
-          <ng-container matColumnDef="pais">
-            <th mat-header-cell *matHeaderCellDef>Pais</th>
+          <ng-container matColumnDef="pais" appResizableColumn>
+            <th mat-header-cell *matHeaderCellDef>País</th>
             <td mat-cell *matCellDef="let v">{{ v.pais }}</td>
           </ng-container>
 
           <!-- Fecha de adquisición -->
-          <ng-container matColumnDef="fechaAdquisicion">
+          <ng-container matColumnDef="fechaAdquisicion" appResizableColumn>
             <th mat-header-cell *matHeaderCellDef>Fecha de Adquisición</th>
             <td mat-cell *matCellDef="let v">{{ v.fechaAdquisicion | date: 'dd/MM/yyyy' }}</td>
           </ng-container>
 
           <!-- Cantidad -->
-          <ng-container matColumnDef="cantidad">
-            <th mat-header-cell *matHeaderCellDef>Cantidad</th>
+          <ng-container matColumnDef="cantidad" appResizableColumn>
+            <th mat-header-cell *matHeaderCellDef>Cantidad que Representa</th>
             <td mat-cell *matCellDef="let v">{{ v.cantidad }}</td>
           </ng-container>
 
           <!-- Tipo de moneda -->
-          <ng-container matColumnDef="tipoMoneda">
+          <ng-container matColumnDef="tipoMoneda" appResizableColumn>
             <th mat-header-cell *matHeaderCellDef>Tipo de Moneda</th>
             <td mat-cell *matCellDef="let v">{{ v.tipoMoneda }}</td>
           </ng-container>
 
           <!-- Valor corriente -->
-          <ng-container matColumnDef="valorCorriente">
-            <th mat-header-cell *matHeaderCellDef>Valor Corriente</th>
+          <ng-container matColumnDef="valorCorriente" appResizableColumn>
+            <th mat-header-cell *matHeaderCellDef>Valor Corriente en Plaza</th>
             <td mat-cell *matCellDef="let v">{{ v.valorCorriente }}</td>
           </ng-container>
 
           <!-- Estado -->
           <ng-container matColumnDef="estado">
             <th mat-header-cell *matHeaderCellDef>Estado</th>
-            <td mat-cell *matCellDef="let v">{{ v.porcentaje == 100 ? 'Completo' : 'Incompleto' }}</td>
+            <td mat-cell *matCellDef="let item">{{ !item.borrador ? 'COMPLETO' : 'INCOMPLETO' }}</td>
           </ng-container>
 
           <!-- Acciones -->
           <ng-container matColumnDef="acciones">
             <th mat-header-cell *matHeaderCellDef>Acciones</th>
             <td mat-cell *matCellDef="let v">
-              <button mat-icon-button color="accent" (click)="openEditModal(v)">
-                <mat-icon>edit</mat-icon>
+              <button mat-icon-button color="accent" (click)="openEditModal(v, true)">
+                <img src="assets/icons/icon-btn-tabla_editar.svg" alt="Editar">
               </button>
               <button mat-icon-button color="warn" (click)="eliminarValor(v)">
-                <mat-icon>delete</mat-icon>
+                <img src="assets/icons/icon-btn-tabla_eliminar.svg" alt="Eliminar">
               </button>
             </td>
           </ng-container>
 
-          <tr mat-header-row *matHeaderRowDef="['titulo','razonSocial','pais','fechaAdquisicion','cantidad','tipoMoneda','valorCorriente','estado','acciones']"></tr>
-          <tr mat-row *matRowDef="let row; columns: ['titulo','razonSocial','pais','fechaAdquisicion','cantidad','tipoMoneda','valorCorriente','estado','acciones'];">
-          </tr>
+          <tr mat-header-row *matHeaderRowDef="displayedColumnsExtranjero"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumnsExtranjero;" [ngClass]="{'fila-incompleta': row.borrador}"></tr>
         </table>
       </div>
     </div>
@@ -201,46 +199,93 @@
   </mat-card-actions>
 </mat-card>
 
-<!-- Modal inline -->
-<ng-template #valorModal let-dialogRef>
-  <h2 mat-dialog-title>{{ editMode ? 'Editar Valor' : 'Agregar Valor' }}</h2>
 
-  <mat-dialog-content>
-    <form [formGroup]="valorForm">
-      <!-- Tipo Valor -->
-      <mat-form-field appearance="fill" class="w-100 mb-3">
-        <mat-label>Tipo de Valor</mat-label>
-        <mat-select formControlName="tipoValor">
-          <mat-option [value]="'BONO'">Bono</mat-option>
-          <mat-option [value]="'FONDO_MUTUO'">Fondo Mutuo</mat-option>
-          <mat-option [value]="'OTRO'">Otro</mat-option>
-        </mat-select>
-      </mat-form-field>
+<!-- valorModal -->
+<ng-template #valorModal>
 
-      <!-- Emisor -->
-      <mat-form-field appearance="fill" class="w-100 mb-3">
-        <mat-label>Emisor</mat-label>
-        <input matInput formControlName="emisor" />
-      </mat-form-field>
 
-      <!-- Cantidad -->
-      <mat-form-field appearance="fill" class="w-100 mb-3">
-        <mat-label>Cantidad</mat-label>
-        <input matInput type="number" formControlName="cantidad" />
-      </mat-form-field>
+      <h2 mat-dialog-title>
+    {{ editMode ? 'Editar Valor' : 'Nuevo Valor' }}
+  </h2>
 
-      <!-- Valor Aproximado -->
-      <mat-form-field appearance="fill" class="w-100 mb-3">
-        <mat-label>Valor Aproximado</mat-label>
-        <input matInput type="number" formControlName="valorAproximado" />
-      </mat-form-field>
-    </form>
-  </mat-dialog-content>
 
-  <mat-dialog-actions align="end">
-    <button mat-button (click)="dialogRef.close()">Cancelar</button>
-    <button mat-raised-button color="primary" (click)="saveValor(dialogRef)">
-      Guardar
-    </button>
-  </mat-dialog-actions>
+  <form [formGroup]="valorForm" (ngSubmit)="saveValor()">
+    <mat-dialog-content class="pt-0">
+      <div class="row gx-3 gy-2">
+
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Título o Documento</mat-label>
+            <mat-select formControlName="tituloId">
+              <mat-option *ngFor="let t of titulos" [value]="t.id">{{t.nombre}}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Razón Social</mat-label>
+            <input matInput formControlName="razonSocial">
+          </mat-form-field>
+        </div>
+
+        <!-- País sólo si extranjero -->
+        <div class="col-md-6" *ngIf="isExtranjero">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>País</mat-label>
+            <mat-select formControlName="paisId">
+              <mat-option *ngFor="let p of paises" [value]="p.id">{{p.nombre}}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Fecha de Adquisición</mat-label>
+            <input matInput [matDatepicker]="picker" formControlName="fechaAdquisicion">
+            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+          </mat-form-field>
+        </div>
+
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Cantidad</mat-label>
+            <input matInput formControlName="cantidad">
+          </mat-form-field>
+        </div>
+
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Tipo de Moneda</mat-label>
+            <mat-select formControlName="monedaId">
+              <mat-option *ngFor="let m of monedas" [value]="m.id">{{m.nombre}}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Valor Corriente</mat-label>
+            <input matInput formControlName="valorCorriente">
+          </mat-form-field>
+        </div>
+
+        <div class="col-md-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Gravámenes</mat-label>
+            <mat-select formControlName="gravamenId">
+              <mat-option *ngFor="let g of gravamenes" [value]="g.id">{{g.nombre}}</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+      </div>
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end">
+      <button mat-button type="button" (click)="closeDialog()">Cancelar</button>
+      <button mat-raised-button color="primary" type="submit">Guardar</button>
+    </mat-dialog-actions>
+  </form>
 </ng-template>

@@ -6,23 +6,34 @@ import {
   TemplateRef
 } from '@angular/core';
 import {
+  FormArray,
   FormBuilder,
+  FormControl,
   FormGroup,
   Validators
 } from '@angular/forms';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { ToastrService } from 'ngx-toastr';
+import Swal from 'sweetalert2';
 
-import { ValidadorDeclaracionService } from '../../../../services/validador-declaracion.service';
-import { StepperStatusService }        from 'src/app/modules/declaraciones/services/stepper-status.service';
 import { PasivosService } from 'src/app/modules/declaraciones/services/pasivos.service';
 import { PensionesService } from 'src/app/modules/declaraciones/services/pensiones.service';
 import { DeclaracionHelperService } from 'src/app/modules/declaraciones/services/declaracion-helper.service';
+import { DeclaracionService } from 'src/app/modules/declaraciones/services/declaracion.service';
 
 interface PasivoItem {
-  tipoPasivo:        string;
-  institucion:       string;
-  monto:             number;
-  fechaAdquisicion:  string;
+  id?: string;
+  tipoId: number;
+  monto: string;
+  razonSocial: string;
+  borrador: boolean;
+}
+
+interface PensionItem {
+  id?: string;
+  monto: string;
+  registroNacional: boolean;
+  borrador: boolean;
 }
 
 @Component({
@@ -33,17 +44,24 @@ interface PasivoItem {
 })
 export class Paso13PasivosComponent implements OnInit {
   @ViewChild('pasivoModal') pasivoModal!: TemplateRef<any>;
+  @ViewChild('pensionModal') pensionModal!: TemplateRef<any>;
 
-  tienePasivos    = 'no';
+  displayedColumnsPensiones = ['monto', 'registroNacional', 'estado', 'acciones'];
+  displayedColumnsPasivos = ['tipoObligacion', 'monto', 'razonSocial', 'estado', 'acciones'];
+
+  tienePasivos = 'no';
   tieneDeudaPension = 'no';
-  pasivosData: PasivoItem[] = [
-    { tipoPasivo: 'CREDITO', institucion: 'Banco ABC', monto: 2000000, fechaAdquisicion: '15/03/2023' }
-  ];
-
+  
   pasivoForm!: FormGroup;
-  editMode = false;
-  currentItem: PasivoItem | null = null;
-  dialogRef: MatDialogRef<any> | null = null;
+  pensionForm!: FormGroup;
+  
+  editPasivoMode = false;
+  editPensionMode = false;
+  
+  currentPasivoItem: PasivoItem | null = null;
+  currentPensionItem: PensionItem | null = null;
+  
+  private dialogRef: any;
 
   private activeDeclId!: string;
 
@@ -54,8 +72,8 @@ export class Paso13PasivosComponent implements OnInit {
 
   tipoObligacion: any[] = [];
 
-  declaracionId: number = 1319527;    //1319527
-  declaranteId: number = 2882000;
+  declaracionId: number = this._declaracionHelper.declaracionId;
+  declaranteId: number = this._declaracionHelper.declaranteId;
 
   constructor(
     private fb: FormBuilder,
@@ -63,77 +81,111 @@ export class Paso13PasivosComponent implements OnInit {
     private _pasivos: PasivosService,
     private _pensiones: PensionesService,
     private _servicioPublico: ServicioService,
-    private _declaracionHelper: DeclaracionHelperService
+    private _declaracionHelper: DeclaracionHelperService,
+    private _declaracion: DeclaracionService,
+    private toastr: ToastrService
   ) {}
 
   ngOnInit(): void {
-    // Inicializa el formulario vacío
-    this.buildForm();
-    // Recupera el ID de la declaración activa
+    this.buildForms();
     this._declaracionHelper.activeId$.subscribe(id => this.activeDeclId = id);
 
     this.loadDeudas();
     this.loadDeudasMayor100UTM();
     this.loadTipoObligacion();
+    this.loadRegistro();
   }
-
 
   ngAfterViewInit(): void {
     this.loadRegistro();
   }
 
+  buildForms(): void {
+    this.pasivoForm = this.fb.group({
+      id: [''],
+      tipoId: [null],
+      monto: [''],
+      razonSocial: [''],
+      borrador: [false]
+    });
+
+    this.pensionForm = this.fb.group({
+      id: [''],
+      monto: [''],
+      registroNacional: [false],
+      borrador: [false]
+    });
+  }
   
-  loadRegistro(){
+  loadRegistro() {
     this._declaracionHelper.declaracionesFlag$.subscribe(data => {
       this.tienePasivos = data.pasivos ? 'si' : 'no';
       this.tieneDeudaPension = data.pensiones ? 'si' : 'no';
-    })
+    });
   }
 
-  loadDeudas(){
+  loadDeudas() {
     this._pasivos.listar(this.declaranteId).subscribe({
       next: (res: any) => {
-        
         this.deduasPensionAlimento = res;
       },
       error: (err) => {
         console.log(err);
+        this.toastr.error('Error al cargar las deudas');
       }
-    })
+    });
   }
 
-  loadDeudasMayor100UTM(){
+  loadDeudasMayor100UTM() {
     this._pensiones.listar(this.declaranteId).subscribe({
       next: (res: any) => {
-        
         this.deudasMayor100UTM = res;
       },
       error: (err) => {
         console.log(err);
+        this.toastr.error('Error al cargar las deudas mayores a 100 UTM');
       }
-    })
+    });
   }
-  loadTipoObligacion(){
+
+  loadTipoObligacion() {
     this._servicioPublico.listarServiciosPublicos("tipoObligacion").subscribe({
       next: (res: any) => {
-        
         this.tipoObligacion = res;
       },
       error: (err) => {
         console.log(err);
+        this.toastr.error('Error al cargar los tipos de obligación');
       }
-    })
+    });
   }
 
   onTieneDeudaPensionChange(value: string): void {
     this.tieneDeudaPension = value;
-  }
-  onTienePasivosChange(value: string): void {
-    this.tienePasivos = value;
- 
+    this._declaracion.guardarRegistro(this.declaranteId, 'pensiones', value === 'si').subscribe({
+      next: (res: any) => {
+        this.toastr.success('Registro actualizado exitosamente');
+      },
+      error: (err: any) => {
+        console.error('Error al guardar registro:', err);
+        this.toastr.error('Error al actualizar el registro');
+      }
+    });
   }
 
-  /** Maneja Guardar/Siguiente */
+  onTienePasivosChange(value: string): void {
+    this.tienePasivos = value;
+    this._declaracion.guardarRegistro(this.declaranteId, 'pasivos', value === 'si').subscribe({
+      next: (res: any) => {
+        this.toastr.success('Registro actualizado exitosamente');
+      },
+      error: (err: any) => {
+        console.error('Error al guardar registro:', err);
+        this.toastr.error('Error al actualizar el registro');
+      }
+    });
+  }
+
   onSubmit(): void {
     const ok = this.tienePasivos === 'si' ? this.pasivoForm.valid : true;
 
@@ -146,66 +198,172 @@ export class Paso13PasivosComponent implements OnInit {
     }
   }
 
-  /** Radio “¿Tiene Pasivos?” */
-
-  /** Abre modal para crear o editar */
-  openAddModal(): void {
-    this.editMode = false;
-    this.currentItem = null;
-    this.buildForm();
+  openAddPasivoModal(): void {
+    this.editPasivoMode = false;
+    this.currentPasivoItem = null;
+    this.pasivoForm.reset({ borrador: false });
     this.dialogRef = this.dialog.open(this.pasivoModal, { width: '800px' });
   }
 
-  openEditModal(item: PasivoItem): void {
-    this.editMode = true;
-    this.currentItem = item;
-    this.buildForm(item);
+  openEditPasivoModal(item: PasivoItem): void {
+    this.editPasivoMode = true;
+    this.currentPasivoItem = item;
+    this.pasivoForm.patchValue(item);
     this.dialogRef = this.dialog.open(this.pasivoModal, { width: '800px' });
   }
 
-  /** Construye o reinicia el formulario */
-  private buildForm(item?: PasivoItem): void {
-    this.pasivoForm = this.fb.group({
-      tipoPasivo:       [item?.tipoPasivo       || 'CREDITO', Validators.required],
-      institucion:      [item?.institucion      || '',         Validators.required],
-      monto:            [item?.monto            || 0,          [Validators.required, Validators.min(1)]],
-      fechaAdquisicion: [item?.fechaAdquisicion || '',         Validators.required]
-    });
+  openAddPensionModal(): void {
+    this.editPensionMode = false;
+    this.currentPensionItem = null;
+    this.pensionForm.reset({ borrador: false, registroNacional: false });
+    this.dialogRef = this.dialog.open(this.pensionModal, { width: '800px' });
   }
 
-  /** Guarda o actualiza tras cerrar modal */
-  savePasivo(dialogRef: MatDialogRef<any>): void {
-    const key  = 'paso13';
-    const path = ['declaraciones', this.activeDeclId, key];
+  openEditPensionModal(item: PensionItem): void {
+    this.editPensionMode = true;
+    this.currentPensionItem = item;
+    this.pensionForm.patchValue(item);
+    this.dialogRef = this.dialog.open(this.pensionModal, { width: '800px' });
+  }
 
+  closeDialog() {
+    if (this.dialogRef) {
+      this.dialogRef.close();
+    }
+  }
+
+  savePasivo(): void {
     if (this.pasivoForm.invalid) {
-      this._declaracionHelper.markStepIncomplete(path);
+      this.toastr.error('Por favor complete todos los campos requeridos');
       return;
     }
 
-    const data = this.pasivoForm.value as PasivoItem;
-    if (this.editMode && this.currentItem) {
-      const idx = this.pasivosData.indexOf(this.currentItem);
-      if (idx >= 0) this.pasivosData[idx] = data;
-    } else {
-      this.pasivosData.push(data);
+    const data = this.pasivoForm.value;
+    const obj = {
+      id: this.editPasivoMode ? data.id : '',
+      razonSocial: data.razonSocial,
+      rut: data.rut,
+      fechaCelebracion: data.fechaCelebracion,
+      notaria: data.notaria,
+      valor: data.valor,
+      borrador: !this.isFormValid(this.pasivoForm)
     }
-    dialogRef.close();
-
-    // Marca completo si hay al menos un pasivo
-    this._declaracionHelper.markStepCompleted(path);
+    this._pasivos.guardarPasivo(this.declaranteId, obj).subscribe({
+      next: (res: any) => {
+        this.toastr.success('Pasivo guardado exitosamente');
+        this.closeDialog();
+        this.loadDeudasMayor100UTM();
+      },
+      error: (err) => {
+        console.error('Error al guardar pasivo:', err);
+        this.toastr.error('Error al guardar el pasivo');
+      }
+    });
   }
 
-  /** Elimina un pasivo */
+  savePension(): void {
+
+    const data = this.pensionForm.value;
+    const obj = {
+      id: this.editPensionMode ? data.id : '',
+      monto: data.monto,
+      registroNacional: data.registroNacional,
+      borrador: !this.isFormValid(this.pensionForm)
+    }
+    this._pensiones.guardar(obj, this.declaranteId).subscribe({
+      next: (res: any) => {
+        this.toastr.success('Pensión guardada exitosamente');
+        this.closeDialog();
+        this.loadDeudas();
+      },
+      error: (err) => {
+        console.error('Error al guardar pensión:', err);
+        this.toastr.error('Error al guardar la pensión');
+      }
+    });
+  }
+
   eliminarPasivo(item: PasivoItem): void {
-    const key  = 'paso13';
-    const path = ['declaraciones', this.activeDeclId, key];
+    if (!item.id) return;
 
-    this.pasivosData = this.pasivosData.filter(x => x !== item);
-    if (this.pasivosData.length > 0) {
-      this._declaracionHelper.markStepCompleted(path);
-    } else {
-      this._declaracionHelper.markStepIncomplete(path);
-    }
+    Swal.fire({
+      title: '¿Estás seguro?',
+      text: 'Esta acción eliminará el pasivo seleccionado.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this._pasivos.eliminar(Number(item.id)).subscribe({
+          next: (res: any) => {
+            this.toastr.success('Pasivo eliminado exitosamente');
+            this.loadDeudasMayor100UTM();
+          },
+          error: (err) => {
+            console.error('Error al eliminar pasivo:', err);
+            this.toastr.error('Error al eliminar el pasivo');
+          }
+        });
+      }
+    });
   }
+
+  eliminarPension(item: PensionItem): void {
+    if (!item.id) return;
+
+    Swal.fire({
+      title: '¿Estás seguro?',
+      text: 'Esta acción eliminará la pensión seleccionada.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this._pensiones.eliminar(Number(item.id)).subscribe({
+          next: (res: any) => {
+            this.toastr.success('Pensión eliminada exitosamente');
+            this.loadDeudas();
+          },
+          error: (err) => {
+            console.error('Error al eliminar pensión:', err);
+            this.toastr.error('Error al eliminar la pensión');
+          }
+        });
+      }
+    });
+  }
+
+  onMontoGlobalChange(value: number): void {
+    this._declaracion.guardarRegistroPasivo(this.declaranteId, 'pasivosGlobal', value).subscribe({
+      next: (res: any) => {
+        this.toastr.success('Monto global guardado exitosamente');
+      },
+      error: (err: any) => {
+        console.error('Error al guardar monto global:', err);
+        this.toastr.error('Error al guardar el monto global');
+      }
+    });
+  }
+
+   private isFormValid(ctrl: any): boolean {
+      if (ctrl instanceof FormControl) {
+        const v = ctrl.value;
+        return v !== null && v !== undefined && String(v).trim() !== '';
+      }
+  
+      if (ctrl instanceof FormGroup) {
+        return Object.values(ctrl.controls).every(child => this.isFormValid(child));
+      }
+  
+      if (ctrl instanceof FormArray) {
+        return ctrl.controls.every(child => this.isFormValid(child));
+      }
+      return true;
+    }
 }

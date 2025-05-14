@@ -46,6 +46,9 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { DipStepperComponent } from './components/dip-stepper/dip-stepper.component';
 import {MatExpansionModule} from '@angular/material/expansion';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { ToastrModule } from 'ngx-toastr';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { ResizableTableModule } from 'src/app/shared/components/resizable-table/resizable-table.module';
 
 @NgModule({
   declarations: [
@@ -72,6 +75,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     AntecedentesDeclaranteComponent,
     InteresesYPatrimoniosComponent,
     DipStepperComponent
+    
   ],
   imports: [
     CommonModule,
@@ -98,7 +102,10 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     ScrollingModule,
     MatProgressBarModule,
     MatExpansionModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatSnackBarModule,
+    ResizableTableModule,
+    ToastrModule.forRoot()
   ]
 })
 export class DeclaracionesModule { }

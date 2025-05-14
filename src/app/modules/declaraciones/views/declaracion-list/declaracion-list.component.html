@@ -16,7 +16,7 @@
   </h2>
 
   <!-- Botón para mostrar/ocultar filtros -->
-  <div class="filtros-header d-flex align-items-center mb-1">
+  <div class="filtros-header d-flex align-items-center">
     <span class="me-2 fw-bold">Filtros avanzados</span>
     <button class="btn btn-link btn-collapse" (click)="toggleFiltros()">
       <mat-icon *ngIf="!showFilters">keyboard_arrow_down</mat-icon>
@@ -52,7 +52,6 @@
         <mat-form-field appearance="outline" class="small-form-field w-100">
           <mat-label>Tipo</mat-label>
           <mat-select [formControl]="tipo">
-            <mat-option value="">TODOS</mat-option>
             <mat-option *ngFor="let tipo of tiposDeclaracion" [value]="tipo.id">
               {{tipo.nombre}}
             </mat-option>
@@ -65,7 +64,6 @@
         <mat-form-field appearance="outline" class="small-form-field w-100">
           <mat-label>Servicio</mat-label>
           <mat-select [formControl]="servicio">
-            <mat-option value="">TODOS</mat-option>
             <mat-option *ngFor="let servicio of servicios" [value]="servicio.id">
               {{servicio.nombre}}
             </mat-option>
@@ -77,11 +75,7 @@
       <div class="col-md-2">
         <mat-form-field appearance="outline" class="small-form-field w-100">
           <mat-label>Cargo</mat-label>
-          <mat-select [formControl]="cargo">
-            <mat-option value="">TODOS</mat-option>
-            <mat-option value="JEFE DE UNIDAD">JEFE DE UNIDAD</mat-option>
-            <mat-option value="ANALISTA">ANALISTA</mat-option>
-          </mat-select>
+          <input type="text" matInput [formControl]="cargo">
         </mat-form-field>
       </div>
 
@@ -90,7 +84,6 @@
         <mat-form-field appearance="outline" class="small-form-field w-100">
           <mat-label>Estado</mat-label>
           <mat-select [formControl]="estado">
-            <mat-option value="">TODOS</mat-option>
             <mat-option *ngFor="let estado of estadosDeclaracion" [value]="estado.id">
               {{estado.nombre}}
             </mat-option>
@@ -110,8 +103,9 @@
       </div>
     </div>
   </div>
-  <br>
-</div>
+
+
+<hr>
 
 <!-- VISTA DE ESCRITORIO: TABLA (visible desde md en adelante) -->
 <div class="d-none d-md-block">
@@ -133,46 +127,46 @@
 
   <table mat-table [dataSource]="dataSource" class="small-table mat-elevation-z8 w-100" [class.loading]="isLoading">
     <!-- Nro Declaración -->
-    <ng-container matColumnDef="nro">
-      <th mat-header-cell *matHeaderCellDef> Nro Declaración </th>
+    <ng-container matColumnDef="nro" appResizableColumn>
+      <th mat-header-cell *matHeaderCellDef appResizableColumn style="width: 10% !important;"> Nro Declaración </th>
       <td mat-cell *matCellDef="let element"> {{ element.id }} </td>
     </ng-container>
 
     <!-- Fecha Recepción -->
-    <ng-container matColumnDef="fechaRecepcion">
-      <th mat-header-cell *matHeaderCellDef> Fecha Recepción </th>
+    <ng-container matColumnDef="fechaRecepcion"  appResizableColumn>
+      <th mat-header-cell *matHeaderCellDef appResizableColumn style="width: 15% !important;"> Fecha Recepción </th>
       <td mat-cell *matCellDef="let element">
         {{ element.recepcion ? (element.recepcion | date:'dd/MM/yyyy HH:mm:ss') : 'No disponible' }}
       </td>
     </ng-container>
 
     <!-- Tipo -->
-    <ng-container matColumnDef="tipo">
-      <th mat-header-cell *matHeaderCellDef> Tipo </th>
+    <ng-container matColumnDef="tipo" appResizableColumn>
+      <th mat-header-cell *matHeaderCellDef appResizableColumn style="width: 25% !important;"> Tipo </th>
       <td mat-cell *matCellDef="let element">
         {{ element.declaTipo }}
       </td>
     </ng-container>
 
     <!-- Servicio -->
-    <ng-container matColumnDef="servicio">
-      <th mat-header-cell *matHeaderCellDef> Servicio </th>
+    <ng-container matColumnDef="servicio" appResizableColumn>
+      <th mat-header-cell *matHeaderCellDef appResizableColumn style="width: 25% !important;"> Servicio </th>
       <td mat-cell *matCellDef="let element">
         {{ element.servicio }}
       </td>
     </ng-container>
 
     <!-- Cargo -->
-    <ng-container matColumnDef="cargo">
-      <th mat-header-cell *matHeaderCellDef> Cargo </th>
+    <ng-container matColumnDef="cargo" appResizableColumn>
+      <th mat-header-cell *matHeaderCellDef appResizableColumn style="width: 10% !important;"> Cargo </th>
       <td mat-cell *matCellDef="let element">
         {{ element.cargo }}
       </td>
     </ng-container>
 
     <!-- Estado (pill) -->
-    <ng-container matColumnDef="estado">
-      <th mat-header-cell *matHeaderCellDef style="align-content: center !important;">
+    <ng-container matColumnDef="estado" appResizableColumn>
+      <th mat-header-cell *matHeaderCellDef style="align-content: center !important; width: 10% !important;">
         <p style="display:inline; text-align: justify; align-content: center;">Estado</p>
         <!-- Botón "Estados" -->
         <button mat-icon-button [matMenuTriggerFor]="menuEstados" aria-label="Leyenda de Estados">
@@ -221,21 +215,13 @@
     <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
   </table>
   <div class="col-12 d-flex justify-content-center" style="background-color: rgba(255, 255, 255, 0.729);">
-    <mat-paginator 
-      style="background-color: transparent;" 
-      [pageSizeOptions]="[5, 10, 20]" 
-      showFirstLastButtons 
-      [length]="totalItems"
-      [pageSize]="pageSize"
-      (page)="onPageChange($event)"
-      aria-label="Paginador de Declaraciones">
+    <mat-paginator style="background-color: transparent;" [pageSizeOptions]="[5, 25, 50]" showFirstLastButtons
+      [length]="totalItems" [pageSize]="pageSize" (page)="onPageChange($event)" aria-label="Paginador de Declaraciones">
     </mat-paginator>
   </div>
 </div>
 
-<!-- VISTA DE MOBILE: LISTA -->
 <div class="d-block d-md-none">
-  <!-- Botón Nueva Declaración -->
   <div class="row mb-3">
     <div class="col-12">
       <button mat-raised-button color="primary" class="w-100" (click)="crear()">
@@ -292,7 +278,8 @@
         </div>
       </div>
       <div class="details mt-2">
-        <p class="mb-1">Fecha Recepción: {{ element.recepcion ? (element.recepcion | date:'dd/MM/yyyy HH:mm:ss') : 'No disponible' }}</p>
+        <p class="mb-1">Fecha Recepción: {{ element.recepcion ? (element.recepcion | date:'dd/MM/yyyy HH:mm:ss') : 'No
+          disponible' }}</p>
         <p class="mb-1">Tipo: {{ element.declaTipo }}</p>
         <p class="mb-1">Servicio: {{ element.servicio }}</p>
         <p class="mb-1">Cargo: {{ element.cargo }}</p>
@@ -306,7 +293,7 @@
     </div>
   </div>
 </div>
-
+</div>
 <mat-menu #menuEstados="matMenu" class="mini-popover">
   <div class="popover-content p-2">
     <div class="legend-item">

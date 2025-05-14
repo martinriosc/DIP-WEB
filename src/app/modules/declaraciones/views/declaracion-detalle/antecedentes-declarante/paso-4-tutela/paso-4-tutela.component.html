@@ -44,31 +44,31 @@
           <table mat-table [dataSource]="data" class="w-100 mat-elevation-z8">
 
             <!-- RUN -->
-            <ng-container matColumnDef="run">
+            <ng-container matColumnDef="run" appResizableColumn>
               <th mat-header-cell *matHeaderCellDef>R.U.N.</th>
               <td mat-cell *matCellDef="let element">{{ element.rut }}</td>
             </ng-container>
 
             <!-- Tipo Relación -->
-            <ng-container matColumnDef="tipoRelacion">
+            <ng-container matColumnDef="tipoRelacion" appResizableColumn>
               <th mat-header-cell *matHeaderCellDef>Tipo Relación</th>
               <td mat-cell *matCellDef="let element">{{ element.parentesco }}</td>
             </ng-container>
 
             <!-- Nombres -->
-            <ng-container matColumnDef="nombres">
+            <ng-container matColumnDef="nombres" appResizableColumn>
               <th mat-header-cell *matHeaderCellDef>Nombres</th>
               <td mat-cell *matCellDef="let element">{{ element.nombre }}</td>
             </ng-container>
 
             <!-- Apellido Paterno -->
-            <ng-container matColumnDef="apPaterno">
+            <ng-container matColumnDef="apPaterno" appResizableColumn>
               <th mat-header-cell *matHeaderCellDef>Apellido Paterno</th>
               <td mat-cell *matCellDef="let element">{{ element.apellidoPaterno }}</td>
             </ng-container>
 
             <!-- Apellido Materno -->
-            <ng-container matColumnDef="apMaterno">
+            <ng-container matColumnDef="apMaterno" appResizableColumn>
               <th mat-header-cell *matHeaderCellDef>Apellido Materno</th>
               <td mat-cell *matCellDef="let element">{{ element.apellidoMaterno }}</td>
             </ng-container>
@@ -120,7 +120,7 @@
             <!-- RUN -->
             <mat-form-field appearance="outline" class="w-100 mb-3">
               <mat-label>R.U.N.</mat-label>
-              <input matInput formControlName="run" />
+              <input matInput formControlName="rut" />
             </mat-form-field>
           </div>
 
@@ -128,10 +128,10 @@
             <!-- Tipo de Relación -->
             <mat-form-field appearance="outline" class="w-100 mb-3">
               <mat-label>Tipo de Relación</mat-label>
-              <mat-select formControlName="tipoRelacion">
-                <mat-option value="PATRIA POTESTAD">Patria Potestad</mat-option>
-                <mat-option value="TUTELA">Tutela</mat-option>
-                <mat-option value="CURATELA">Curatela</mat-option>
+              <mat-select formControlName="parentescoId">
+                <mat-option *ngFor="let p of parentescos" [value]="p.id">
+                  {{ p.nombre }}
+                </mat-option>
               </mat-select>
             </mat-form-field>
           </div>
@@ -143,7 +143,7 @@
             <!-- Nombres -->
             <mat-form-field appearance="outline" class="w-100 mb-3">
               <mat-label>Nombres</mat-label>
-              <input matInput formControlName="nombres" />
+              <input matInput formControlName="nombre" />
             </mat-form-field>
           </div>
         </div>
@@ -172,7 +172,7 @@
 
   <mat-dialog-actions align="end">
     <button mat-button mat-dialog-close>Cancelar</button>
-    <button mat-raised-button color="primary" (click)="saveHijo(dialogRef)">
+    <button mat-raised-button color="primary" mat-dialog-close (click)="saveHijo(dialogRef)">
       Guardar
     </button>
   </mat-dialog-actions>

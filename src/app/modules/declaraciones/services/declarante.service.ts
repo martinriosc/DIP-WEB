@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiResponse } from '../../auth/models/ApiResponse';
@@ -10,18 +10,28 @@ import { environment } from 'src/environments/environment';
 export class DeclaranteService {
   // URL base de la API
   private apiUrl = environment.apiUrl;
-  
+
   constructor(private http: HttpClient) { }
 
   /**
    * Guarda la información del declarante
    */
-  guardarDeclarante(data: any, declaracionId: number): Observable<ApiResponse> {
-    const formData = new FormData();
-    formData.append('data', JSON.stringify(data));
-    formData.append('declaracionId', declaracionId.toString());
-    
-    return this.http.post<ApiResponse>(`${this.apiUrl}/pr/service/declarante/guardar`, formData, { withCredentials: true });
+  guardarDeclarante(declarante: any, declaracionId: number): Observable<any> {
+    const body = new HttpParams()
+      .set('data', JSON.stringify(declarante))
+      .set('declaracionId', declaracionId);
+
+    // 2) Forzar el mismo Content‑Type que usaba jQuery
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+    });
+
+    // 3) Enviar la cookie de sesión
+    return this.http.post<any>(
+      `${this.apiUrl}/pr/service/declarante/guardar`,
+      body.toString(),                // 👈 importante: string plano
+      { headers, withCredentials: true, observe: 'response' }
+    );
   }
 
   /**

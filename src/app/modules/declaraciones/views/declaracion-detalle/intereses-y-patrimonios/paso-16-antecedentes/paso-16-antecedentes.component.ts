@@ -5,7 +5,9 @@ import {
   TemplateRef
 } from '@angular/core';
 import {
+  FormArray,
   FormBuilder,
+  FormControl,
   FormGroup,
   Validators
 } from '@angular/forms';
@@ -13,17 +15,17 @@ import {
   MatDialog,
   MatDialogRef
 } from '@angular/material/dialog';
+import { ToastrService } from 'ngx-toastr';
+import Swal from 'sweetalert2';
 
 import { OtrosAntecedentesService } from 'src/app/modules/declaraciones/services/otros-antecedentes.service';
 import { DeclaracionService } from 'src/app/modules/declaraciones/services/declaracion.service';
 import { DeclaracionHelperService } from 'src/app/modules/declaraciones/services/declaracion-helper.service';
 
 interface Antecedente {
-  tipo: string;
+  id: string;
   descripcion: string;
-  fecha: string;
-  observaciones: string;
-  estado: string;
+  borrador: boolean;
 }
 
 @Component({
@@ -35,8 +37,10 @@ interface Antecedente {
 export class Paso16AntecedentesComponent implements OnInit {
   @ViewChild('antecedentesModal') antecedentesModal!: TemplateRef<any>;
 
+  displayedColumns = ['antecedente','estado', 'acciones'];
+
   tieneAntecedentes = 'no';
-  antecedentes: any[] = [];
+  antecedentes: Antecedente[] = [];
   antecedentesForm!: FormGroup;
   editMode = false;
   currentItem: Antecedente | null = null;
@@ -45,9 +49,8 @@ export class Paso16AntecedentesComponent implements OnInit {
   private activeDeclId!: string;
   private readonly key = 'paso16';
 
-
-  declaracionId: number = 1319527;    //1319527
-  declaranteId: number = 2882000;
+  declaracionId: number = this._declaracionHelper.declaracionId;
+  declaranteId: number = this._declaracionHelper.declaranteId;
 
   constructor(
     private fb: FormBuilder,
@@ -55,65 +58,49 @@ export class Paso16AntecedentesComponent implements OnInit {
     private _otrosAntecedentes: OtrosAntecedentesService,
     private _declaracion: DeclaracionService,
     private _declaracionHelper: DeclaracionHelperService,
+    private toastr: ToastrService
   ) {}
 
   ngOnInit(): void {
-    // Inicializa el formulario vacío
     this.buildForm();
-    // Obtiene el ID de la declaración activa
     this._declaracionHelper.activeId$.subscribe(id => this.activeDeclId = id);
-    // Marca inicialmente como incompleto
-    this._declaracionHelper.markStepIncomplete(
-      ['declaraciones', this.activeDeclId, this.key]
-    );
+    this._declaracionHelper.markStepIncomplete(['declaraciones', this.activeDeclId, this.key]);
 
     this.loadOtrosAntecedentes();
-  }
-
-
-  ngAfterViewInit(): void {
     this.loadRegistro();
   }
 
-  
-  loadRegistro(){
+  loadRegistro() {
     this._declaracionHelper.declaracionesFlag$.subscribe(data => {
-      
       this.tieneAntecedentes = data.otrosAntecedentes ? 'si' : 'no';
-    })
+    });
   }
-  
+
   loadOtrosAntecedentes() {
-    this._otrosAntecedentes.listar(this.declaracionId).subscribe({
-      next: (data:any) => {
-        
+    this._otrosAntecedentes.listar(this.declaranteId).subscribe({
+      next: (data: any) => {
         this.antecedentes = data;
       },
       error: (error) => {
         console.error('Error al cargar otros antecedentes:', error);
+        this.toastr.error('Error al cargar otros antecedentes');
       }
     });
   }
 
-  /** Guardar y avanzar */
-  onSubmit(): void {
-    const ok =
-      this.tieneAntecedentes === 'no' ||
-      (this.tieneAntecedentes === 'si' && this.antecedentes.length > 0);
-
-    if (ok) {
-      this._declaracionHelper.markStepCompleted(['declaraciones', 'paso16']);
-      this._declaracionHelper.nextStep();
-    } else {
-      this._declaracionHelper.markStepIncomplete(['declaraciones', 'paso16']);
-      this._declaracionHelper.nextStep();
-    }
-  }
-
-  /** Radio "¿Tiene antecedentes?" */
   onTieneAntecedentesChange(value: string): void {
     this.tieneAntecedentes = value;
     const path = ['declaraciones', this.activeDeclId, this.key];
+
+    this._declaracion.guardarRegistro(this.declaranteId, 'otrosAntecedentes', value === 'si').subscribe({
+      next: (res: any) => {
+        console.log('Registro guardado exitosamente');
+      },
+      error: (err: any) => {
+        console.error('Error al guardar registro:', err);
+        this.toastr.error('Error al guardar registro');
+      }
+    });
 
     if (value === 'no') {
       this._declaracionHelper.markStepCompleted(path);
@@ -126,7 +113,6 @@ export class Paso16AntecedentesComponent implements OnInit {
     }
   }
 
-  /** Abre modal para agregar */
   openAddModal(): void {
     this.editMode = false;
     this.currentItem = null;
@@ -134,7 +120,6 @@ export class Paso16AntecedentesComponent implements OnInit {
     this.dialogRef = this.dialog.open(this.antecedentesModal, { width: '800px' });
   }
 
-  /** Abre modal para editar */
   openEditModal(item: Antecedente): void {
     this.editMode = true;
     this.currentItem = item;
@@ -142,49 +127,112 @@ export class Paso16AntecedentesComponent implements OnInit {
     this.dialogRef = this.dialog.open(this.antecedentesModal, { width: '800px' });
   }
 
-  /** Construye o resetea el formulario */
   private buildForm(item?: Antecedente): void {
     this.antecedentesForm = this.fb.group({
-      tipo: [item?.tipo || ''],
+      id: [item?.id || ''],
       descripcion: [item?.descripcion || ''],
-      fecha: [item?.fecha || ''],
-      observaciones: [item?.observaciones || ''],
-      estado: [item?.estado || 'Activo']
+      borrador: [item?.borrador || false]
     });
   }
 
-  /** Guarda o actualiza un antecedente */
   saveAntecedente(dialogRef: any): void {
-    const key = 'paso16';
-    const path = ['declaraciones', this.activeDeclId, key];
 
-    if (this.antecedentesForm.invalid) {
-      this._declaracionHelper.markStepIncomplete(path);
+
+    const form = this.antecedentesForm.value;
+    const payload = {
+      id: this.editMode ? this.currentItem?.id : 0,
+      descripcion: form.descripcion,
+      borrador: !this.isFormValid(this.antecedentesForm)
+    }
+    
+    this._otrosAntecedentes.guardar(payload, this.declaranteId).subscribe({
+      next: (res: any) => {
+        this.loadOtrosAntecedentes();
+       this.closeDialog();
+        this.toastr.success('Antecedente guardado exitosamente');
+        
+        const path = ['declaraciones', this.activeDeclId, this.key];
+        if (this.antecedentes.length > 0) {
+          this._declaracionHelper.markStepCompleted(path);
+        } else {
+          this._declaracionHelper.markStepIncomplete(path);
+        }
+      },
+      error: (err: any) => {
+        console.error('Error al guardar antecedente:', err);
+        this.toastr.error('Error al guardar antecedente');
+      }
+    });
+  }
+  closeDialog(): void {
+    if (this.dialogRef) {
+      this.dialogRef.close();
+    }
+  }
+  eliminarAntecedente(item: Antecedente): void {
+    if (!item.id) {
+      this.toastr.error('No se puede eliminar el antecedente');
       return;
     }
 
-    const a = this.antecedentesForm.value as any;
-    if (this.editMode && this.currentItem) {
-      const idx = this.antecedentes.indexOf(this.currentItem);
-      if (idx >= 0) this.antecedentes[idx] = a;
-    } else {
-      this.antecedentes.push(a);
-    }
-    dialogRef.close();
-
-    // Marca completo si hay al menos uno
-    this._declaracionHelper.markStepCompleted(path);
+    Swal.fire({
+      title: '¿Estás seguro?',
+      text: 'Esta acción eliminará el antecedente seleccionado.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this._otrosAntecedentes.eliminar(Number(item.id)).subscribe({
+          next: (res: any) => {
+            this.loadOtrosAntecedentes();
+            this.toastr.success('Antecedente eliminado exitosamente');
+            
+            const path = ['declaraciones', this.activeDeclId, this.key];
+            if (this.antecedentes.length > 0) {
+              this._declaracionHelper.markStepCompleted(path);
+            } else {
+              this._declaracionHelper.markStepIncomplete(path);
+            }
+          },
+          error: (err: any) => {
+            console.error('Error al eliminar antecedente:', err);
+            this.toastr.error('Error al eliminar antecedente');
+          }
+        });
+      }
+    });
   }
 
-  /** Elimina un antecedente */
-  eliminarAntecedente(item: Antecedente): void {
-    const path = ['declaraciones', this.activeDeclId, this.key];
+  onSubmit(): void {
+    const ok =
+      this.tieneAntecedentes === 'no' ||
+      (this.tieneAntecedentes === 'si' && this.antecedentes.length > 0);
 
-    this.antecedentes = this.antecedentes.filter(x => x !== item);
-    if (this.antecedentes.length > 0) {
-      this._declaracionHelper.markStepCompleted(path);
+    if (ok) {
+      this._declaracionHelper.markStepCompleted(['declaraciones', this.activeDeclId, this.key]);
+      this._declaracionHelper.nextStep();
     } else {
-      this._declaracionHelper.markStepIncomplete(path);
+      this._declaracionHelper.markStepIncomplete(['declaraciones', this.activeDeclId, this.key]);
     }
   }
+
+   private isFormValid(ctrl: any): boolean {
+      if (ctrl instanceof FormControl) {
+        const v = ctrl.value;
+        return v !== null && v !== undefined && String(v).trim() !== '';
+      }
+  
+      if (ctrl instanceof FormGroup) {
+        return Object.values(ctrl.controls).every(child => this.isFormValid(child));
+      }
+  
+      if (ctrl instanceof FormArray) {
+        return ctrl.controls.every(child => this.isFormValid(child));
+      }
+      return true;
+    }
 }

@@ -1,21 +1,36 @@
 <div class="container-fluid">
-  <!-- Breadcrumb -->
+  <!-- ▸ Spinner global -->
+  <div *ngIf="isLoading" class="loading-spinner-container">
+    <div class="spinner-content">
+      <mat-spinner diameter="50"></mat-spinner>
+      <p class="loading-text">Cargando Revisores...</p>
+    </div>
+  </div>
+
+  <!-- ▸ Breadcrumb -->
   <nav aria-label="breadcrumb" class="mb-2">
     <ol class="breadcrumb">
-      <li class="breadcrumb-item">
-        <a routerLink="/">Inicio</a>
-      </li>
-      <li class="breadcrumb-item active" aria-current="page">
-        Revisores
-      </li>
+      <li class="breadcrumb-item"><a routerLink="/">Inicio</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Revisores</li>
     </ol>
   </nav>
 
-  <!-- Título del componente -->
+  <!-- ▸ Título -->
   <h2 class="component-title mb-3">Lista de Revisores</h2>
 
-  <!-- Botón para mostrar/ocultar filtros -->
-  <div class="filtros-header d-flex align-items-center mb-3">
+  <!-- ▸ Pestañas (bootstrap-like nav-tabs) -->
+  <ul class="nav nav-tabs mb-2">
+    <li class="nav-item" *ngFor="let tab of tabs">
+      <a class="nav-link"
+         [class.active]="currentTab === tab.id"
+         (click)="setTab(tab.id)">
+        {{ tab.label }}&nbsp;({{ tab.count() }})
+      </a>
+    </li>
+  </ul>
+
+  <!-- ▸ Cabecera filtros -->
+  <div class="filtros-header d-flex align-items-center mb-1 mt-3">
     <span class="me-2 fw-bold">Filtros avanzados</span>
     <button class="btn btn-link btn-collapse" (click)="toggleFiltros()">
       <mat-icon *ngIf="!showFilters">keyboard_arrow_down</mat-icon>
@@ -23,16 +38,60 @@
     </button>
   </div>
 
-  <!-- Caja de filtros colapsable -->
+  <!-- ▸ Caja de filtros -->
   <div class="filtros-caja" [class.collapsed]="!showFilters">
-    <div class="row g-2 mb-3">
-      <!-- Fecha Asignación -->
+    <div class="row g-2 mb-1">
+      <!-- Enviado Por -->
       <div class="col-md-3">
         <mat-form-field appearance="outline" class="small-form-field w-100">
-          <mat-label>Fecha Asignación</mat-label>
-          <input matInput [matDatepicker]="picker" [formControl]="fechaAsignacion">
-          <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-          <mat-datepicker #picker></mat-datepicker>
+          <mat-label>Enviado por</mat-label>
+          <input matInput [formControl]="enviadoPor">
+        </mat-form-field>
+      </div>
+
+      <!-- Fecha Declaración -->
+      <div class="col-md-3">
+        <mat-form-field appearance="outline" class="small-form-field w-100">
+          <mat-label>Fecha Declaración</mat-label>
+          <input matInput [matDatepicker]="pickerDec" [formControl]="fechaDeclaracion">
+          <mat-datepicker-toggle matSuffix [for]="pickerDec"></mat-datepicker-toggle>
+          <mat-datepicker #pickerDec></mat-datepicker>
+        </mat-form-field>
+      </div>
+
+      <!-- Tipo -->
+      <div class="col-md-3">
+        <mat-form-field appearance="outline" class="small-form-field w-100">
+          <mat-label>Tipo</mat-label>
+          <mat-select [formControl]="tipo">
+            <mat-option *ngFor="let t of tiposDeclaracion" [value]="t.id">{{ t.nombre }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <!-- RUN -->
+      <div class="col-md-3">
+        <mat-form-field appearance="outline" class="small-form-field w-100">
+          <mat-label>RUN</mat-label>
+          <input matInput [formControl]="run">
+        </mat-form-field>
+      </div>
+
+      <!-- Declarante -->
+      <div class="col-md-3">
+        <mat-form-field appearance="outline" class="small-form-field w-100">
+          <mat-label>Declarante</mat-label>
+          <input matInput [formControl]="declarante">
+        </mat-form-field>
+      </div>
+
+      <!-- Servicio -->
+      <div class="col-md-3">
+        <mat-form-field appearance="outline" class="small-form-field w-100">
+          <mat-label>Servicio</mat-label>
+          <mat-select [formControl]="servicio">
+            <mat-option *ngFor="let s of servicios" [value]="s.id">{{ s.nombre }}</mat-option>
+          </mat-select>
         </mat-form-field>
       </div>
 
@@ -40,12 +99,7 @@
       <div class="col-md-3">
         <mat-form-field appearance="outline" class="small-form-field w-100">
           <mat-label>Cargo</mat-label>
-          <mat-select [formControl]="cargo">
-            <mat-option value="">TODOS</mat-option>
-            <mat-option value="Analista">Analista</mat-option>
-            <mat-option value="Supervisor">Supervisor</mat-option>
-            <mat-option value="Jefe de Unidad">Jefe de Unidad</mat-option>
-          </mat-select>
+          <input matInput [formControl]="cargo">
         </mat-form-field>
       </div>
 
@@ -54,224 +108,152 @@
         <mat-form-field appearance="outline" class="small-form-field w-100">
           <mat-label>Estado</mat-label>
           <mat-select [formControl]="estado">
-            <mat-option value="">TODOS</mat-option>
-            <mat-option value="Activo">Activo</mat-option>
-            <mat-option value="Inactivo">Inactivo</mat-option>
+            <mat-option *ngFor="let e of estadosDeclaracion" [value]="e.id">{{ e.nombre }}</mat-option>
           </mat-select>
         </mat-form-field>
       </div>
     </div>
 
-    <!-- Fila de botones de filtros -->
-    <div class="row mb-3">
+    <!-- Botones filtros -->
+    <div class="row mb-1">
       <div class="col-12 d-flex justify-content-end">
         <button mat-raised-button color="primary" class="me-2" (click)="buscar()">
-          Buscar
+          <img src="assets/icons/icon-btn-tabla_filtrar.svg" style="width: 20px; filter: invert(1);" alt> Buscar
         </button>
-        <button mat-raised-button color="warn" (click)="limpiar()">
-          Limpiar
+        <button mat-raised-button color="warn" class="me-2" (click)="limpiar()">
+          <img src="assets/icons/icon-btn-tabla_eliminar.svg"  style="width: 20px; filter: invert(1);" alt> Limpiar
+        </button>
+        <button mat-raised-button color="accent" (click)="export()">
+          <img src="assets/icons/icon-btn-tabla_descargar.svg" style="width: 20px; filter: invert(1);" alt> Exportar
         </button>
       </div>
     </div>
   </div>
 
-  <br />
+  <hr>
 
-  <!-- Barra de acciones: Descargar y Agregar Revisor -->
-  <div class="row align-items-center g-2 mb-3">
-    <!-- Botón Descargar Seleccionados -->
+  <!-- ▸ Barra de acciones -->
+  <div class="row g-2 mb-3 float-end">
     <div class="col-auto">
-      <button mat-raised-button color="accent" (click)="descargarSeleccionados()">
-        Descargar Seleccionados
-      </button>
-    </div>
-
-    <!-- Botón Agregar Revisor al final -->
-    <div class="col-auto ms-auto">
-      <button mat-raised-button color="primary">
-        Agregar Revisor
+      <button mat-raised-button color="primary" (click)="descargarSeleccionados()"
+              [disabled]="selection.selected.length === 0">
+        <img src="assets/icons/icon-btn-tabla_descargar.svg"
+             style="width:20px; height:20px; filter:invert(1);" alt> Descargar Seleccionados
       </button>
     </div>
   </div>
 
-  <!-- VISTA ESCRITORIO (tabla) - visible a partir de MD -->
-  <div class="d-none d-md-block">
-    <table mat-table [dataSource]="dataSource" class="small-table mat-elevation-z8 w-100">
-      <!-- Columna de selección -->
-      <ng-container matColumnDef="select">
-        <th mat-header-cell *matHeaderCellDef>
-          <mat-checkbox
-            (change)="masterToggle()"
-            [checked]="isAllSelected()"
-            [indeterminate]="isSomeSelected()"
-            color="primary"
-            matTooltip="Seleccionar todo"
-          >
-          </mat-checkbox>
-        </th>
-        <td mat-cell *matCellDef="let element">
-          <mat-checkbox
-            (click)="$event.stopPropagation()"
-            (change)="$event ? toggle(element) : null"
-            [checked]="selection.isSelected(element)"
-            color="primary"
-          >
-          </mat-checkbox>
-        </td>
-      </ng-container>
+  <!-- ▸ Tabla -->
+  <table mat-table [dataSource]="dataSource"
+         class="small-table mat-elevation-z8 w-100"
+         [class.loading]="isLoading">
 
-      <!-- RUT -->
-      <ng-container matColumnDef="rut">
-        <th mat-header-cell *matHeaderCellDef> RUT </th>
-        <td mat-cell *matCellDef="let element">
-          {{ element.rut }}
-        </td>
-      </ng-container>
+    <!-- Selección -->
+    <ng-container matColumnDef="select">
+      <th mat-header-cell *matHeaderCellDef>
+        <mat-checkbox color="primary"
+                      (change)="masterToggle()"
+                      [checked]="isAllSelected()"
+                      [indeterminate]="isSomeSelected()">
+        </mat-checkbox>
+      </th>
+      <td mat-cell *matCellDef="let element">
+        <mat-checkbox color="primary"
+                      (click)="$event.stopPropagation()"
+                      (change)="toggle(element)"
+                      [checked]="selection.isSelected(element)">
+        </mat-checkbox>
+      </td>
+    </ng-container>
 
-      <!-- Nombre -->
-      <ng-container matColumnDef="nombreCompleto">
-        <th mat-header-cell *matHeaderCellDef> Nombre </th>
-        <td mat-cell *matCellDef="let element">
-          {{ element.nombreCompleto }}
-        </td>
-      </ng-container>
+    <!-- ID -->
+    <ng-container matColumnDef="id" appResizableColumn>
+      <th mat-header-cell *matHeaderCellDef>ID</th>
+      <td mat-cell *matCellDef="let e">{{ e.id }}</td>
+    </ng-container>
 
-      <!-- Fecha Asignación -->
-      <ng-container matColumnDef="fechaAsignacion">
-        <th mat-header-cell *matHeaderCellDef> Fecha Asignación </th>
-        <td mat-cell *matCellDef="let element">
-          {{ element.fechaAsignacion }}
-        </td>
-      </ng-container>
+    <!-- Fecha -->
+    <ng-container matColumnDef="fechaDeclaracion" appResizableColumn>
+      <th mat-header-cell *matHeaderCellDef>Fecha Declaración</th>
+      <td mat-cell *matCellDef="let e">{{ e.fecha | date:'dd/MM/yyyy HH:mm' }}</td>
+    </ng-container>
 
-      <!-- Cargo -->
-      <ng-container matColumnDef="cargo">
-        <th mat-header-cell *matHeaderCellDef> Cargo </th>
-        <td mat-cell *matCellDef="let element">
-          {{ element.cargo }}
-        </td>
-      </ng-container>
+    <!-- Tipo -->
+    <ng-container matColumnDef="tipoDeclaracion" appResizableColumn>
+      <th mat-header-cell *matHeaderCellDef>Tipo</th>
+      <td mat-cell *matCellDef="let e">{{ e.declaTipo }}</td>
+    </ng-container>
 
-      <!-- Estado -->
-      <ng-container matColumnDef="estado">
-        <th mat-header-cell *matHeaderCellDef> Estado </th>
-        <td mat-cell *matCellDef="let element">
-          <span [ngClass]="getEstadoPillClass(element.estado)" class="estado-pill">
-            {{ element.estado }}
-          </span>
-        </td>
-      </ng-container>
+    <!-- Numeral -->
+    <ng-container matColumnDef="numeral" appResizableColumn>
+      <th mat-header-cell *matHeaderCellDef>Numeral</th>
+      <td mat-cell *matCellDef="let e">{{ e.anio }}</td>
+    </ng-container>
 
-      <!-- Acciones -->
-      <ng-container matColumnDef="acciones">
-        <th mat-header-cell *matHeaderCellDef> Acciones </th>
-        <td mat-cell *matCellDef="let element" class="actions-cell">
-          <button mat-icon-button color="primary" (click)="editar(element)" matTooltip="Editar">
-            <mat-icon>edit</mat-icon>
-          </button>
-          <button mat-icon-button color="accent" (click)="bitacora(element)" matTooltip="Bitácora">
-            <mat-icon>list</mat-icon>
-          </button>
-          <button mat-icon-button color="accent" (click)="archivar(element)" matTooltip="Archivar">
-            <mat-icon>archive</mat-icon>
-          </button>
-          <button mat-icon-button color="warn" (click)="eliminar(element)" matTooltip="Eliminar">
-            <mat-icon>delete</mat-icon>
-          </button>
-        </td>
-      </ng-container>
+    <!-- RUT -->
+    <ng-container matColumnDef="rut" appResizableColumn>
+      <th mat-header-cell *matHeaderCellDef>RUT</th>
+      <td mat-cell *matCellDef="let e">{{ e.rut }}</td>
+    </ng-container>
 
-      <!-- Cabecera y filas -->
-      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-      <tr mat-row        *matRowDef="let row; columns: displayedColumns;"></tr>
-    </table>
-  </div>
+    <!-- Declarante -->
+    <ng-container matColumnDef="declarante" appResizableColumn>
+      <th mat-header-cell *matHeaderCellDef>Declarante</th>
+      <td mat-cell *matCellDef="let e">{{ e.declarante }}</td>
+    </ng-container>
 
-  <!-- Paginador -->
-  <div class="row mt-2 align-items-center d-none d-md-flex">
-    <div class="col-auto">
-      <span class="me-2">
-        Total: {{ dataSource?.data!.length }} revisores
-      </span>
-    </div>
-    <div class="col-auto ms-auto">
-      <mat-paginator
-        [pageSizeOptions]="[5, 10, 20]"
-        showFirstLastButtons
-        [length]="dataSource?.data!.length"
-        aria-label="Paginador de Revisores"
-      >
-      </mat-paginator>
-    </div>
-  </div>
+    <!-- Servicio -->
+    <ng-container matColumnDef="servicio" appResizableColumn>
+      <th mat-header-cell *matHeaderCellDef>Servicio</th>
+      <td mat-cell *matCellDef="let e">{{ e.servicio }}</td>
+    </ng-container>
 
-  <!-- VISTA MOBILE: LISTA -->
-  <div class="d-block d-md-none">
-    <div class="list-group">
-      <div
-        class="list-group-item"
-        *ngFor="let element of dataSource.data"
-        (click)="toggle(element)"
-        [class.active]="selection.isSelected(element)"
-      >
-        <div class="d-flex w-100 justify-content-between">
-          <h5 class="mb-1">
-            {{ element.rut }}
-          </h5>
-          <!-- Checkbox para selección en mobile -->
-          <mat-checkbox
-            (click)="$event.stopPropagation()"
-            [checked]="selection.isSelected(element)"
-            color="primary"
-          >
-          </mat-checkbox>
-        </div>
-        <p class="mb-1">Nombre: {{ element.nombreCompleto }}</p>
-        <p class="mb-1">Fecha Asignación: {{ element.fechaAsignacion }}</p>
-        <p class="mb-1">Cargo: {{ element.cargo }}</p>
-        <p class="mb-1">
-          Estado:
-          <span [ngClass]="getEstadoPillClass(element.estado)" class="estado-pill">
-            {{ element.estado }}
-          </span>
-        </p>
+    <!-- Cargo -->
+    <ng-container matColumnDef="cargo" appResizableColumn>
+      <th mat-header-cell *matHeaderCellDef>Cargo</th>
+      <td mat-cell *matCellDef="let e">{{ e.cargo }}</td>
+    </ng-container>
 
-        <!-- Acciones en mobile -->
-        <div class="mt-2">
-          <button
-            mat-icon-button
-            color="primary"
-            (click)="editar(element); $event.stopPropagation()"
-            matTooltip="Editar"
-          >
-            <mat-icon>edit</mat-icon>
-          </button>
-          <button
-            mat-icon-button
-            color="accent"
-            (click)="bitacora(element); $event.stopPropagation()"
-            matTooltip="Bitácora"
-          >
-            <mat-icon>list</mat-icon>
-          </button>
-          <button
-            mat-icon-button
-            color="accent"
-            (click)="archivar(element); $event.stopPropagation()"
-            matTooltip="Archivar"
-          >
-            <mat-icon>archive</mat-icon>
-          </button>
-          <button
-            mat-icon-button
-            color="warn"
-            (click)="eliminar(element); $event.stopPropagation()"
-            matTooltip="Eliminar"
-          >
-            <mat-icon>delete</mat-icon>
-          </button>
-        </div>
-      </div>
-    </div>
+    <!-- Estado -->
+    <ng-container matColumnDef="estado" appResizableColumn>
+      <th mat-header-cell *matHeaderCellDef>Estado</th>
+      <td mat-cell *matCellDef="let e">
+        <span [ngClass]="getEstadoPillClass(e.declaEstado)" class="estado-pill">{{ e.declaEstado }}</span>
+      </td>
+    </ng-container>
+
+    <!-- Enviado por -->
+    <ng-container matColumnDef="enviadoPor">
+      <th mat-header-cell *matHeaderCellDef>Enviado por</th>
+      <td mat-cell *matCellDef="let e">{{ e.remitente }}</td>
+    </ng-container>
+
+    <!-- Acciones -->
+    <ng-container matColumnDef="acciones">
+      <th mat-header-cell *matHeaderCellDef>Acciones</th>
+      <td mat-cell *matCellDef="let e" class="actions-cell">
+        <button mat-icon-button color="accent" (click)="bitacora(e)" matTooltip="Bitácora">
+          <img src="assets/icons/icons-btn-tabla_bitacora.svg" style="width:20px; height:20px;">
+        </button>
+        <button mat-icon-button color="primary" (click)="derivar(e)" matTooltip="Derivar">
+          <img src="assets/icons/icons-btn-tabla_derivar.svg" style="width:20px; height:20px;">
+        </button>
+        <button mat-icon-button color="accent" (click)="enviarAJefeServicio(e)" matTooltip="Enviar a Jefe de Servicio">
+          <img src="assets/icons/icons-btn-tabla_enviar.svg" style="width:20px; height:20px;">
+        </button>
+      </td>
+    </ng-container>
+
+    <!-- Cabecera / filas -->
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row        *matRowDef="let row; columns: displayedColumns;"></tr>
+  </table>
+
+  <!-- ▸ Paginador -->
+  <div class="d-flex justify-content-center mt-3">
+    <mat-paginator [pageSizeOptions]="[5,10,20]"
+                   showFirstLastButtons
+                   [length]="dataSource?.data?.length">
+    </mat-paginator>
   </div>
 </div>

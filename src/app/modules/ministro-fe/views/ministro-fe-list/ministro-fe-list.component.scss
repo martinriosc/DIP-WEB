@@ -2,59 +2,407 @@
   padding: 1rem;
 }
 
-/* Título */
-h2 {
+.component-title {
   font-weight: 600;
+  margin-bottom: 1rem;
 }
 
-/* Espaciados con .mb-2, .mb-3 (usando clases de Bootstrap o personal) */
-.mb-2 {
-  margin-bottom: 0.5rem !important;
+/* Filtros colapsables */
+.filtros-header {
+  font-size: 1rem;
 }
-.mb-3 {
-  margin-bottom: 1rem !important;
-}
-.mt-3 {
-  margin-top: 1rem !important;
-}
-
-/* Tabs (usando .nav-tabs de Bootstrap) */
-.nav-tabs .nav-link.active {
-  color: #495057;
-  background-color: #fff;
-  border-color: #dee2e6 #dee2e6 #fff;
+.btn-collapse {
+  font-size: 1rem;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
 }
 
-/* Pequeño form field */
-.small-form-field {
-  font-size: 0.875rem;
+.filtros-caja {
+  padding: 1rem;
+  border: 1px solid #cccccc;
+  border-radius: 4px;
+  transition: max-height 0.3s ease, opacity 0.3s ease;
+  overflow: hidden;
+  max-height: 999px;
+  opacity: 1;
+}
+.filtros-caja.collapsed {
+  max-height: 0;
+  padding: 0 1rem;
+  opacity: 0;
+}
+.filtros-caja.collapsed > .row,
+.filtros-caja.collapsed > div {
+  opacity: 0;
+  pointer-events: none;
 }
 
-/* Tabla */
+/* Tabla (desktop) */
 .small-table {
   font-size: 0.875rem;
   background-color: #fafafa;
 
-  /* Encabezado en azul Material */
   mat-header-row {
     background-color: #1976d2;
     color: #fff;
   }
-
   mat-header-cell {
     font-weight: 600;
-    white-space: nowrap;
   }
-
-  /* Filas alternadas */
   tr.mat-row:nth-child(odd) {
     background-color: #f1f1f1;
   }
 }
 
-.gap-2 > * {
+.actions-cell {
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+/* Styles para mobile: List view */
+.list-group-item {
+  /* Evitar que al click se active la clase "active" por defecto del framework */
+  cursor: default;
+  /* Estilo por defecto de fondo */
+  background-color: #fff;
+  border: 1px solid #e0e0e0;
+  margin-bottom: 0.5rem;
+  padding: 0.5rem;
+
+  &.selected {
+    background-color: #f0f0f0; /* Gris claro para selección */
+  }
+}
+
+/* Primera fila: contiene checkbox y número a la izquierda, y menú a la derecha */
+.first-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.left-col {
+  display: flex;
+  align-items: center;
+}
+
+.ml-2 {
   margin-left: 0.5rem;
+}
+
+/* Aseguramos que el menú desplegable muestre icono y texto en la misma línea */
+.mat-menu-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Detalles adicionales */
+.details {
+  margin-top: 0.5rem;
+}
+
+/* Paginador y espaciados adicionales */
+.row.mt-2.align-items-center {
+  margin-top: 1rem !important;
 }
 .me-2 {
   margin-right: 0.5rem !important;
+}
+.ms-auto {
+  margin-left: auto !important;
+}
+
+/* Pills de estado */
+.estado-pill {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #fff;
+  padding: 2px 10px;
+  border-radius: 999px;
+  text-transform: uppercase;
+}
+.pill-success {
+  background-color: #28a745;
+}
+.pill-warning {
+  background-color: #ffc107;
+  color: #343a40;
+}
+.pill-secondary {
+  background-color: #6c757d;
+}
+.pill-default {
+  background-color: #999999;
+}
+/* Popover con matMenu */
+.mini-popover {
+  /* Personalizas la tarjeta del menú si deseas */
+  .popover-content {
+    padding: 100px !important;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    align-items: flex-start; /* Justifica en la izquierda */
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    .estado-pill {
+      /* Mismos estilos que en la tabla, ajustados al popover si requieres */
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #fff;
+      padding: 2px 10px;
+      border-radius: 999px;
+      text-transform: uppercase;
+    }
+  }
+}
+
+.accion-icon {
+  width: 24px;
+  height: 24px;
+  margin-right: 3px;
+}
+
+.container {
+  padding: 20px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+
+  h1 {
+    margin: 0;
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 10px;
+  }
+}
+
+.filters-container {
+  background: white;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.filters-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  align-items: end;
+}
+
+.filter-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.table-container {
+  background: white;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  overflow: hidden;
+}
+
+.table-actions {
+  padding: 10px;
+  border-bottom: 1px solid rgba(0,0,0,.12);
+}
+
+table {
+  width: 100%;
+}
+
+.mat-column-acciones {
+  width: 120px;
+  text-align: center;
+}
+
+.mat-column-nro {
+  width: 100px;
+}
+
+.mat-column-fechaRecepcion {
+  width: 120px;
+}
+
+.mat-column-tipo {
+  width: 200px;
+}
+
+.mat-column-servicio {
+  width: 200px;
+}
+
+.mat-column-cargo {
+  width: 150px;
+}
+
+.mat-column-estado {
+  width: 120px;
+}
+
+.mat-row:hover {
+  background-color: #f5f5f5;
+}
+
+.mat-header-cell {
+  background-color: #fafafa;
+  color: rgba(0,0,0,.87);
+  font-weight: 500;
+}
+
+.mat-paginator {
+  border-top: 1px solid rgba(0,0,0,.12);
+}
+
+// Estilos para los pills de estado
+.pill {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 500;
+  text-align: center;
+  min-width: 80px;
+}
+
+.pill-success {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.pill-warning {
+  background-color: #fff3e0;
+  color: #ef6c00;
+}
+
+.pill-secondary {
+  background-color: #eceff1;
+  color: #546e7a;
+}
+
+.pill-default {
+  background-color: #f5f5f5;
+  color: #616161;
+}
+
+.loading-spinner-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  backdrop-filter: blur(2px);
+}
+
+.spinner-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  min-width: 150px;
+  min-height: 150px;
+  justify-content: center;
+}
+
+.loading-spinner-container mat-spinner {
+  margin: 0;
+  padding: 0;
+  width: 50px !important;
+  height: 50px !important;
+  display: block;
+}
+
+.loading-text {
+  margin-top: 1rem;
+  color: #333;
+  font-size: 1rem;
+  font-weight: 500;
+  text-align: center;
+}
+
+.loading {
+  opacity: 0.7;
+  pointer-events: none;
+  filter: blur(1px);
+  transition: opacity 0.3s ease, filter 0.3s ease;
+}
+
+/* Estilos específicos para móvil */
+@media (max-width: 767px) {
+  .container-fluid {
+    padding: 0.75rem;
+  }
+
+  /* Botón Nueva Declaración en móvil */
+  .row.mb-3 {
+    margin: 0 0 1rem 0;
+    
+    button {
+      padding: 0.75rem;
+      font-size: 1rem;
+      
+      img {
+        margin-right: 0.5rem;
+      }
+    }
+  }
+
+  /* Lista de declaraciones en móvil */
+  .list-group {
+    margin-top: 0.5rem;
+    
+    .list-group-item {
+      border-radius: 8px;
+      margin-bottom: 0.75rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      
+      .details {
+        p {
+          margin-bottom: 0.5rem;
+          font-size: 0.9rem;
+          
+          &:last-child {
+            margin-bottom: 0;
+          }
+        }
+      }
+    }
+  }
+}
+
+
+/* ---------- específicos (mínimos) ---------- */
+.icon-invert {
+  width: 20px;
+  filter: invert(1);
+  margin-right: .25rem;
 }

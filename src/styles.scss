@@ -6,7 +6,7 @@ $accent-color: #e91e63;
 $warn-color: #f44336;
 
 // Importa el theming de Angular Material
-@import '@angular/material/theming';
+@import "@angular/material/theming";
 
 // Incluye los estilos base de Angular Material
 @include mat-core();
@@ -17,13 +17,15 @@ $custom-accent: mat-palette($mat-pink, 500, 300, 700);
 $custom-warn: mat-palette($mat-red);
 
 // Define tu tema custom
-$custom-theme: mat-light-theme((
-  color: (
-    primary: $custom-primary,
-    accent: $custom-accent,
-    warn: $custom-warn,
+$custom-theme: mat-light-theme(
+  (
+    color: (
+      primary: $custom-primary,
+      accent: $custom-accent,
+      warn: $custom-warn,
+    ),
   )
-));
+);
 
 // Aplica el tema a Angular Material
 @include angular-material-theme($custom-theme);
@@ -39,7 +41,7 @@ $custom-theme: mat-light-theme((
 
 /* Encabezado con título y subtítulo */
 .encabezado {
-  background-color: #f3f3f3 !important;  /* color de fondo para destacar el encabezado */
+  background-color: #f3f3f3 !important; /* color de fondo para destacar el encabezado */
   padding: 1rem !important;
 }
 
@@ -83,4 +85,107 @@ $custom-theme: mat-light-theme((
 
 .form-declaracion .mat-form-field {
   margin-bottom: 0.5rem !important;
+}
+.fila-incompleta {
+  background-color: rgba(248, 151, 151, 0.149) !important;
+
+  td {
+    background-color: rgba(248, 151, 151, 0.149) !important;
+  }
+}
+
+/* 1.  Texto en una sola línea + “…” cuando se desborda  */
+.mat-cell,
+.mat-header-cell {
+  white-space: nowrap; /* no hacer saltos de línea            */
+  overflow: hidden; /* ocultar lo que no cabe              */
+  text-overflow: ellipsis; /* “…“ al final del texto recortado    */
+}
+
+/* 2.  Altura fija + scroll vertical
+      —Pon la altura que quieras en la custom-prop  */
+:root {
+  --tabla-altura-px: 420px; /* cámbialo si necesitas otra altura   */
+}
+.cdk-table,            /* alias interno de mat-table              */
+.mat-table {
+  display: block; /* permite el overflow en Y        */
+  max-height: var(--tabla-altura-px);
+  overflow-y: auto;
+}
+
+/* 3.  Cabecera ligeramente más oscura                              */
+.mat-header-row {
+  background: rgba(0, 0, 0, 0.06); /* tono gris sutil             */
+}
+
+/* 4.  Columnas redimensionables                                   */
+/* ---  Opción “CSS-only” (rápida, sin TS)  ----------------------- */
+.mat-header-cell {
+  resize: horizontal; /* el usuario puede arrastrar borde  */
+  overflow: hidden; /* necesario para que resize funcione*/
+  min-width: 80px; /* evita columnas ridículamente estrechas */
+}
+
+/*  ---  Mango visual para el borde derecho (UX) ------------------ */
+.mat-header-cell::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+  width: 4px; /* ancho del “handle”                */
+  cursor: col-resize;
+  background: transparent; /* visible solo al pasar el mouse    */
+}
+.mat-header-cell:hover::after {
+  background: rgba(0, 0, 0, 0.15); /* oscurece el handle al hover       */
+}
+
+/*  5.  Compatibilidad con celdas sticky (opcional)                 */
+.mat-header-row,
+.mat-row {
+  display: table; /* mantiene layout de tabla          */
+  width: 100%;
+  table-layout: fixed; /* reparte espacios equitativamente  */
+}
+
+/* 6.  Ajustes para los paginadores debajo de tablas fijas          */
+.mat-paginator {
+  border-top: 1px solid #e0e0e0;
+}
+
+/* 7.  Evita que los iconos se estiren al hacer resize              */
+.mat-icon-button img,
+.actions-cell img {
+  max-width: 20px;
+}
+/*  mango visible + cursor  */
+.resize-handle {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 8px; /* más ancho => más fácil de atinar */
+  height: 100%;
+  cursor: col-resize;
+  background: transparent;
+}
+.resize-handle:hover {
+  background: rgba(0, 0, 0, 0.15);
+}
+
+/* evita seleccionar texto al arrastrar */
+.no-select {
+  user-select: none !important;
+}
+
+.mat-mdc-table thead,
+.mat-mdc-header-row .mat-mdc-table .mat-mdc-header-cell {
+  background: #ececec !important;
+  color: #000000 !important;
+  border: 1px solid black !important;
+  margin-top: 0px !important;
+  margin-bottom: 0px !important;
+  padding-top : 0px !important;
+  padding-bottom : 0px !important;
 }

@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiResponse } from '../../auth/models/ApiResponse';
@@ -41,24 +41,47 @@ export class PersonaRelacionadaService {
     return this.http.get<ApiResponse>(`${this.apiUrl}/pr/service/personaRelacionada/getPersona?idPersonaRelacionada=${idPersonaRelacionada}`, { withCredentials: true });
   }
 
-  /**
-   * Guarda información de una persona relacionada
-   */
-  guardar(data: any, declaranteId: number): Observable<ApiResponse> {
-    const formData = new FormData();
-    formData.append('data', JSON.stringify(data));
-    formData.append('declaranteId', declaranteId.toString());
-    
-    return this.http.post<ApiResponse>(`${this.apiUrl}/pr/service/personaRelacionada/guardar`, formData, { withCredentials: true });
+
+  guardarPariente(data: any, idDeclaracion: number): Observable<ApiResponse> {
+  const body = new HttpParams()
+    .set('data', JSON.stringify(data))
+    .set('idDeclaracion', idDeclaracion.toString());
+
+  const headers = new HttpHeaders({
+    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+  });
+
+  return this.http.post<ApiResponse>(
+    `${this.apiUrl}/pr/service/personarelacionada/parientes/guardar`,
+    body.toString(),
+    { headers, withCredentials: true }
+  );
+}
+
+
+ 
+  guardar(data: any, idDeclaracion: number): Observable<any> {
+    const body = new HttpParams()
+      .set('data', JSON.stringify(data))
+      .set('idDeclaracion', idDeclaracion.toString());
+
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+    });
+
+    return this.http.post(
+      `${this.apiUrl}/pr/service/personarelacionada/guardar`,
+      body.toString(),
+      { headers, withCredentials: true }
+    );
   }
 
-  /**
-   * Elimina una persona relacionada
-   */
-  eliminar(id: number): Observable<ApiResponse> {
-    return this.http.get<ApiResponse>(`${this.apiUrl}/pr/service/personaRelacionada/eliminar?id=${id}`, { withCredentials: true });
+  eliminar(id: string) {
+    return this.http.get<any>(
+      `${this.apiUrl}/pr/service/personarelacionada/eliminar/${id}`,
+      { withCredentials: true }
+    );
   }
-
   /**
    * Valida la información de un RUT para una persona
    */

@@ -10,7 +10,7 @@ import { Router } from '@angular/router';
 export class AppComponent implements OnInit {
   // Datos dummy de usuario
   currentUser = {
-    name: 'Martín Ríos',
+    name: 'CHRISTIAN ALEJANDRO CONTARDO SALINAS',
     photoUrl: 'https://via.placeholder.com/50'
   };
 

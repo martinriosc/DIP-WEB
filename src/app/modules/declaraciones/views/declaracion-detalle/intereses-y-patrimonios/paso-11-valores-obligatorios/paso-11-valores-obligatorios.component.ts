@@ -5,29 +5,34 @@ import {
   TemplateRef
 } from '@angular/core';
 import {
+  FormArray,
   FormBuilder,
+  FormControl,
   FormGroup,
   Validators
 } from '@angular/forms';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import Swal from 'sweetalert2';
+import { ToastrService } from 'ngx-toastr';
 
-import { ValidadorDeclaracionService } from '../../../../services/validador-declaracion.service';
-import { StepperStatusService }        from 'src/app/modules/declaraciones/services/stepper-status.service';
 import { ValoresObligatoriosService } from 'src/app/modules/declaraciones/services/valores-obligatorios.service';
 import { LocalidadService } from 'src/app/modules/declaraciones/services/localidad.service';
 import { MonedaService } from 'src/app/modules/declaraciones/services/moneda.service';
 import { InmuebleService } from 'src/app/modules/declaraciones/services/inmueble.service';
 import { DeclaracionHelperService } from 'src/app/modules/declaraciones/services/declaracion-helper.service';
+import { DeclaracionService } from 'src/app/modules/declaraciones/services/declaracion.service';
 
 interface ValorObligatorio {
-  tipoDocumento: string;
-  nroDocumento: string;
-  montoTotal: number;
-  registraInscripcion: string;
-  estado: string;
-  fechaEmision: string;
-  tipoMoneda: string;
+  id?: string;
+  tipoInstrumento: string;
+  razonSocial: string;
   pais: string;
+  fecha: string;
+  monedaId: number;
+  monto: string;
+  gravamen: number;
+  tipoValorId: number;
+  borrador: boolean;
 }
 
 @Component({
@@ -42,14 +47,17 @@ export class Paso11ValoresObligatoriosComponent implements OnInit {
   @ViewChild('depositosModal') depositosModal!: TemplateRef<any>;
   @ViewChild('segurosModal') segurosModal!: TemplateRef<any>;
 
+  displayedColumnsCuentas = ['tipoInstrumento', 'razonSocial', 'pais', 'fecha', 'monto', 'tipoMoneda', 'gravamen','estado', 'acciones'];
+  displayedColumnsAhorros = ['tipoInstrumento', 'razonSocial', 'pais', 'fecha', 'monto', 'tipoMoneda', 'gravamen','estado', 'acciones'];
+  displayedColumnsDepositos = ['tipoInstrumento', 'razonSocial', 'pais', 'fecha', 'monto', 'tipoMoneda', 'gravamen','estado', 'acciones'];
+  displayedColumnsSeguros = ['tipoInstrumento','tipoSeguro', 'razonSocial', 'pais', 'fecha', 'monto', 'tipoMoneda', 'gravamen','estado', 'acciones'];
+
   tieneValoresObligatorios = 'no';
-  valoresObligatoriosData: ValorObligatorio[] = [
-    { tipoDocumento: 'PAGARE', nroDocumento: 'ABC-123', montoTotal: 500000, registraInscripcion: 'SI', estado: 'Activo', fechaEmision: '2023-01-10', tipoMoneda: 'Peso', pais: 'Argentina' }
-  ];
+  valoresObligatoriosData: ValorObligatorio[] = [];
   valorForm!: FormGroup;
   editMode = false;
   currentItem: ValorObligatorio | null = null;
-  dialogRef: MatDialogRef<any> | null = null;
+  private dialogRef: any;
 
   private activeDeclId!: string;
 
@@ -68,8 +76,13 @@ export class Paso11ValoresObligatoriosComponent implements OnInit {
   monedas: any[] = [];
   gravamenes: any[] = [];
 
-  declaracionId: number = 1319527;    //1319527
-  declaranteId: number = 2882000;
+  isSeguro = false;
+  isCuentaLibreta = false;
+  isAhorroPrevisional = false;
+  isDepositoPlazo = false;
+
+  declaracionId: number = this._declaracionHelper.declaracionId;
+  declaranteId: number = this._declaracionHelper.declaranteId;
 
   constructor(
     private fb: FormBuilder,
@@ -78,7 +91,9 @@ export class Paso11ValoresObligatoriosComponent implements OnInit {
     private _localidad: LocalidadService,
     private _moneda: MonedaService,
     private _inmueble: InmuebleService,
-    private _declaracionHelper: DeclaracionHelperService
+    private _declaracionHelper: DeclaracionHelperService,
+    private _declaracion: DeclaracionService,
+    private toastr: ToastrService
   ) {}
 
   ngOnInit(): void {
@@ -217,144 +232,166 @@ export class Paso11ValoresObligatoriosComponent implements OnInit {
     }
   }
 
-  /** Abre modal para agregar nueva cuenta/libreta */
-  openAddCuentaModal(): void {
-    this.editMode = false;
-    this.currentItem = null;
-    this.buildForm();
-    this.loadTiposInstrumentos(1);
-    this.dialogRef = this.dialog.open(this.cuentasModal, { width: '800px' });
-  }
-
-  /** Abre modal para editar cuenta/libreta existente */
-  openEditCuentaModal(item: any): void {
-    this.editMode = true;
-    this.currentItem = item;
-    this.buildForm(item);
-    this.loadTiposInstrumentos(1);
-    this.dialogRef = this.dialog.open(this.cuentasModal, { width: '800px' });
-  }
-
-  /** Abre modal para agregar nuevo ahorro previsional */
-  openAddAhorroModal(): void {
-    this.editMode = false;
-    this.currentItem = null;
-    this.buildForm();
-    this.loadTiposInstrumentos(2);
-    this.dialogRef = this.dialog.open(this.ahorrosModal, { width: '800px' });
-  }
-
-  /** Abre modal para editar ahorro previsional existente */
-  openEditAhorroModal(item: any): void {
-    this.editMode = true;
-    this.currentItem = item;
-    this.buildForm(item);
-    this.loadTiposInstrumentos(2);
-    this.dialogRef = this.dialog.open(this.ahorrosModal, { width: '800px' });
-  }
-
-  /** Abre modal para agregar nuevo depósito */
-  openAddDepositoModal(): void {
-    this.editMode = false;
-    this.currentItem = null;
-    this.buildForm();
-    this.loadTiposInstrumentos(3);
-    this.dialogRef = this.dialog.open(this.depositosModal, { width: '800px' });
-  }
-
-  /** Abre modal para editar depósito existente */
-  openEditDepositoModal(item: any): void {
-    this.editMode = true;
-    this.currentItem = item;
-    this.buildForm(item);
-    this.loadTiposInstrumentos(3);
-    this.dialogRef = this.dialog.open(this.depositosModal, { width: '800px' });
-  }
-
-  /** Abre modal para agregar nuevo seguro */
-  openAddSeguroModal(): void {
-    this.editMode = false;
-    this.currentItem = null;
-    this.buildForm();
-    this.loadTiposInstrumentos(4);
-    this.dialogRef = this.dialog.open(this.segurosModal, { width: '800px' });
-  }
-
-  /** Abre modal para editar seguro existente */
-  openEditSeguroModal(item: any): void {
-    this.editMode = true;
-    this.currentItem = item;
-    this.buildForm(item);
-    this.loadTiposInstrumentos(4);
-    this.dialogRef = this.dialog.open(this.segurosModal, { width: '800px' });
-  }
-
   /** Construye o reinicia el formulario de la modal */
   private buildForm(item?: ValorObligatorio): void {
     this.valorForm = this.fb.group({
-      tipoDocumento: [item?.tipoDocumento || 'PAGARE'],
-      nroDocumento: [item?.nroDocumento || ''],
-      montoTotal: [item?.montoTotal || 0, [Validators.min(0)]],
-      registraInscripcion: [item?.registraInscripcion || ''],
-      estado: [item?.estado || ''],
-      fechaEmision: [item?.fechaEmision || ''],
-      tipoMoneda: [item?.tipoMoneda || ''],
-      pais: [item?.pais || '']
+      id: [item?.id || ''],
+      tipoInstrumentoId: [item?.tipoInstrumento || ''],
+      razonSocial: [item?.razonSocial || ''],
+      paisId: [item?.pais || ''],
+      fecha: [item?.fecha || ''],
+      monedaId: [item?.monedaId || 1],
+      monto: [item?.monto || ''],
+      gravamenId: [item?.gravamen || 13],
+      tipoValorId: [item?.tipoValorId || 1],
+      borrador: [item?.borrador || true]
     });
   }
 
+  closeDialog() {
+    if (this.dialogRef) {
+      this.dialogRef.close();
+    }
+  }
+
   /** Guarda o actualiza un registro desde la modal */
-  saveValorOblig(dialogRef: any): void {
-    const key  = 'paso11';
-    const path = ['declaraciones', this.activeDeclId, key];
+  saveValorOblig(): void {
 
-    if (this.valorForm.invalid) {
-      this._declaracionHelper.markStepIncomplete(path);
-      return;
-    }
+const payload = {
+   ...this.valorForm.value,              // ya incluye tipoValorId, borrador, etc.
+   borrador: !this.isFormValid(this.valorForm),
+};
 
-    const data = this.valorForm.value as ValorObligatorio;
-    if (this.editMode && this.currentItem) {
-      const idx = this.valoresObligatoriosData.indexOf(this.currentItem);
-      if (idx >= 0) this.valoresObligatoriosData[idx] = data;
-    } else {
-      this.valoresObligatoriosData.push(data);
-    }
-
-    this._declaracionHelper.markStepCompleted(path);
-
-    dialogRef.close();
+this._valoresObligatorios
+    .guardar(payload, this.declaranteId)
+    .subscribe({
+        next: _ => { this.loadValores(); this.closeDialog(); },
+        error: _ => this.toastr.error('No se pudo guardar')
+    });
   }
 
   /** Elimina un registro */
-  eliminarValorOblig(item: ValorObligatorio): void {
-    const key  = 'paso11';
-    const path = ['declaraciones', this.activeDeclId, key];
-
-    this.valoresObligatoriosData = this.valoresObligatoriosData.filter(x => x !== item);
-    if (this.valoresObligatoriosData.length > 0) {
-      this._declaracionHelper.markStepCompleted(path);
-    } else {
-      this._declaracionHelper.markStepIncomplete(path);
-    }
+  eliminarValorOblig(id: string): void {
+    Swal.fire({
+      title: '¿Estás seguro?',
+      text: 'Esta acción eliminará el registro seleccionado.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this._valoresObligatorios.eliminar(Number(id)).subscribe({
+          next: (res: any) => {
+            this.loadValores();
+            this.toastr.success('Registro eliminado exitosamente');
+          },
+          error: (err) => {
+            console.error('Error al eliminar:', err);
+            this.toastr.error('Error al eliminar el registro');
+          }
+        });
+      }
+    });
   }
 
-  onTieneCuentasLibretaChange(value: string): void {
+  /** Abre modal para editar un registro */
+  openEditModal(item: ValorObligatorio, tipo: number): void {
+   this.editMode = true;
+  this.isSeguro = (tipo===4);
+  this.buildForm(item);
+  this.loadTiposInstrumentos(tipo);
+  this.loadGravamen('13');
+
+  this.dialogRef = this.dialog.open(this.getTemplate(tipo), {width:'800px'});
+  }
+
+  /** Abre modal para agregar nuevo registro */
+  openAddModal(tipo: number): void {
+   this.editMode = false;
+  this.isSeguro = (tipo===4);            // para mostrar campo extra “tipoSeguro”
+  this.buildForm();                      // ← limpio
+  this.valorForm.patchValue({ tipoValorId: tipo });   // ****
+  this.loadTiposInstrumentos(tipo);      // combos
+  this.loadGravamen('13');
+
+  this.dialogRef = this.dialog.open(this.getTemplate(tipo), {width:'800px'});
+  }
+
+
+private getTemplate(tipo:number):TemplateRef<any>{
+  switch(tipo){
+    case 1: return this.cuentasModal;
+    case 2: return this.ahorrosModal;
+    case 3: return this.depositosModal;
+    default:return this.segurosModal;
+  }
+}
+
+  onTieneCuentasLibretaChange(value: string): void {  
     this.tieneCuentasLibretas = value;
+    this._declaracion.guardarRegistro(this.declaranteId, 'rgCuentas', value === 'si').subscribe({
+      next: (res: any) => {
+        console.log('Registro guardado exitosamente');
+      },
+      error: (err: any) => {
+        console.error('Error al guardar registro:', err);
+      }
+    });
   }
 
   onTieneAhorrosChange(value: string): void {
     this.tieneAhorrosPrevisionales = value;
+    this._declaracion.guardarRegistro(this.declaranteId, 'rgAhorro', value === 'si').subscribe({
+      next: (res: any) => {
+        console.log('Registro guardado exitosamente');
+      },
+      error: (err: any) => {
+        console.error('Error al guardar registro:', err);
+      }
+    });
   }
 
   onTieneDepositoAPlazoChange(value: string): void {
     this.tieneDepositosPlazo = value;
+    this._declaracion.guardarRegistro(this.declaranteId, 'rgDeposito', value === 'si').subscribe({
+      next: (res: any) => {
+        console.log('Registro guardado exitosamente');
+      },
+      error: (err: any) => {
+        console.error('Error al guardar registro:', err);
+      }
+    });
   }
 
   onTieneSeguroChange(value: string): void {
     this.tieneSeguros = value;
+    this._declaracion.guardarRegistro(this.declaranteId, 'rgSeguro', value === 'si').subscribe({
+      next: (res: any) => {
+        console.log('Registro guardado exitosamente');
+      },
+      error: (err: any) => {
+        console.error('Error al guardar registro:', err);
+      }
+    });
   }
 
+ private isFormValid(ctrl: any): boolean {
+    if (ctrl instanceof FormControl) {
+      const v = ctrl.value;
+      return v !== null && v !== undefined && String(v).trim() !== '';
+    }
 
+    if (ctrl instanceof FormGroup) {
+      return Object.values(ctrl.controls).every(child => this.isFormValid(child));
+    }
+
+    if (ctrl instanceof FormArray) {
+      return ctrl.controls.every(child => this.isFormValid(child));
+    }
+    return true;
+  }
 }
 

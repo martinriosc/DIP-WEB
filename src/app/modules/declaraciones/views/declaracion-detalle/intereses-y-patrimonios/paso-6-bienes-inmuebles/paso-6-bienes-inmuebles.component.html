@@ -10,9 +10,7 @@
 
   <div class="contenido-form">
     <!-- Bien Inmueble Situado en Chile -->
-
     <div class="border p-3 mb-3">
-
       <div class="row mb-3 align-items-center">
         <div class="col-md-4 etiqueta fw-bold">Bien Inmueble Situado en Chile</div>
         <div class="col-md-7 text-end">
@@ -34,95 +32,95 @@
           <div class="col-md-12">
             <table mat-table [dataSource]="bienesChile" class="w-100 mat-elevation-z8">
               <!-- Región -->
-              <ng-container matColumnDef="region">
+              <ng-container matColumnDef="region" appResizableColumn>
                 <th mat-header-cell *matHeaderCellDef>Región</th>
                 <td mat-cell *matCellDef="let b">{{ b.region }}</td>
               </ng-container>
 
               <!-- Comuna -->
-              <ng-container matColumnDef="comuna">
+              <ng-container matColumnDef="comuna" appResizableColumn>
                 <th mat-header-cell *matHeaderCellDef>Comuna</th>
                 <td mat-cell *matCellDef="let b">{{ b.comuna }}</td>
               </ng-container>
 
               <!-- Dirección -->
-              <ng-container matColumnDef="direccion">
+              <ng-container matColumnDef="direccion" appResizableColumn>
                 <th mat-header-cell *matHeaderCellDef>Dirección</th>
-                <td mat-cell *matCellDef="let b">{{ b.calle }} {{ b.numero }}</td>
+                <td mat-cell *matCellDef="let b">{{ b.calle }} {{ b.numero }} {{ b.departamento }}</td>
               </ng-container>
 
               <!-- N° Inscripción -->
-              <ng-container matColumnDef="inscripcion">
+              <ng-container matColumnDef="inscripcion" appResizableColumn>
                 <th mat-header-cell *matHeaderCellDef>N° de Inscripción</th>
                 <td mat-cell *matCellDef="let b">{{ b.numeroInscripcion }}</td>
               </ng-container>
 
               <!-- Fojas -->
-              <ng-container matColumnDef="fojas">
+              <ng-container matColumnDef="fojas" appResizableColumn>
                 <th mat-header-cell *matHeaderCellDef>Fojas</th>
                 <td mat-cell *matCellDef="let b">{{ b.fojas }}</td>
               </ng-container>
 
               <!-- Año -->
-              <ng-container matColumnDef="anio">
+              <ng-container matColumnDef="anio" appResizableColumn>
                 <th mat-header-cell *matHeaderCellDef>Año</th>
                 <td mat-cell *matCellDef="let b">{{ b.anio }}</td>
               </ng-container>
 
               <!-- Rol Avaluo -->
-              <ng-container matColumnDef="rolAvaluo">
+              <ng-container matColumnDef="rolAvaluo" appResizableColumn>
                 <th mat-header-cell *matHeaderCellDef>Rol de Avalúo</th>
                 <td mat-cell *matCellDef="let b">{{ b.rolAvaluo }}</td>
               </ng-container>
 
               <!-- Conservador de Bienes Raices -->
-              <ng-container matColumnDef="conservador">
+              <ng-container matColumnDef="conservador" appResizableColumn>
                 <th mat-header-cell *matHeaderCellDef>Conservador de Bienes Raices</th>
                 <td mat-cell *matCellDef="let b">{{ b.conservador }}</td>
               </ng-container>
 
               <!-- Avalúo -->
-              <ng-container matColumnDef="avaluo">
+              <ng-container matColumnDef="avaluo" appResizableColumn>
                 <th mat-header-cell *matHeaderCellDef>Avalúo Fiscal</th>
                 <td mat-cell *matCellDef="let b">{{ b.avaluoFiscal }}</td>
               </ng-container>
 
               <!-- Fecha de Adquisición -->
-              <ng-container matColumnDef="fechaAdquisicion">
+              <ng-container matColumnDef="fechaAdquisicion" appResizableColumn>
                 <th mat-header-cell *matHeaderCellDef>Fecha de Adquisición</th>
                 <td mat-cell *matCellDef="let b">{{ b.fechaAdquisicion }}</td>
               </ng-container>
 
               <!-- Estado -->
-              <ng-container matColumnDef="estado">
+              <ng-container matColumnDef="estado" appResizableColumn>
                 <th mat-header-cell *matHeaderCellDef>Estado</th>
-                <td mat-cell *matCellDef="let b">{{ b.porcentaje == 100 ? 'Completo' : 'Incompleto' }}</td>
+                <td mat-cell *matCellDef="let b">{{ !b.borrador ? 'COMPLETO' : 'INCOMPLETO' }}</td>
               </ng-container>
-
 
               <!-- Acciones -->
               <ng-container matColumnDef="acciones">
                 <th mat-header-cell *matHeaderCellDef>Acciones</th>
                 <td mat-cell *matCellDef="let b">
-                  <button mat-icon-button color="accent" (click)="openEditChileModal(b)">
-                    <mat-icon>edit</mat-icon>
+                  <button mat-icon-button color="accent" (click)="openEditChileModal(b)" matTooltip="Editar">
+                    <img src="assets/icons/icon-btn-tabla_editar.svg">
                   </button>
-                  <button mat-icon-button color="warn" (click)="eliminarBien(b)">
-                    <mat-icon>delete</mat-icon>
+                  <button mat-icon-button color="warn" (click)="eliminarBien(b)" matTooltip="Eliminar">
+                    <img src="assets/icons/icon-btn-tabla_eliminar.svg">
                   </button>
                 </td>
               </ng-container>
 
               <tr mat-header-row *matHeaderRowDef="displayedColumnsChile"></tr>
-              <tr mat-row *matRowDef="let row; columns: displayedColumnsChile;"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumnsChile;"
+                [ngClass]="{'fila-incompleta': row.borrador}"></tr>
             </table>
           </div>
         </div>
       </div>
     </div>
 
+    <!-- Bien Inmueble Situado en el Extranjero -->
     <div class="border p-3 mb-3">
-      <!-- Bien Inmueble Situado en el Extranjero -->
       <div class="row mb-3 align-items-center">
         <div class="col-md-4 etiqueta fw-bold">Bien Inmueble Situado en el Extranjero</div>
         <div class="col-md-7 text-end">
@@ -140,78 +138,86 @@
           </div>
         </div>
 
-        <table mat-table [dataSource]="bienesExtranjero" class="w-100 mat-elevation-z8">
-          <ng-container matColumnDef="pais">
-            <th mat-header-cell *matHeaderCellDef>País</th>
-            <td mat-cell *matCellDef="let b">{{ b.pais }}</td>
-          </ng-container>
+        <div class="row">
+          <div class="col-md-12">
+            <table mat-table [dataSource]="bienesExtranjero" class="w-100 mat-elevation-z8">
+              <!-- País -->
+              <ng-container matColumnDef="pais" appResizableColumn>
+                <th mat-header-cell *matHeaderCellDef>País</th>
+                <td mat-cell *matCellDef="let b">{{ b.pais }}</td>
+              </ng-container>
 
-          <!-- Ciudad -->
-          <ng-container matColumnDef="ciudad">
-            <th mat-header-cell *matHeaderCellDef>Ciudad</th>
-            <td mat-cell *matCellDef="let b">{{ b.ciudad }}</td>
-          </ng-container>
+              <!-- Ciudad -->
+              <ng-container matColumnDef="ciudad" appResizableColumn>
+                <th mat-header-cell *matHeaderCellDef>Ciudad</th>
+                <td mat-cell *matCellDef="let b">{{ b.ciudad }}</td>
+              </ng-container>
 
-          <ng-container matColumnDef="direccion">
-            <th mat-header-cell *matHeaderCellDef>Dirección</th>
-            <td mat-cell *matCellDef="let b">{{ b.direccion }}</td>
-          </ng-container>
+              <!-- Dirección -->
+              <ng-container matColumnDef="direccion" appResizableColumn>
+                <th mat-header-cell *matHeaderCellDef>Dirección</th>
+                <td mat-cell *matCellDef="let b">{{ b.calle }} {{ b.numero }} {{ b.departamento }}</td>
+              </ng-container>
 
-          <!-- Valor Corriente -->
-          <ng-container matColumnDef="valorCorriente">
-            <th mat-header-cell *matHeaderCellDef>Valor Corriente</th>
-            <td mat-cell *matCellDef="let b">{{ b.valorCorriente }}</td>
-          </ng-container>
+              <!-- Valor Corriente -->
+              <ng-container matColumnDef="valorCorriente" appResizableColumn>
+                <th mat-header-cell *matHeaderCellDef>Valor Corriente</th>
+                <td mat-cell *matCellDef="let b">{{ b.valor }}</td>
+              </ng-container>
 
-          <!-- Tipo Moneda -->
-          <ng-container matColumnDef="tipoMoneda">
-            <th mat-header-cell *matHeaderCellDef>Tipo Moneda</th>
-            <td mat-cell *matCellDef="let b">{{ b.tipoMoneda }}</td>
-          </ng-container>
+              <!-- Tipo Moneda -->
+              <ng-container matColumnDef="tipoMoneda" appResizableColumn>
+                <th mat-header-cell *matHeaderCellDef>Tipo Moneda</th>
+                <td mat-cell *matCellDef="let b">{{ b.tipoMoneda }}</td>
+              </ng-container>
 
-          <!-- Fecha de Adquisición -->
-          <ng-container matColumnDef="fechaAdquisicion">
-            <th mat-header-cell *matHeaderCellDef>Fecha de Adquisición</th>
-            <td mat-cell *matCellDef="let b">{{ b.fechaAdquisicion }}</td>
-          </ng-container>
+              <!-- Fecha de Adquisición -->
+              <ng-container matColumnDef="fechaAdquisicion" appResizableColumn>
+                <th mat-header-cell *matHeaderCellDef>Fecha de Adquisición</th>
+                <td mat-cell *matCellDef="let b">{{ b.fechaAdquisicion }}</td>
+              </ng-container>
 
-          <!-- Forma de Propiedad -->
-          <ng-container matColumnDef="formaPropiedad">
-            <th mat-header-cell *matHeaderCellDef>Forma de Propiedad</th>
-            <td mat-cell *matCellDef="let b">{{ b.formaPropiedad }}</td>
-          </ng-container>
+              <!-- Forma de Propiedad -->
+              <ng-container matColumnDef="formaPropiedad" appResizableColumn>
+                <th mat-header-cell *matHeaderCellDef>Forma de Propiedad</th>
+                <td mat-cell *matCellDef="let b">{{ b.clase }}</td>
+              </ng-container>
 
-          <!-- Domicilio -->
-          <ng-container matColumnDef="domicilio">
-            <th mat-header-cell *matHeaderCellDef>Domicilio</th>
-            <td mat-cell *matCellDef="let b">{{ b.domicilio }}</td>
-          </ng-container>
+              <!-- Domicilio -->
+              <ng-container matColumnDef="domicilio" appResizableColumn>
+                <th mat-header-cell *matHeaderCellDef>Domicilio</th>
+                <td mat-cell *matCellDef="let b">{{ b.rbDomicilio ? 'Sí' : 'No' }}</td>
+              </ng-container>
 
-          <!-- Estado -->
-          <ng-container matColumnDef="estado">
-            <th mat-header-cell *matHeaderCellDef>Estado</th>
-            <td mat-cell *matCellDef="let b">{{ b.estado }}</td>
-          </ng-container>
+              <!-- Estado -->
+              <ng-container matColumnDef="estado" appResizableColumn>
+                <th mat-header-cell *matHeaderCellDef>Estado</th>
+                <td mat-cell *matCellDef="let b">{{ !b.borrador ? 'COMPLETO' : 'INCOMPLETO' }}</td>
+              </ng-container>
 
-          <!-- Acciones -->
-          <ng-container matColumnDef="accionesExt">
-            <th mat-header-cell *matHeaderCellDef>Acciones</th>
-            <td mat-cell *matCellDef="let b">
-              <button mat-icon-button color="accent" (click)="openEditExtranjeroModal(b)">
-                <mat-icon>edit</mat-icon>
-              </button>
-              <button mat-icon-button color="warn" (click)="eliminarBienExt(b)">
-                <mat-icon>delete</mat-icon>
-              </button>
-            </td>
-          </ng-container>
+              <!-- Acciones -->
+              <ng-container matColumnDef="acciones">
+                <th mat-header-cell *matHeaderCellDef>Acciones</th>
+                <td mat-cell *matCellDef="let b">
+                  <button mat-icon-button color="accent" (click)="openEditExtranjeroModal(b)" matTooltip="Editar">
+                    <img src="assets/icons/icon-btn-tabla_editar.svg">
+                  </button>
+                  <button mat-icon-button color="warn" (click)="eliminarBienExt(b)" matTooltip="Eliminar">
+                    <img src="assets/icons/icon-btn-tabla_eliminar.svg">
+                  </button>
+                </td>
+              </ng-container>
 
-          <tr mat-header-row *matHeaderRowDef="displayedColumnsExtranjero"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumnsExtranjero;"></tr>
-        </table>
+              <tr mat-header-row *matHeaderRowDef="displayedColumnsExtranjero"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumnsExtranjero;"
+                [ngClass]="{'fila-incompleta': row.borrador}"></tr>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   </div>
+
   <!-- Botón Guardar -->
   <mat-card-actions class="acciones justify-content-end mt-3">
     <button mat-raised-button color="primary" type="submit" (click)="onSubmit()">
@@ -220,85 +226,218 @@
   </mat-card-actions>
 </mat-card>
 
-<!-- MODAL Chile -->
+<!-- Modal Bien Inmueble Chile -->
 <ng-template #bienChileModal let-dialogRef>
   <h2 mat-dialog-title>{{ editChile ? 'Editar Bien Inmueble (Chile)' : 'Agregar Bien Inmueble (Chile)' }}</h2>
 
   <mat-dialog-content>
     <form [formGroup]="bienChileForm">
-      <mat-form-field appearance="fill" class="w-100 mb-3">
+      <!-- Región -->
+      <mat-form-field appearance="outline" class="w-100 mb-3">
         <mat-label>Región</mat-label>
-        <mat-select formControlName="region">
-          <mat-option *ngFor="let reg of regiones" [value]="reg">{{ reg }}</mat-option>
+        <mat-select formControlName="regionId" (selectionChange)="loadComunas()">
+          <mat-option *ngFor="let reg of regiones" [value]="reg.id">{{ reg.nombre }}</mat-option>
         </mat-select>
       </mat-form-field>
 
-      <mat-form-field appearance="fill" class="w-100 mb-3">
+      <!-- Comuna -->
+      <mat-form-field appearance="outline" class="w-100 mb-3">
         <mat-label>Comuna</mat-label>
-        <mat-select formControlName="comuna">
-          <mat-option *ngFor="let c of comunas" [value]="c">{{ c }}</mat-option>
+        <mat-select formControlName="comunaId">
+          <mat-option *ngFor="let c of comunas" [value]="c.id">{{ c.nombre }}</mat-option>
         </mat-select>
       </mat-form-field>
 
-      <mat-form-field appearance="fill" class="w-100 mb-3">
-        <mat-label>Dirección</mat-label>
-        <input matInput formControlName="direccion" />
+      <!-- Calle -->
+      <mat-form-field appearance="outline" class="w-100 mb-3">
+        <mat-label>Calle</mat-label>
+        <input matInput formControlName="calle" />
       </mat-form-field>
 
-      <mat-form-field appearance="fill" class="w-100 mb-3">
+      <!-- Número -->
+      <mat-form-field appearance="outline" class="w-100 mb-3">
+        <mat-label>Número</mat-label>
+        <input matInput formControlName="numero" />
+      </mat-form-field>
+
+      <!-- Departamento -->
+      <mat-form-field appearance="outline" class="w-100 mb-3">
+        <mat-label>Departamento</mat-label>
+        <input matInput formControlName="departamento" />
+      </mat-form-field>
+
+      <!-- N° Inscripción -->
+      <mat-form-field appearance="outline" class="w-100 mb-3">
         <mat-label>N° de Inscripción</mat-label>
-        <input matInput formControlName="inscripcion" />
+        <input matInput formControlName="numeroInscripcion" />
       </mat-form-field>
 
-      <mat-form-field appearance="fill" class="w-100 mb-3">
+      <!-- Fojas -->
+      <mat-form-field appearance="outline" class="w-100 mb-3">
         <mat-label>Fojas</mat-label>
         <input matInput formControlName="fojas" />
       </mat-form-field>
 
-      <mat-form-field appearance="fill" class="w-100 mb-3">
+      <!-- Año -->
+      <mat-form-field appearance="outline" class="w-100 mb-3">
         <mat-label>Año</mat-label>
-        <input matInput type="number" formControlName="anio" />
+        <input matInput formControlName="anio" />
       </mat-form-field>
 
-      <mat-form-field appearance="fill" class="w-100 mb-3">
-        <mat-label>Rol de Avalúo</mat-label>
-        <input matInput formControlName="rolAvaluo" />
+      <!-- Rol Avalúo -->
+      <div class="row g-2 mb-3">
+        <div class="col-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Rol de Avalúo&nbsp;(1° parte)</mat-label>
+            <input matInput formControlName="rolAvaluoUno" />
+          </mat-form-field>
+        </div>
+
+        <div class="col-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>Rol de Avalúo&nbsp;(2° parte)</mat-label>
+            <input matInput formControlName="rolAvaluoDos" />
+          </mat-form-field>
+        </div>
+      </div>
+
+      <!-- Conservador -->
+      <mat-form-field appearance="outline" class="w-100 mb-3">
+        <mat-label>Conservador de Bienes Raíces</mat-label>
+        <mat-select formControlName="conservadorId">
+          <mat-option *ngFor="let c of conservadoresBienes" [value]="c.id">{{ c.nombre }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <!-- Avalúo Fiscal -->
+      <mat-form-field appearance="outline" class="w-100 mb-3">
+        <mat-label>Avalúo Fiscal</mat-label>
+        <input matInput formControlName="avaluoFiscal" />
+      </mat-form-field>
+
+      <!-- No Propietario -->
+      <mat-form-field appearance="outline" class="w-100 mb-3">
+        <mat-label>Es usted propietario</mat-label>
+        <mat-select formControlName="noPropietario">
+          <mat-option [value]="false">Sí</mat-option>
+          <mat-option [value]="true">No</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <!-- Porcentaje -->
+      <mat-form-field appearance="outline" class="w-100 mb-3">
+        <mat-label>Porcentaje de Propiedad</mat-label>
+        <input matInput formControlName="porcentaje" />
+      </mat-form-field>
+
+      <!-- Fecha Adquisición -->
+      <mat-form-field appearance="outline" class="w-100 mb-3">
+        <mat-label>Fecha de Adquisición</mat-label>
+        <input matInput formControlName="fechaAdquisicion" />
+      </mat-form-field>
+
+      <!-- Clase -->
+      <mat-form-field appearance="outline" class="w-100 mb-3">
+        <mat-label>Forma de Propiedad</mat-label>
+        <mat-select formControlName="claseId">
+          <mat-option *ngFor="let c of clasesPropiedad" [value]="c.id">{{ c.nombre }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <!-- Domicilio -->
+      <mat-form-field appearance="outline" class="w-100 mb-3">
+        <mat-label>¿Es su domicilio?</mat-label>
+        <mat-select formControlName="rbDomicilio">
+          <mat-option [value]="true">Sí</mat-option>
+          <mat-option [value]="false">No</mat-option>
+        </mat-select>
       </mat-form-field>
     </form>
   </mat-dialog-content>
 
   <mat-dialog-actions align="end">
-    <button mat-button (click)="dialogRef.close()">Cancelar</button>
-    <button mat-raised-button color="primary" (click)="saveBienChile(dialogRef)">Guardar</button>
+    <button mat-button (click)="closeDialog()">Cancelar</button>
+    <button mat-raised-button color="primary" (click)="saveBienChile()">Guardar</button>
   </mat-dialog-actions>
 </ng-template>
 
-<!-- MODAL Extranjero -->
+<!-- Modal Bien Inmueble Extranjero -->
 <ng-template #bienExtranjeroModal let-dialogRef>
   <h2 mat-dialog-title>{{ editExtranjero ? 'Editar Bien Inmueble (Extranjero)' : 'Agregar Bien Inmueble (Extranjero)' }}
   </h2>
 
   <mat-dialog-content>
     <form [formGroup]="bienExtranjeroForm">
-      <mat-form-field appearance="fill" class="w-100 mb-3">
+      <!-- País -->
+      <mat-form-field appearance="outline" class="w-100 mb-3">
         <mat-label>País</mat-label>
-        <input matInput formControlName="pais" />
+        <mat-select formControlName="paisId">
+          <mat-option *ngFor="let p of paises" [value]="p.id">{{ p.nombre }}</mat-option>
+        </mat-select>
       </mat-form-field>
 
-      <mat-form-field appearance="fill" class="w-100 mb-3">
-        <mat-label>Dirección</mat-label>
-        <input matInput formControlName="direccion" />
+      <!-- Ciudad -->
+      <mat-form-field appearance="outline" class="w-100 mb-3">
+        <mat-label>Ciudad</mat-label>
+        <input matInput formControlName="ciudad" />
       </mat-form-field>
 
-      <mat-form-field appearance="fill" class="w-100 mb-3">
-        <mat-label>Observaciones</mat-label>
-        <textarea matInput formControlName="observaciones"></textarea>
+      <!-- Calle -->
+      <mat-form-field appearance="outline" class="w-100 mb-3">
+        <mat-label>Calle</mat-label>
+        <input matInput formControlName="calle" />
+      </mat-form-field>
+
+      <!-- Número -->
+      <mat-form-field appearance="outline" class="w-100 mb-3">
+        <mat-label>Número</mat-label>
+        <input matInput formControlName="numero" />
+      </mat-form-field>
+
+      <!-- Departamento -->
+      <mat-form-field appearance="outline" class="w-100 mb-3">
+        <mat-label>Departamento</mat-label>
+        <input matInput formControlName="departamento" />
+      </mat-form-field>
+
+      <!-- Valor -->
+      <mat-form-field appearance="outline" class="w-100 mb-3">
+        <mat-label>Valor Corriente</mat-label>
+        <input matInput formControlName="valor" />
+      </mat-form-field>
+
+      <!-- Tipo Moneda -->
+      <mat-form-field appearance="outline" class="w-100 mb-3">
+        <mat-label>Tipo de Moneda</mat-label>
+        <mat-select formControlName="tipoMonedaId">
+          <mat-option *ngFor="let m of monedas" [value]="m.id">{{ m.nombre }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <!-- Porcentaje -->
+      <mat-form-field appearance="outline" class="w-100 mb-3">
+        <mat-label>Porcentaje de Propiedad</mat-label>
+        <input matInput formControlName="porcentaje" />
+      </mat-form-field>
+
+      <!-- Fecha Adquisición -->
+      <mat-form-field appearance="outline" class="w-100 mb-3">
+        <mat-label>Fecha de Adquisición</mat-label>
+        <input matInput formControlName="fechaAdquisicion" />
+      </mat-form-field>
+
+      <!-- Clase -->
+      <mat-form-field appearance="outline" class="w-100 mb-3">
+        <mat-label>Forma de Propiedad</mat-label>
+        <mat-select formControlName="claseId">
+          <mat-option *ngFor="let f of formasPropiedad" [value]="f.id">{{ f.nombre }}</mat-option>
+        </mat-select>
       </mat-form-field>
     </form>
   </mat-dialog-content>
 
   <mat-dialog-actions align="end">
-    <button mat-button (click)="dialogRef.close()">Cancelar</button>
-    <button mat-raised-button color="primary" (click)="saveBienExtranjero(dialogRef)">Guardar</button>
+    <button mat-button (click)="closeDialog()">Cancelar</button>
+    <button mat-raised-button color="primary" (click)="saveBienExtranjero()">Guardar</button>
   </mat-dialog-actions>
 </ng-template>

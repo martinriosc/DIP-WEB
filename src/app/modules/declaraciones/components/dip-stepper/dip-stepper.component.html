@@ -77,7 +77,7 @@
                 <div class="row">
                   <div class="step-info row p-3 pb-4 g-2 align-items-center bg-white"
                     style="border-top: 1px solid #ff5d17d3;">
-                    <!-- Texto “Paso …” -->
+                    <!-- Texto "Paso …" -->
                     <span class="progress-bar-dip m-0 col-12 col-md-2">
                       Paso {{ intIndex + 1 }} de {{ intSteps.length }}
                       ({{ ((intProgress$ | async) ?? 0) * 100 | number:'1.0-0' }}%)
@@ -153,27 +153,28 @@
 </div>
 
 
-<ng-template #declarantesModal let-dialogRef>
-  <h2 mat-dialog-title>Selecciona un declarante o persona relacionada</h2>
-  <br>
-  <mat-dialog-content>
-    <div class="container-fluid">
-      <div class="row">
-        <div class="col">
-          <mat-form-field class="w-100">
-            <mat-label>Seleccionar Declarante</mat-label>
-            <mat-select (selectionChange)="selectDeclarante($event.value)">
-              <mat-option *ngFor="let decl of declaraciones$ | async" [value]="decl.id">
-                {{ decl.declara }}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
+<ng-template #declaracionModal>
+  <div class="modal-content">
+    <h2 mat-dialog-title>Selecciona un declarante o persona relacionada</h2>
+    <mat-dialog-content>
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col">
+            <mat-form-field class="w-100">
+              <mat-label>Seleccionar Declarante</mat-label>
+              <mat-select (selectionChange)="selectDeclarante($event.value)">
+                <mat-option *ngFor="let decl of declaraciones$ | async" [value]="decl.id">
+                  {{ decl.declara }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
         </div>
       </div>
-    </div>
-  </mat-dialog-content>
+    </mat-dialog-content>
 
-  <mat-dialog-actions align="end">
-    <button mat-button (click)="dialogRef.close()" mat-dialog-close>Cancelar</button>
-  </mat-dialog-actions>
+    <mat-dialog-actions align="end">
+      <button mat-button mat-dialog-close>Cancelar</button>
+    </mat-dialog-actions>
+  </div>
 </ng-template>

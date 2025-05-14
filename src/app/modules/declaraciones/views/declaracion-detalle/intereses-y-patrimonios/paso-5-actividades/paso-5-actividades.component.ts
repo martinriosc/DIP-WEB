@@ -1,19 +1,24 @@
-import { Component, ViewChild, TemplateRef, Optional, SkipSelf } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import {
+  Component,
+  TemplateRef,
+  ViewChild,
+  AfterViewInit,
+  OnInit
+} from '@angular/core';
+import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
-import { ValidadorDeclaracionService } from '../../../../services/validador-declaracion.service';
-import { MatStepper } from '@angular/material/stepper';
-import { StepperStatusService } from 'src/app/modules/declaraciones/services/stepper-status.service';
-import { ActividadProfesional } from 'src/app/shared/models/AllModels';
-import { ActividadProfesionalService } from 'src/app/modules/declaraciones/services/actividad-profesional.service';
+import { formatDate } from '@angular/common';
+import {
+  ActividadProfesionalService
+} from 'src/app/modules/declaraciones/services/actividad-profesional.service';
 import { ComunService } from 'src/app/modules/declaraciones/services/comun.service';
-import { DeclaracionHelperService } from 'src/app/modules/declaraciones/services/declaracion-helper.service';
-
-interface ActividadItem {
-  tipoActividad: string;
-  rubroArea: string;
-  vinculo: string;
-}
+import { DeclaracionHelperService }
+  from 'src/app/modules/declaraciones/services/declaracion-helper.service';
+import { DeclaracionService }
+  from 'src/app/modules/declaraciones/services/declaracion.service';
+import Swal from 'sweetalert2';
+import { ToastrService } from 'ngx-toastr';
+import { NgxSpinnerService } from 'ngx-spinner';
 
 @Component({
   selector: 'app-paso-5-actividades',
@@ -21,317 +26,442 @@ interface ActividadItem {
   templateUrl: './paso-5-actividades.component.html',
   styleUrls: ['./paso-5-actividades.component.scss']
 })
-export class Paso5ActividadesComponent {
-  actividadesUltimos12Meses = 'no';
-  displayedColumnActividad12Meses: string[] = ['tipoActividad', 'rubroArea', 'vinculo', 'objetoEntidad', 'dataSensible', 'estado', 'acciones'];
-  @ViewChild('actividad12MesesModal') actividad12MesesModal!: TemplateRef<any>;
-  actividades12MesesForm!: FormGroup;
-  edit12MesesMode = false;
-  current12MesesItem: any | null = null;
+export class Paso5ActividadesComponent implements OnInit, AfterViewInit {
+
+  /* ---------------- Estados globales ---------------- */
+  actividadesUltimos12Meses = '';
+  actividadesQueRealiza = '';
+  actividadesConyuge = '';
+  flagConyuge = false;
+  private dialogRef: any;
+
+  /* ---------------- Tablas & columnas ---------------- */
+  displayedColumnActividad12Meses = ['tipoActividad', 'rubroArea', 'vinculo', 'objetoEntidad', 'dataSensible', 'estado', 'acciones'];
+  displayedColumnsActividadesRealiza = ['tipoActividad', 'rubroArea', 'vinculo', 'objetoVinculo', 'fechaInicio', 'beneficiario', 'dataSensible', 'estado', 'acciones'];
+  displayedColumnsActividadesConyuge = ['tipoActividad', 'rubroArea', 'fechaInicio', 'clasificacion', 'beneficiario', 'rutBeneficiario', 'dataSensible', 'estado', 'acciones'];
+
   actividades12Meses: any[] = [];
-
-
-
-  actividadesQueRealiza = 'no';
-  displayedColumnsActividadesRealiza: string[] = ['tipoActividad', 'rubroArea', 'vinculo', 'objetoVinculo', 'fechaInicio', 'beneficiario', 'dataSensible', 'estado', 'acciones'];
-  @ViewChild('actividadesRealizaModal') actividadesRealizaModal!: TemplateRef<any>;
-  actividadesRealizaForm!: FormGroup;
-  editRealizaMode = false;
-  currentRealizaItem: any | null = null;
   actividadesRealiza: any[] = [];
-
-
-  flagConyuge: boolean = false;
-  actividadesConyuge = 'no';
-  displayedColumnsActividadesConyuge: string[] = ['tipoActividad', 'rubroArea', 'fechaInicio', 'clasificacion', 'beneficiario', 'rutBeneficiario', 'dataSensible', 'estado', 'acciones'];
-  @ViewChild('actividadesConyugeModal') actividadesConyugeModal!: TemplateRef<any>;
-  actividadesConyugeForm!: FormGroup;
-  editConyugeMode = false;
-  currentConyugeItem: any | null = null;
   actividadesConyugeData: any[] = [];
 
+  /* ---------------- Formularios ---------------- */
+  @ViewChild('actividad12MesesModal') actividad12MesesModal!: TemplateRef<any>;
+  @ViewChild('actividadesRealizaModal') actividadesRealizaModal!: TemplateRef<any>;
+  @ViewChild('actividadesConyugeModal') actividadesConyugeModal!: TemplateRef<any>;
 
+  actividades12MesesForm!: FormGroup;
+  actividadesRealizaForm!: FormGroup;
+  actividadesConyugeForm!: FormGroup;
 
+  /* ---------------- Flags de edición ---------------- */
+  edit12MesesMode = false;
+  editRealizaMode = false;
+  editConyugeMode = false;
+
+  current12MesesItem: any = null;
+  currentRealizaItem: any = null;
+  currentConyugeItem: any = null;
+
+  /* ---------------- Catálogos ---------------- */
   tiposActividades: any[] = [];
   actividadesProfesionales: any[] = [];
   clasificaciones: any[] = [];
 
-  declaracionId: number = 1319527;
-  declaranteId: number = 2882000;
-
+  /* ---------------- IDs ---------------- */
+  declaracionId = 0;
+  declaranteId = 0;
   private activeDeclId!: string;
+
   constructor(
     private fb: FormBuilder,
     private dialog: MatDialog,
-    private _declaracionHelper: DeclaracionHelperService,
-    private _actividad: ActividadProfesionalService,
-    private _comun: ComunService,
-    @Optional() @SkipSelf() private stepper?: MatStepper
+    private helper: DeclaracionHelperService,
+    private actividadSrv: ActividadProfesionalService,
+    private comunSrv: ComunService,
+    private declaracionSrv: DeclaracionService,
+    private toastr: ToastrService,
+    private _spinner: NgxSpinnerService
   ) { }
 
-
+  /* ===================================================================
+     CICLO DE VIDA
+  =================================================================== */
   ngOnInit(): void {
-    this.buildForm('12meses');
-    this.buildForm('realiza');
-    this.buildForm('conyuge');
-    this._declaracionHelper.activeId$.subscribe(id => this.activeDeclId = id);
+    this._spinner.show();
+    this.buildAllForms();
+    this.helper.activeId$.subscribe(id => (this.activeDeclId = id));
 
-    this.loadTipoActivdad();
-    this.loadActividadesProfesionales();
-    this.loadClasificaciones();
-
-    this.validarConygue()
+    this.loadCatalogos();
+    this.validarConyuge();
     this.loadActividades();
-
   }
 
   ngAfterViewInit(): void {
-    this.loadRegistro();
+    this.helper.declaracionesFlag$.subscribe(flag => {
+      this.actividadesUltimos12Meses = flag.actividadesIndividuales ? 'si' : 'no';
+      this.actividadesQueRealiza = flag.actividadesDependientes ? 'si' : 'no';
+      this.actividadesConyuge = flag.actividadesGremiales ? 'si' : 'no';
+    });
   }
 
+  /* ===================================================================
+     UI – Construcción de formularios
+  =================================================================== */
+  private buildAllForms() {
+    /* grupo 1 */
+    this.actividades12MesesForm = this.fb.group({
+      tipoActividadId: [''],
+      rubroId: [''],
+      descripcionActividad: [''],
+      rbDatoSensible: ['']
+    });
 
-  loadRegistro() {
-    this._declaracionHelper.declaracionesFlag$.subscribe(data => {
-      
-      this.actividadesUltimos12Meses = data.actividadesIndividuales ? 'si' : 'no';
-      this.actividadesQueRealiza = data.actividadesGremiales ? 'si' : 'no';
-      this.actividadesConyuge = data.actividadesDependiente ? 'si' : 'no';
-    })
+    /* grupo 2 */
+    this.actividadesRealizaForm = this.fb.group({
+      tipoActividadId: [''],
+      rubroId: [''],
+      fechaInicio: [''],
+      clasificacionId: [''],
+      beneficiario: [''],
+      rbRunRut: ['rut'],
+      rut: [''],
+      rbDatoSensible: ['']
+    });
+
+    /* grupo 3 */
+    this.actividadesConyugeForm = this.fb.group({
+      tipoActividadId: [''],
+      rubroId: [''],
+      fechaInicio: [''],
+      clasificacionId: [''],
+      beneficiario: [''],
+      rbRunRut: ['rut'],
+      rut: [''],
+      rbDatoSensible: ['']
+    });
   }
 
+  /* ===================================================================
+     CARGA DE CATÁLOGOS
+  =================================================================== */
+  private loadCatalogos() {
+    this.comunSrv.listarEntity('', 'TipoActividad').subscribe({
+      next: (res: any) => (this.tiposActividades = res),
+      error: console.error
+    });
 
-  private buildForm(tipo: string,item?: any): void {
-    if(tipo == '12meses'){
-      this.actividades12MesesForm = this.fb.group({
-        tipoActividad: [item?.tipoActividad || '', Validators.required],
-        rubroArea: [item?.rubroArea || '', Validators.required],
-        descripcion: [item?.vinculo || '', Validators.required],
-        datoSensible: [item?.datoSensible || 'false', Validators.required]
-      });
-    } else if(tipo == 'realiza'){
-      this.actividadesRealizaForm = this.fb.group({
-        tipoActividad: [item?.tipoActividad || '', Validators.required],
-        rubroArea: [item?.rubroArea || '', Validators.required],
-        fechaInicio: [item?.fechaInicio || '', Validators.required],
-        clasificacion: [item?.clasificacion || '', Validators.required],
-        beneficiario: [item?.razonSocial || '', Validators.required],
-        rutOrun: [item?.rutOrun || '', Validators.required],
-        rutBeneficiario: [item?.rutBeneficiario || '', Validators.required],
-        datoSensible: [item?.datoSensible || 'false', Validators.required]
-      });
-    } else if(tipo == 'conyuge'){
-      this.actividadesConyugeForm = this.fb.group({
-        tipoActividad: [item?.tipoActividad || '', Validators.required],
-        rubroArea: [item?.rubroArea || '', Validators.required],
-        fechaInicio: [item?.fechaInicio || '', Validators.required],
-        clasificacion: [item?.clasificacion || '', Validators.required],
-        beneficiario: [item?.razonSocial || '', Validators.required],
-        rutOrun: [item?.rutOrun || '', Validators.required],
-        rutBeneficiario: [item?.rutBeneficiario || '', Validators.required],
-        datoSensible: [item?.datoSensible || 'false', Validators.required]
-      });
+    this.actividadSrv.listar('', 'tipo').subscribe({
+      next: res => (this.actividadesProfesionales = res),
+      error: console.error
+    });
+
+    this.actividadSrv.listar('', 'clasificacion').subscribe({
+      next: res => (this.clasificaciones = res),
+      error: console.error
+    });
+  }
+
+  /* ===================================================================
+     CONYUGE
+  =================================================================== */
+  private validarConyuge() {
+    this.actividadSrv.validarConyuge(this.declaracionId).subscribe({
+      next: flag => (this.flagConyuge = flag),
+      error: console.error
+    });
+  }
+
+  /* ===================================================================
+     CRUD — Lectura
+  =================================================================== */
+  private loadActividades() {
+    this.actividadSrv.listarActividades(1, this.declaranteId).subscribe({
+      next: res => (this.actividades12Meses = res || []),
+      error: console.error
+    });
+
+    this.actividadSrv.listarActividades(2, this.declaranteId).subscribe({
+      next: res => (this.actividadesRealiza = res || []),
+      error: console.error
+    });
+
+    this.actividadSrv.listarActividades(3, this.declaranteId).subscribe({
+      next: res => (this.actividadesConyugeData = res || []),
+      error: console.error
+    });
+
+    this._spinner.hide();
+  }
+
+  /* ===================================================================
+     CRUD — Creación / Edición
+  =================================================================== */
+  /* ---------- helpers ---------- */
+  private buildPayload(tipo: '12meses' | 'realiza' | 'conyuge', form: FormGroup, id = '') {
+
+    let formulario: any = form.value
+
+    switch (tipo) {
+
+      /* grupo 1: Actividades últimos 12 meses */
+      case '12meses':
+        return {
+          id,
+          grupo: '1',
+          tipoActividadId: formulario.tipoActividadId,
+          rubroId: formulario.rubroId,
+          descripcionActividad: formulario.descripcionActividad,
+          rbDatoSensible: formulario.rbDatoSensible,
+          borrador: !this.isFormValid(form)
+        };
+
+      /* grupo 2: Actividades realiza a la fecha */
+      case 'realiza':
+        return {
+          id,
+          grupo: '2',
+          tipoActividadId: formulario.tipoActividadId,
+          rubroId: formulario.rubroId,
+          fechaInicio: formatDate(formulario.fechaInicio, 'dd/MM/yyyy', 'es'),
+          clasificacionId: formulario.clasificacionId,
+          razonSocial: formulario.beneficiario,
+          rbRunRut: formulario.rutOrun === 'rut',
+          rut: formulario.rut,
+          rbDatoSensible: formulario.rbDatoSensible,
+          borrador: !this.isFormValid(form)
+        };
+
+      /* grupo 3: Actividades cónyuge */
+      default:
+        return {
+          id,
+          grupo: '3',
+          tipoActividadId: formulario.tipoActividadId,
+          rubroId: formulario.rubroId,
+          fechaInicio: formatDate(formulario.fechaInicio, 'dd/MM/yyyy', 'es'),
+          clasificacionId: formulario.clasificacionId,
+          razonSocial: formulario.beneficiario,
+          rut: formulario.rut,
+          rbDatoSensible: formulario.rbDatoSensible,
+          borrador: !this.isFormValid(form)
+        };
     }
-   
-
+  }
+  
+  private isFormValid(ctrl: any): boolean {
+  if (ctrl instanceof FormControl) {
+    const v = ctrl.value;
+    return v !== null && v !== undefined && String(v).trim() !== '';
   }
 
-
-  validarConygue() {
-    this._actividad.validarConyuge(this.declaracionId).subscribe({
-      next: (res: any) => {
-        this.flagConyuge = res;
-      },
-      error: (err) => {
-        console.log(err);
-      }
-    })
+  if (ctrl instanceof FormGroup) {
+    return Object.values(ctrl.controls).every(child => this.isFormValid(child));
   }
 
-  loadActividades() {
-    this._actividad.listarActividades(1, this.declaranteId).subscribe({
-      next: (res: any) => {
-        if (res.length > 0) {
-          this.actividades12Meses = res;
+  if (ctrl instanceof FormArray) {
+    return ctrl.controls.every(child => this.isFormValid(child));
+  }
+  return true;
+}
+
+
+  /* ---------- alta / edición ---------- */
+  saveActividad(tipo: '12meses' | 'realiza' | 'conyuge') {
+    const form =
+      tipo === '12meses' ? this.actividades12MesesForm :
+        tipo === 'realiza' ? this.actividadesRealizaForm :
+          this.actividadesConyugeForm;
+
+
+    /* id = '' cuando es alta */
+    const id =
+      tipo === '12meses' && this.edit12MesesMode ? this.current12MesesItem?.id :
+        tipo === 'realiza' && this.editRealizaMode ? this.currentRealizaItem?.id :
+          tipo === 'conyuge' && this.editConyugeMode ? this.currentConyugeItem?.id :
+            '';
+
+    const payload = this.buildPayload(tipo, form, id);
+
+    console.log(payload);
+
+    this.actividadSrv.guardarActividad(payload, this.declaranteId).subscribe({
+      next: saved => {
+        this.loadActividades();
+        this.toastr.success('Actividad guardada correctamente');
+        switch (tipo) {
+          case '12meses':
+            if (this.edit12MesesMode) {
+              const idx = this.actividades12Meses.findIndex(a => a.id === saved.id);
+              if (idx > -1) this.actividades12Meses[idx] = saved;
+            } else {
+              this.actividades12Meses.push(saved);
+            }
+            break;
+
+          case 'realiza':
+            if (this.editRealizaMode) {
+              const idx = this.actividadesRealiza.findIndex(a => a.id === saved.id);
+              if (idx > -1) this.actividadesRealiza[idx] = saved;
+            } else {
+              this.actividadesRealiza.push(saved);
+            }
+            break;
+
+          case 'conyuge':
+            if (this.editConyugeMode) {
+              const idx = this.actividadesConyugeData.findIndex(a => a.id === saved.id);
+              if (idx > -1) this.actividadesConyugeData[idx] = saved;
+            } else {
+              this.actividadesConyugeData.push(saved);
+            }
+            break;
         }
-      },
-      error: (err) => {
-        console.log(err);
-      }
-    })
 
-    this._actividad.listarActividades(2, this.declaranteId).subscribe({
-      next: (res: any) => {
-        if (res.length > 0) {
-          this.actividadesRealiza = res;
-        }
+        this.closeDialog();
+        // this.helper.markStepCompleted(['declaraciones', this.activeDeclId, 'paso5']);
       },
-      error: (err) => {
-        console.log(err);
-      }
-    })
-
-    this._actividad.listarActividades(3, this.declaranteId).subscribe({
-      next: (res: any) => {
-        if (res.length > 0) {
-          this.actividadesConyugeData = res;
-
-        }
-      },
-      error: (err) => {
-        console.log(err);
-      }
-    })
+      error: err => console.error('Error al guardar:', err)
+    });
   }
 
-  loadTipoActivdad() {
-    this._comun.listarEntity('', 'TipoActividad').subscribe({
-      next: (res: any) => {
-        this.tiposActividades = res;
-      },
-      error: (err) => {
-        console.log(err);
+  /* ---------- eliminación ---------- */
+  eliminarActividad(item: any) {
+    Swal.fire({
+      title: '¿Estás seguro?',
+      text: 'Esta acción eliminará la actividad seleccionada.',
+      icon: 'warning',
+      showCancelButton: true,
+    }).then(result => {
+      if (result.isConfirmed) {
+        this.actividadSrv.eliminarActividad(item.id).subscribe({
+          next: () => {
+            this.actividades12Meses = this.actividades12Meses.filter(a => a.id !== item.id);
+            this.actividadesRealiza = this.actividadesRealiza.filter(a => a.id !== item.id);
+            this.actividadesConyugeData = this.actividadesConyugeData.filter(a => a.id !== item.id);
+            this.toastr.success('Actividad eliminada correctamente');
+          },
+          error: err => console.error('Error al eliminar:', err)
+        });
       }
-    })
+    });
+
+
+    // if (!confirm(`¿Eliminar la actividad seleccionada?`)) { return; }
+
+    // this.actividadSrv.eliminarActividad(item.id).subscribe({
+    //   next: () => {
+    //     this.actividades12Meses = this.actividades12Meses.filter(a => a.id !== item.id);
+    //     this.actividadesRealiza = this.actividadesRealiza.filter(a => a.id !== item.id);
+    //     this.actividadesConyugeData = this.actividadesConyugeData.filter(a => a.id !== item.id);
+    //   },
+    //   error: err => console.error('Error al eliminar:', err)
+    // });
   }
 
-  loadActividadesProfesionales() {
-    this._actividad.listar("", "tipo").subscribe({
-      next: (res: any) => {
-        this.actividadesProfesionales = res;
-      },
-      error: (err) => {
-        console.log(err);
-      }
-    })
-  }
+  /* ===================================================================
+     DIALOG – Apertura
+  =================================================================== */
+  openAddModal(tipo: '12meses' | 'realiza' | 'conyuge') {
+    /* reset flags & form */
+    switch (tipo) {
+      case '12meses':
+        this.edit12MesesMode = false; this.current12MesesItem = null;
+        this.actividades12MesesForm.reset({ datoSensible: 'No' });
+        this.dialogRef = this.dialog.open(this.actividad12MesesModal, { width: '800px' });
+        break;
 
-  loadClasificaciones() {
-    this._actividad.listar("", "clasificacion").subscribe({
-      next: (res: any) => {
-        this.clasificaciones = res;
-      },
-      error: (err) => {
-        console.log(err);
-      }
-    })
-  }
+      case 'realiza':
+        this.editRealizaMode = false; this.currentRealizaItem = null;
+        this.actividadesRealizaForm.reset({ datoSensible: 'No', rutOrun: 'rut' });
+        this.dialogRef = this.dialog.open(this.actividadesRealizaModal, { width: '800px' });
+        break;
 
-
-
-  onSubmit(): void {
-    const ok1 = this.actividadesUltimos12Meses ? this.actividades12Meses.length > 0 : true;
-    const ok2 = this.actividadesQueRealiza ? this.actividadesRealiza.length > 0 : true;
-    const ok3 = this.actividadesConyuge ? this.actividadesConyugeData.length > 0 : true;
-    const ok = ok1 && ok2 && ok3;
-    if (ok) {
-      this._declaracionHelper.markStepCompleted(['declaraciones', 'paso5']);
-      this._declaracionHelper.nextStep();
-    } else {
-      this._declaracionHelper.markStepIncomplete(['declaraciones', 'paso5']);
-      this._declaracionHelper.nextStep();
+      case 'conyuge':
+        this.editConyugeMode = false; this.currentConyugeItem = null;
+        this.actividadesConyugeForm.reset({ datoSensible: 'No', rutOrun: 'rut' });
+        this.dialogRef = this.dialog.open(this.actividadesConyugeModal, { width: '800px' });
+        break;
     }
   }
 
-  openAddModal(tipo: string): void {
-    if(tipo == '12meses'){
-      this.edit12MesesMode = false;
-      this.current12MesesItem = null;
-      this.buildForm('12meses');
-      this.dialog.open(this.actividad12MesesModal, { width: '800px' });
-    } else if(tipo == 'realiza'){
-      this.editRealizaMode = false;
-      this.currentRealizaItem = null;
-      this.buildForm('realiza');
-      this.dialog.open(this.actividadesRealizaModal, { width: '800px' });
-    } else if(tipo == 'conyuge'){
-      this.editConyugeMode = false;
-      this.currentConyugeItem = null;
-      this.buildForm('conyuge');
-      this.dialog.open(this.actividadesConyugeModal, { width: '800px' });
-    }
-   
-  }
+  openEditModal(tipo: '12meses' | 'realiza' | 'conyuge', item: any) {
+    switch (tipo) {
+      case '12meses':
+        this.edit12MesesMode = true;
+        this.current12MesesItem = item;
+        this.actividades12MesesForm.patchValue({
+          ...item,
+          datoSensible: item.rbDatoSensible ? 'Si' : 'No'
+        });
+        this.dialogRef = this.dialog.open(this.actividad12MesesModal, { width: '800px' });
+        break;
 
-  openEditModal(tipo: string, item: any): void {
-    if(tipo == '12meses'){
-      this.edit12MesesMode = true;
-      this.current12MesesItem = item;
-      this.buildForm('12meses',item);
-      this.dialog.open(this.actividad12MesesModal, { width: '800px' });
-    } else if(tipo == 'realiza'){
-      this.editRealizaMode = true;
-      this.currentRealizaItem = item;
-      this.buildForm('realiza',item);
-      this.dialog.open(this.actividadesRealizaModal, { width: '800px' });
-    } else if(tipo == 'conyuge'){
-      this.editConyugeMode = true;
-      this.currentConyugeItem = item;
-      this.buildForm('conyuge',item);
-      this.dialog.open(this.actividadesConyugeModal, { width: '800px' });
-    }
-  }
+      case 'realiza':
+        this.editRealizaMode = true;
+        this.currentRealizaItem = item;
+        this.actividadesRealizaForm.patchValue({
+          ...item,
+          fechaInicio: item.fechaInicio ? new Date(item.fechaInicio) : '',
+          datoSensible: item.rbDatoSensible ? 'Si' : 'No',
+          rutOrun: item.rbRunRut ? 'rut' : 'run',
+          rutBeneficiario: item.rut
+        });
+        this.dialogRef = this.dialog.open(this.actividadesRealizaModal, { width: '800px' });
+        break;
 
-  saveActividad(tipo: string, dialogRef: any): void {
-    if(tipo == '12meses'){
-      const formValue = this.actividades12MesesForm.value as any;
-      if(this.edit12MesesMode && this.current12MesesItem){
-        const i = this.actividades12Meses.indexOf(this.current12MesesItem);
-        if(i >= 0) this.actividades12Meses[i] = formValue;
-      } else {
-        this.actividades12Meses.push(formValue);
-      }
-      dialogRef.close();
-      this._declaracionHelper.markStepCompleted(['declaraciones', this.activeDeclId, 'paso5']);
-        
-      } else if(tipo == 'realiza'){
-        const formValue = this.actividadesRealizaForm.value as any;
-        if(this.editRealizaMode && this.currentRealizaItem){
-          const i = this.actividadesRealiza.indexOf(this.currentRealizaItem);
-          if(i >= 0) this.actividadesRealiza[i] = formValue;
-        } else {
-          this.actividadesRealiza.push(formValue);
-        }
-        dialogRef.close();
-        this._declaracionHelper.markStepCompleted(['declaraciones', this.activeDeclId, 'paso5']);
-      } else if(tipo == 'conyuge'){
-        const formValue = this.actividadesConyugeForm.value as any;
-        if(this.editConyugeMode && this.currentConyugeItem){
-          const i = this.actividadesConyugeData.indexOf(this.currentConyugeItem);
-          if(i >= 0) this.actividadesConyugeData[i] = formValue;
-        } else {
-          this.actividadesConyugeData.push(formValue);
-        }
-        dialogRef.close();
-        this._declaracionHelper.markStepCompleted(['declaraciones', this.activeDeclId, 'paso5']);
+      case 'conyuge':
+        this.editConyugeMode = true;
+        this.currentConyugeItem = item;
+        this.actividadesConyugeForm.patchValue({
+          ...item,
+          fechaInicio: item.fechaInicio ? new Date(item.fechaInicio) : '',
+          datoSensible: item.rbDatoSensible ? 'Si' : 'No',
+          rutBeneficiario: item.rut
+        });
+        this.dialogRef = this.dialog.open(this.actividadesConyugeModal, { width: '800px' });
+        break;
     }
   }
 
-  eliminarActividad(item: any): void {
-    if(confirm(`¿Eliminar la actividad "${item.nombre}"?`)) {
-      if(item.tipo == '12meses'){
-        this.actividades12Meses = this.actividades12Meses.filter(a => a.id !== item.id);
-        
-      } else if(item.tipo == 'realiza'){
-        this.actividadesRealiza = this.actividadesRealiza.filter(a => a.id !== item.id);
-      } else if(item.tipo == 'conyuge'){
-        this.actividadesConyugeData = this.actividadesConyugeData.filter(a => a.id !== item.id);
-      }
+  closeDialog() {
+    if (this.dialogRef) {
+      this.dialogRef.close();
+    }
+  }
+
+  /* ===================================================================
+     RADIO – Tiene/No tiene
+  =================================================================== */
+  onTieneActividad12MesesChange(val: 'si' | 'no') {
+    this.actividadesUltimos12Meses = val;
+    this.declaracionSrv.guardarRegistro(this.declaranteId, 'actividadesIndividuales', val === 'si').subscribe();
+  }
+
+  onTieneActividadRealizaChange(val: 'si' | 'no') {
+    this.actividadesQueRealiza = val;
+    this.declaracionSrv.guardarRegistro(this.declaranteId, 'actividadesDependientes', val === 'si').subscribe();
+  }
+
+  onTieneActividadConyugeChange(val: 'si' | 'no') {
+    this.actividadesConyuge = val;
+    this.declaracionSrv.guardarRegistro(this.declaranteId, 'actividadesGremiales', val === 'si').subscribe();
+  }
+
+  /* ===================================================================
+     SUBMIT — paso terminado
+  =================================================================== */
+  onSubmit() {
+    const listo =
+      (this.actividadesUltimos12Meses === 'no' || this.actividades12Meses.length) &&
+      (this.actividadesQueRealiza === 'no' || this.actividadesRealiza.length) &&
+      (this.actividadesConyuge === 'no' || this.actividadesConyugeData.length);
+
+    if (!listo) {
+      this.helper.markStepIncomplete(['declaraciones', 'paso5']);
+      return;
     }
 
-  }
-
-  onTieneActividad12MesesChange(value: string): void {
-    this.actividadesUltimos12Meses = value;
-
-  }
-
-  onTieneActividadRealizaChange(value: string): void {
-    this.actividadesQueRealiza = value;
-
-  }
-
-  onTieneActividadConyugeChange(value: string): void {
-    this.actividadesConyuge = value;
-
+    this.helper.markStepCompleted(['declaraciones', 'paso5']);
+    this.helper.nextStep();
   }
 }

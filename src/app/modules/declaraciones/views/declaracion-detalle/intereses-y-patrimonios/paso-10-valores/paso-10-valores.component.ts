@@ -5,25 +5,39 @@ import {
   TemplateRef
 } from '@angular/core';
 import {
+  FormArray,
   FormBuilder,
+  FormControl,
   FormGroup,
   Validators
 } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import Swal from 'sweetalert2';
 
-import { ValidadorDeclaracionService } from '../../../../services/validador-declaracion.service';
-import { StepperStatusService }        from 'src/app/modules/declaraciones/services/stepper-status.service';
 import { ComunidadValoresService } from 'src/app/modules/declaraciones/services/comunidad-valores.service';
 import { MonedaService } from 'src/app/modules/declaraciones/services/moneda.service';
 import { InmuebleService } from 'src/app/modules/declaraciones/services/inmueble.service';
 import { LocalidadService } from 'src/app/modules/declaraciones/services/localidad.service';
 import { DeclaracionHelperService } from 'src/app/modules/declaraciones/services/declaracion-helper.service';
+import { DeclaracionService } from 'src/app/modules/declaraciones/services/declaracion.service';
+import { Toast, ToastrService } from 'ngx-toastr';
+import { NgxSpinnerService } from 'ngx-spinner';
 
 interface ValorItem {
-  tipoValor:        string;
-  emisor:           string;
-  cantidad:         number;
-  valorAproximado:  number;
+  id?: string;
+  tipoId: string;
+  extranjero: boolean;
+  tituloId: string;
+  razonSocial: string;
+  paisId?: string;
+  fechaAdquisicion: string;
+  cantidad: string;
+  monedaId: string;
+  valorCorriente: string;
+  gravamenId: string;
+  borrador: boolean;
+  controlador: boolean;
 }
 
 @Component({
@@ -34,14 +48,18 @@ interface ValorItem {
 })
 export class Paso10ValoresComponent implements OnInit {
   @ViewChild('valorModal') valorModal!: TemplateRef<any>;
+  private dialogRef: any;
 
-  tieneValoresChile   = 'no';
+  displayedColumnsChile = ['titulo', 'razonSocial', 'fechaAdquisicion', 'cantidad', 'tipoMoneda', 'valorCorriente', 'estado', 'acciones'];
+  displayedColumnsExtranjero = ['titulo', 'razonSocial', 'pais', 'fechaAdquisicion', 'cantidad', 'tipoMoneda', 'valorCorriente', 'estado', 'acciones'];
+
+  tieneValoresChile = 'no';
   tieneValoresExtranjero = 'no';
-
 
   valorForm!: FormGroup;
   editMode = false;
   currentItem: ValorItem | null = null;
+  isExtranjero = false;
 
   private activeDeclId!: string;
 
@@ -52,50 +70,46 @@ export class Paso10ValoresComponent implements OnInit {
   gravamenes: any[] = [];
   paises: any[] = [];
 
-  declaracionId: number = 1319527;    //1319527
-  declaranteId: number = 2882000;
+  declaracionId: number = this._declaracionHelper.declaracionId;
+  declaranteId: number = this._declaracionHelper.declaranteId;
 
   constructor(
     private fb: FormBuilder,
     private dialog: MatDialog,
     private _comunidad: ComunidadValoresService,
-    private _moneda : MonedaService,
+    private _moneda: MonedaService,
     private _inmueble: InmuebleService,
     private _localidad: LocalidadService,
-    private _declaracionHelper: DeclaracionHelperService
-  ) {}
+    private _declaracionHelper: DeclaracionHelperService,
+    private _declaracion: DeclaracionService,
+    private _toastr: ToastrService,
+    private _spinner: NgxSpinnerService
+  ) { }
 
   ngOnInit(): void {
-    // Construye el formulario vacío
     this.buildForm();
-    // Obtiene la declaración activa
     this._declaracionHelper.activeId$.subscribe(id => this.activeDeclId = id);
 
     this.loadValores();
     this.loadPaises();
     this.loadMonedas();
-    // this.loadGravamenes();
     this.loadTitulos();
   }
-
 
   ngAfterViewInit(): void {
     this.loadRegistro();
   }
 
-  
-  loadRegistro(){
+  loadRegistro() {
     this._declaracionHelper.declaracionesFlag$.subscribe(data => {
       this.tieneValoresChile = data.instrumento ? 'si' : 'no';
       this.tieneValoresExtranjero = data.instrumentoExtranjero ? 'si' : 'no';
     })
   }
 
-
-  loadValores(){
-    this._comunidad.listar(3,this.declaranteId,false).subscribe({
+  loadValores() {
+    this._comunidad.listar(3, this.declaranteId, false).subscribe({
       next: (res: any) => {
-        
         this.valoresChile = res;
       },
       error: (err) => {
@@ -103,9 +117,8 @@ export class Paso10ValoresComponent implements OnInit {
       }
     })
 
-    this._comunidad.listar(3,this.declaranteId,true).subscribe({
+    this._comunidad.listar(3, this.declaranteId, true).subscribe({
       next: (res: any) => {
-        
         this.valoresExtranjero = res;
       },
       error: (err) => {
@@ -114,10 +127,9 @@ export class Paso10ValoresComponent implements OnInit {
     })
   }
 
-  loadPaises(){
+  loadPaises() {
     this._localidad.getPaisesExtranjeros().subscribe({
       next: (res: any) => {
-        
         this.paises = res;
       },
       error: (err) => {
@@ -126,10 +138,9 @@ export class Paso10ValoresComponent implements OnInit {
     })
   }
 
-  loadMonedas(){
+  loadMonedas() {
     this._moneda.listar().subscribe({
       next: (res: any) => {
-        
         this.monedas = res;
       },
       error: (err) => {
@@ -138,10 +149,9 @@ export class Paso10ValoresComponent implements OnInit {
     })
   }
 
-  loadTitulos(){
+  loadTitulos() {
     this._comunidad.listarTitulos().subscribe({
       next: (res: any) => {
-        
         this.titulos = res;
       },
       error: (err) => {
@@ -150,19 +160,6 @@ export class Paso10ValoresComponent implements OnInit {
     })
   }
 
-  loadGravamenes(tipoGravamen: string){
-    this._inmueble.listarAtributos('degravamen', tipoGravamen).subscribe({
-      next: (res: any) => {
-        
-        this.gravamenes = res;
-      },
-      error: (err) => {
-        console.log(err);
-      }
-    })
-  }
-
-  /** Guarda y avanza al siguiente paso */
   onSubmit(): void {
     const ok1 = this.tieneValoresChile === 'si' ? this.valoresChile.length > 0 : true;
     const ok2 = this.tieneValoresExtranjero === 'si' ? this.valoresExtranjero.length > 0 : true;
@@ -177,72 +174,135 @@ export class Paso10ValoresComponent implements OnInit {
     }
   }
 
-  /** Abre modal para agregar */
-  openAddModal(): void {
+  openAddModal(isExtranjero: boolean = false): void {
     this.editMode = false;
     this.currentItem = null;
+    this.isExtranjero = isExtranjero;
     this.buildForm();
-    this.dialog.open(this.valorModal, { width: '800px' });
+    this.dialogRef = this.dialog.open(this.valorModal, { width: '800px' });
   }
 
-  /** Abre modal para editar */
-  openEditModal(item: ValorItem): void {
+  openEditModal(item: ValorItem, isExtranjero: boolean = false): void {
     this.editMode = true;
     this.currentItem = item;
+    this.isExtranjero = isExtranjero;
     this.buildForm(item);
-    this.dialog.open(this.valorModal, { width: '800px' });
+    this.dialogRef = this.dialog.open(this.valorModal, { width: '800px' });
   }
 
-  /** Construye o resetea el formulario */
   private buildForm(item?: ValorItem): void {
     this.valorForm = this.fb.group({
-      tipoValor:       [item?.tipoValor      || 'BONO', Validators.required],
-      emisor:          [item?.emisor         || '',     Validators.required],
-      cantidad:        [item?.cantidad       || 0,      [Validators.required, Validators.min(1)]],
-      valorAproximado: [item?.valorAproximado || 0,      [Validators.required, Validators.min(0)]]
+      id: [item?.id || ''],
+      tipoId: [item?.tipoId || ''],
+      extranjero: [this.isExtranjero],
+      paisId: [item?.paisId || ''],
+      tituloId: [item?.tituloId || '', Validators.required],
+      razonSocial: [item?.razonSocial || ''],
+      fechaAdquisicion: [item?.fechaAdquisicion || ''],
+      cantidad: [item?.cantidad || ''],
+      monedaId: [item?.monedaId || ''],
+      valorCorriente: [item?.valorCorriente || ''],
+      gravamenId: [item?.gravamenId || '']
     });
+
+    if (this.isExtranjero) {
+      this.valorForm.get('paisId')?.setValidators([Validators.required]);
+    }
   }
 
-  /** Guarda o actualiza un valor desde la modal */
-  saveValor(dialogRef: any): void {
-    // const key  = 'paso10';
-    // const path = ['declaraciones', this.activeDeclId, key];
-
-    // if (this.valorForm.invalid) {
-    //   this.validador.markIncomplete(key);
-    //   this.stepperState.markStepIncomplete(path);
-    //   return;
-    // }
-
-    // const v = this.valorForm.value as ValorItem;
-    // if (this.editMode && this.currentItem) {
-    //   const idx = this.valoresData.indexOf(this.currentItem);
-    //   if (idx >= 0) this.valoresData[idx] = v;
-    // } else {
-    //   this.valoresData.push(v);
-    // }
-    // dialogRef.close();
-
-    // // Marca completo si hay al menos uno
-    // this.validador.markComplete(key);
-    // this.stepperState.markStepCompleted(path);
+  closeDialog() {
+    if (this.dialogRef) {
+      this.dialogRef.close();
+    }
   }
 
-  /** Elimina un valor */
+  saveValor(): void {
+
+    const payload = {
+      ...this.valorForm.value,
+      tipoId: 3,                         // siempre “3” para Valores
+      extranjero: this.isExtranjero,     // ← se envía correctamente
+      borrador: !this.isFormValid(this.valorForm),
+      controlador: false
+    };
+
+
+    this._comunidad.guardar(payload, this.declaranteId)
+      .subscribe({
+        next: _ => {
+          this._toastr.success('Guardado correctamente');
+          this.loadValores(); this.closeDialog();
+        },
+        error: _ => this._toastr.error('No se pudo guardar')
+      });
+  }
+
   eliminarValor(v: ValorItem): void {
-    const key  = 'paso10';
-    const path = ['declaraciones', this.activeDeclId, key];
+   
 
+    Swal.fire({
+      title: '¿Estás seguro?',
+      text: 'Esta acción eliminará el valor seleccionado.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this._comunidad.eliminar(v.id as string).subscribe({
+          next: (res: any) => {
+            this._toastr.success('Eliminado correctamente');
 
-  
+            this.loadValores();
+          },
+          error: (err) => {
+            console.log(err);
+            this._toastr.error('No se pudo eliminar');
+          }
+        });
+      }
+    });
   }
 
   onTieneValoresChileChange(value: string) {
     this.tieneValoresChile = value;
-
+    this._declaracion.guardarRegistro(this.declaranteId, 'intrumento', value === 'si').subscribe({
+      next: (res: any) => {
+        console.log('Registro guardado exitosamente');
+      },
+      error: (err: any) => {
+        console.error('Error al guardar registro:', err);
+      }
+    });
   }
 
   onTieneValoresExtranjeroChange(value: string) {
     this.tieneValoresExtranjero = value;
+    this._declaracion.guardarRegistro(this.declaranteId, 'intrumentoExtranjero', value === 'si').subscribe({
+      next: (res: any) => {
+        console.log('Registro guardado exitosamente');
+      },
+      error: (err: any) => {
+        console.error('Error al guardar registro:', err);
+      }
+    });
+  }
+
+  private isFormValid(ctrl: any): boolean {
+    if (ctrl instanceof FormControl) {
+      const v = ctrl.value;
+      return v !== null && v !== undefined && String(v).trim() !== '';
+    }
+
+    if (ctrl instanceof FormGroup) {
+      return Object.values(ctrl.controls).every(child => this.isFormValid(child));
+    }
+
+    if (ctrl instanceof FormArray) {
+      return ctrl.controls.every(child => this.isFormValid(child));
+    }
+    return true;
   }
 }

@@ -7,11 +7,12 @@ import {
   Optional,
   SkipSelf
 } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
+import { formatDate } from '@angular/common';
+import { ToastrService } from 'ngx-toastr';
+import Swal from 'sweetalert2';
 
-import { ValidadorDeclaracionService } from '../../../../services/validador-declaracion.service';
-import { StepperStatusService }        from 'src/app/modules/declaraciones/services/stepper-status.service';
 import { InmuebleService } from 'src/app/modules/declaraciones/services/inmueble.service';
 import { LocalidadService } from 'src/app/modules/declaraciones/services/localidad.service';
 import { MonedaService } from 'src/app/modules/declaraciones/services/moneda.service';
@@ -19,21 +20,51 @@ import { MatStepper } from '@angular/material/stepper';
 import { Declaracion } from 'src/app/shared/models/AllModels';
 import { DeclaracionService } from 'src/app/modules/declaraciones/services/declaracion.service';
 import { DeclaracionHelperService } from 'src/app/modules/declaraciones/services/declaracion-helper.service';
+import { NgxSpinnerService } from 'ngx-spinner';
 
 interface BienChile {
-  region: string;
-  comuna: string;
-  direccion: string;
-  inscripcion: string;
+  id?: string;
+  tabId: string;
+  regionId: number;
+  comunaId: number;
+  calle: string;
+  numero: string;
+  departamento: string;
+  numeroInscripcion: string;
   fojas: string;
-  anio: number;
+  anio: string;
+  rolAvaluoUno: string;
+  rolAvaluoDos: string;
+  conservadorId: number;
+  avaluoFiscal: string;
+  porcentaje: number;
+  fechaAdquisicion: string;
+  claseId: number;
+  rbDomicilio: boolean;
+  extranjero: boolean;
+  borrador: boolean;
+  controlador: boolean;
   rolAvaluo: string;
+  noPropietario: boolean;
 }
 
 interface BienExtranjero {
-  pais: string;
-  direccion: string;
-  observaciones: string;
+  id?: string;
+  tabId: string;
+  paisId: number;
+  ciudad: string;
+  calle: string;
+  numero: string;
+  departamento: string;
+  valor: string;
+  tipoMonedaId: number;
+  porcentaje: number;
+  fechaAdquisicion: string;
+  claseId: number;
+  extranjero: boolean;
+  borrador: boolean;
+  controlador: boolean;
+  noPropietario: boolean;
 }
 
 @Component({
@@ -48,11 +79,11 @@ export class Paso6BienesInmueblesComponent implements OnInit, AfterViewInit {
 
   bienesChile: any[] = [];
   displayedColumnsChile = [
-    'region','comuna','direccion','inscripcion','fojas','anio','rolAvaluo', 'conservador','avaluo','fechaAdquisicion','estado','acciones'
+    'region', 'comuna', 'direccion', 'inscripcion', 'fojas', 'anio', 'rolAvaluo', 'conservador', 'avaluo', 'fechaAdquisicion', 'estado', 'acciones'
   ];
 
   bienesExtranjero: any[] = [];
-  displayedColumnsExtranjero = ['pais','ciudad','direccion','valorCorriente','tipoMoneda','fechaAdquisicion','formaPropiedad','domicilio','estado','accionesExt'];
+  displayedColumnsExtranjero = ['pais', 'ciudad', 'direccion', 'valorCorriente', 'tipoMoneda', 'fechaAdquisicion', 'formaPropiedad', 'domicilio', 'estado', 'acciones'];
 
   @ViewChild('bienChileModal') bienChileModal!: TemplateRef<any>;
   bienChileForm!: FormGroup;
@@ -64,8 +95,8 @@ export class Paso6BienesInmueblesComponent implements OnInit, AfterViewInit {
   editExtranjero = false;
   currentExtranjero: BienExtranjero | null = null;
 
-  regiones = [];
-  comunas  = [];
+  regiones: any[] = [];
+  comunas: any[] = [];
 
   conservadoresBienes: any[] = [];
   clasesPropiedad: any[] = [];
@@ -73,8 +104,14 @@ export class Paso6BienesInmueblesComponent implements OnInit, AfterViewInit {
   paises: any[] = [];
   monedas: any[] = [];
 
-  declaracionId: number = 1319527;    //1319527
-  declaranteId: number = 2882000;
+  declaracionId: number = this._declaracionHelper.declaracionId;
+  declaranteId: number = this._declaracionHelper.declaranteId;
+
+  private dialogRef: any;
+
+  @ViewChild('dialogTemplate') dialogTemplate!: TemplateRef<any>;
+  @ViewChild('modalChile') modalChile!: TemplateRef<any>;
+  @ViewChild('modalExtranjero') modalExtranjero!: TemplateRef<any>;
 
   constructor(
     private fb: FormBuilder,
@@ -83,10 +120,10 @@ export class Paso6BienesInmueblesComponent implements OnInit, AfterViewInit {
     private _localidad: LocalidadService,
     private _moneda: MonedaService,
     private _declaracionHelper: DeclaracionHelperService,
-    @Optional() @SkipSelf() private stepper?: MatStepper
-  ) {
- 
-  }
+    private _declaracion: DeclaracionService,
+    private toastr: ToastrService,
+    private _spinner: NgxSpinnerService
+  ) { }
 
   ngOnInit(): void {
     this.buildChileForm();
@@ -96,7 +133,6 @@ export class Paso6BienesInmueblesComponent implements OnInit, AfterViewInit {
     this.loadRegiones();
     this.loadConservadorBienes();
     this.loadClasesPropiedad();
-    // this.loadFormasPropiedad();
     this.loadPaises();
     this.loadMonedas();
   }
@@ -105,120 +141,113 @@ export class Paso6BienesInmueblesComponent implements OnInit, AfterViewInit {
     this.loadRegistro();
   }
 
-  
-  loadRegistro(){
+  loadRegistro() {
     this._declaracionHelper.declaracionesFlag$.subscribe(data => {
-      
       this.tieneExtranjero = data.bienesInmueblesExtranjero ? 'si' : 'no';
       this.tieneChile = data.bienesInmuebles ? 'si' : 'no';
     })
   }
 
-
-
   loadBienesInmuebles() {
     this._inmueble.listarBienesInmuebles(this.declaranteId).subscribe({
-      next: (res:any) => {
-        
-          this.bienesChile = res;
-        
+      next: (res: any) => {
+        this.bienesChile = res;
       },
       error: (err) => {
-        console.log(err);
+        console.error('Error al cargar bienes inmuebles:', err);
+        this.toastr.error('Error al cargar bienes inmuebles');
       }
     })
   }
 
   loadBienesInmueblesExtranjero() {
     this._inmueble.listarBienesInmueblesExtranjero(this.declaranteId).subscribe({
-      next: (res:any) => {
-        
+      next: (res: any) => {
         this.bienesExtranjero = res;
       },
       error: (err) => {
-        console.log(err);
+        console.error('Error al cargar bienes inmuebles extranjeros:', err);
+        this.toastr.error('Error al cargar bienes inmuebles extranjeros');
       }
     })
   }
 
-  loadRegiones(){
+  loadRegiones() {
     this._localidad.getRegiones().subscribe({
-      next: (response:any) => {
-        
+      next: (response: any) => {
         this.regiones = response;
       },
       error: (error) => {
         console.error('Error al cargar regiones:', error);
+        this.toastr.error('Error al cargar regiones');
       }
     })
   }
 
-  loadComunas(){
-    this._localidad.getComunasPorRegion(this.bienChileForm.value.region).subscribe({
-      next: (response:any) => {
-        
+  loadComunas() {
+    this._localidad.getComunasPorRegion(this.bienChileForm.value.regionId).subscribe({
+      next: (response: any) => {
         this.comunas = response;
       },
       error: (error) => {
         console.error('Error al cargar comunas:', error);
+        this.toastr.error('Error al cargar comunas');
       }
     })
   }
 
-  loadConservadorBienes(){
+  loadConservadorBienes() {
     this._inmueble.listarAtributos('conservador').subscribe({
-      next: (res:any) => {
-        
+      next: (res: any) => {
         this.conservadoresBienes = res;
       },
       error: (err) => {
-        console.log(err);
+        console.error('Error al cargar conservadores:', err);
+        this.toastr.error('Error al cargar conservadores');
       }
     })
   }
 
-  loadClasesPropiedad(){
+  loadClasesPropiedad() {
     this._inmueble.listarAtributos('clase').subscribe({
-      next: (res:any) => {
-        
+      next: (res: any) => {
         this.clasesPropiedad = res;
         this.formasPropiedad = res;
       },
       error: (err) => {
-        console.log(err);
+        console.error('Error al cargar clases de propiedad:', err);
+        this.toastr.error('Error al cargar clases de propiedad');
       }
     })
   }
 
-  loadPaises(){
+  loadPaises() {
     this._localidad.getPaisesExtranjeros().subscribe({
-      next: (response:any) => {
-        
+      next: (response: any) => {
         this.paises = response;
       },
       error: (error) => {
-        console.error('Error al cargar paises:', error);
+        console.error('Error al cargar países:', error);
+        this.toastr.error('Error al cargar países');
       }
     })
   }
 
-  loadMonedas(){
+  loadMonedas() {
     this._moneda.listar().subscribe({
       next: (response) => {
-        
         this.monedas = response.data;
       },
       error: (error) => {
         console.error('Error al cargar monedas:', error);
+        this.toastr.error('Error al cargar monedas');
       }
     })
   }
 
-
-
   onSubmit(): void {
     const ok1 = this.tieneChile ? this.bienesChile.length > 0 : true;
-    const ok2 = this.tieneExtranjero ? this.bienesExtranjero.length > 0 : true; 
+    const ok2 = this.tieneExtranjero ? this.bienesExtranjero.length > 0 : true;
     const ok = ok1 && ok2;
     if (ok) {
       this._declaracionHelper.markStepCompleted(['declaraciones', 'paso6']);
@@ -229,118 +258,242 @@ export class Paso6BienesInmueblesComponent implements OnInit, AfterViewInit {
     }
   }
 
-
   openAddChileModal(): void {
     this.editChile = false;
     this.currentChile = null;
     this.buildChileForm();
-    this.dialog.open(this.bienChileModal, { width: '800px' });
+    this.dialogRef = this.dialog.open(this.bienChileModal, { width: '800px' });
   }
 
   openEditChileModal(item: BienChile): void {
     this.editChile = true;
     this.currentChile = item;
     this.buildChileForm(item);
-    this.dialog.open(this.bienChileModal, { width: '800px' });
+    this.dialogRef = this.dialog.open(this.bienChileModal, { width: '800px' });
   }
 
-  saveBienChile(dialogRef: any): void {
-  //   if (this.bienChileForm.valid) {
-  //     const formValue = this.bienChileForm.value as BienChile;
-  //     if (this.editChile && this.currentChile) {
-  //       const idx = this.bienesChile.indexOf(this.currentChile);
-  //       if (idx >= 0) this.bienesChile[idx] = formValue;
-  //     } else {
-  //       this.bienesChile.push(formValue);
-  //     }
-  //     dialogRef.close();
-  //     // Marca paso como completo ahora que hay al menos un bien
-  //     this.validador.markComplete('paso6');
-  //     this.stepperState.markStepCompleted(['declaraciones', this.activeDeclId, 'paso6']);
-  //   }
+  closeDialog() {
+    if (this.dialogRef) {
+      this.dialogRef.close();
+    }
+  }
+
+  saveBienChile(): void {
+    // if (this.bienChileForm.valid) {
+    const formValue = this.bienChileForm.value;
+    console.log(formValue)
+    const payload = {
+      id: this.editChile ? this.currentChile?.id : null,
+      tabId: '1',
+      regionId: formValue.regionId || '',
+      comunaId: formValue.comunaId || '',
+      calle: formValue.calle || '',
+      numero: formValue.numero || '',
+      departamento: formValue.departamento || '',
+      numeroInscripcion: formValue.numeroInscripcion || '',
+      fojas: formValue.fojas || '',
+      anio: formValue.anio || '',
+      rolAvaluoUno: formValue.rolAvaluoUno || '',
+      rolAvaluoDos: formValue.rolAvaluoDos || '',
+      conservadorId: formValue.conservadorId || '',
+      avaluoFiscal: formValue.avaluoFiscal || '',
+      porcentaje: formValue.porcentaje || 100,
+      fechaAdquisicion: formValue.fechaAdquisicion ? formatDate(formValue.fechaAdquisicion, 'dd/MM/yyyy', 'es') : '',
+      claseId: formValue.claseId || '',
+      rbDomicilio: formValue.rbDomicilio || false,
+      extranjero: false,
+      borrador: !this.isFormValid(this.bienChileForm),
+      controlador: false,
+      rolAvaluo: formValue.rolAvaluoUno && formValue.rolAvaluoDos ? `${formValue.rolAvaluoUno}-${formValue.rolAvaluoDos}` : '',
+      noPropietario: formValue.noPropietario || false
+    };
+
+    this._inmueble.guardarBienInmueble(payload, this.declaranteId).subscribe({
+      next: (res: any) => {
+        this.loadBienesInmuebles();
+        this.toastr.success('Bien inmueble guardado correctamente');
+        this.closeDialog();
+      },
+      error: (err) => {
+        console.error('Error al guardar bien inmueble:', err);
+        this.toastr.error('Error al guardar bien inmueble');
+      }
+    });
+    // }
   }
 
   eliminarBien(b: BienChile): void {
-  //   this.bienesChile = this.bienesChile.filter(x => x !== b);
-  //   if (this.tieneChile === 'si' && this.bienesChile.length === 0) {
-  //     this.validador.markIncomplete('paso6');
-  //     this.stepperState.markStepIncomplete(['declaraciones', this.activeDeclId, 'paso6']);
-  //   }
+    Swal.fire({
+      title: '¿Estás seguro?',
+      text: 'Esta acción eliminará el bien inmueble seleccionado.',
+      icon: 'warning',
+      showCancelButton: true,
+    }).then(result => {
+      if (result.isConfirmed) {
+        this._inmueble.eliminarInmueble(Number(b.id)).subscribe({
+          next: () => {
+            this.loadBienesInmuebles();
+            this.toastr.success('Bien inmueble eliminado correctamente');
+          },
+          error: (err) => {
+            console.error('Error al eliminar bien inmueble:', err);
+            this.toastr.error('Error al eliminar bien inmueble');
+          }
+        });
+      }
+    });
   }
 
   onChileChange(value: string): void {
     this.tieneChile = value;
-  //   if (value === 'no') {
-  //     // Marca como completo si no aplica
-  //     this.validador.markComplete('paso6');
-  //     this.stepperState.markStepCompleted(['declaraciones', this.activeDeclId, 'paso6']);
-  //   }
+    this._declaracion.guardarRegistro(this.declaranteId, 'bienesInmuebles', value === 'si').subscribe({
+      next: (res: any) => {
+        this.toastr.success('Registro actualizado correctamente');
+      },
+      error: (err: any) => {
+        console.error('Error al guardar registro:', err);
+        this.toastr.error('Error al actualizar registro');
+      }
+    });
   }
 
   private buildChileForm(item?: BienChile): void {
     this.bienChileForm = this.fb.group({
-      region      : [item?.region      || '', Validators.required],
-      comuna      : [item?.comuna      || '', Validators.required],
-      direccion   : [item?.direccion   || '', Validators.required],
-      inscripcion : [item?.inscripcion || '', Validators.required],
-      fojas       : [item?.fojas       || '', Validators.required],
-      anio        : [item?.anio        || new Date().getFullYear(), Validators.required],
-      rolAvaluo   : [item?.rolAvaluo   || '', Validators.required]
+      regionId: [item?.regionId || ''],
+      comunaId: [item?.comunaId || ''],
+      calle: [item?.calle || ''],
+      numero: [item?.numero || ''],
+      departamento: [item?.departamento || ''],
+      numeroInscripcion: [item?.numeroInscripcion || ''],
+      fojas: [item?.fojas || ''],
+      anio: [item?.anio || ''],
+      rolAvaluoUno: [item?.rolAvaluoUno || ''],
+      rolAvaluoDos: [item?.rolAvaluoDos || ''],
+      conservadorId: [item?.conservadorId || ''],
+      avaluoFiscal: [item?.avaluoFiscal || ''],
+      porcentaje: [item?.porcentaje || 100],
+      fechaAdquisicion: [item?.fechaAdquisicion || ''],
+      claseId: [item?.claseId || ''],
+      rbDomicilio: [item?.rbDomicilio || false],
+      noPropietario: [item?.noPropietario || false]
     });
   }
-
-  // —— Bienes en Exterior ——
 
   openAddExtranjeroModal(): void {
     this.editExtranjero = false;
     this.currentExtranjero = null;
     this.buildExtranjeroForm();
-    this.dialog.open(this.bienExtranjeroModal, { width: '800px' });
+    this.dialogRef = this.dialog.open(this.bienExtranjeroModal, { width: '800px' });
   }
 
   openEditExtranjeroModal(b: BienExtranjero): void {
     this.editExtranjero = true;
     this.currentExtranjero = b;
     this.buildExtranjeroForm(b);
-    this.dialog.open(this.bienExtranjeroModal, { width: '800px' });
+    this.dialogRef = this.dialog.open(this.bienExtranjeroModal, { width: '800px' });
   }
 
-  saveBienExtranjero(dialogRef: any): void {
-  //   if (this.bienExtranjeroForm.valid) {
-  //     const formValue = this.bienExtranjeroForm.value as BienExtranjero;
-  //     if (this.editExtranjero && this.currentExtranjero) {
-  //       const idx = this.bienesExtranjero.indexOf(this.currentExtranjero);
-  //       if (idx >= 0) this.bienesExtranjero[idx] = formValue;
-  //     } else {
-  //       this.bienesExtranjero.push(formValue);
-  //     }
-  //     dialogRef.close();
-  //     this.validador.markComplete('paso6');
-  //     this.stepperState.markStepCompleted(['declaraciones', this.activeDeclId, 'paso6']);
-  //   }
+  saveBienExtranjero(): void {
+    if (this.bienExtranjeroForm.valid) {
+      const formValue = this.bienExtranjeroForm.value;
+      const payload = {
+        id: this.editExtranjero ? this.currentExtranjero?.id : null,
+        tabId: '1',
+        paisId: formValue.paisId || '',
+        ciudad: formValue.ciudad || '',
+        calle: formValue.calle || '',
+        numero: formValue.numero || '',
+        departamento: formValue.departamento || '',
+        valor: formValue.valor || '',
+        tipoMonedaId: formValue.tipoMonedaId || '',
+        porcentaje: formValue.porcentaje || 100,
+        fechaAdquisicion: formValue.fechaAdquisicion ? formatDate(formValue.fechaAdquisicion, 'dd/MM/yyyy', 'es') : '',
+        claseId: formValue.claseId || '',
+        extranjero: true,
+        borrador: !this.isFormValid(this.bienExtranjeroForm),
+        controlador: false,
+        noPropietario: formValue.noPropietario || false
+      };
+
+      this._inmueble.guardarBienInmueble(payload, this.declaranteId).subscribe({
+        next: (res: any) => {
+          this.loadBienesInmueblesExtranjero();
+          this.toastr.success('Bien inmueble extranjero guardado correctamente');
+          this.closeDialog();
+        },
+        error: (err) => {
+          console.error('Error al guardar bien inmueble extranjero:', err);
+          this.toastr.error('Error al guardar bien inmueble extranjero');
+        }
+      });
+    }
   }
 
   eliminarBienExt(b: BienExtranjero): void {
-  //   this.bienesExtranjero = this.bienesExtranjero.filter(x => x !== b);
-  //   if (this.tieneExtranjero === 'si' && this.bienesExtranjero.length === 0) {
-  //     this.validador.markIncomplete('paso6');
-  //     this.stepperState.markStepIncomplete(['declaraciones', this.activeDeclId, 'paso6']);
-  //   }
+    Swal.fire({
+      title: '¿Estás seguro?',
+      text: 'Esta acción eliminará el bien inmueble extranjero seleccionado.',
+      icon: 'warning',
+      showCancelButton: true,
+    }).then(result => {
+      if (result.isConfirmed) {
+        this._inmueble.eliminarInmueble(Number(b.id)).subscribe({
+          next: () => {
+            this.loadBienesInmueblesExtranjero();
+            this.toastr.success('Bien inmueble extranjero eliminado correctamente');
+          },
+          error: (err) => {
+            console.error('Error al eliminar bien inmueble extranjero:', err);
+            this.toastr.error('Error al eliminar bien inmueble extranjero');
+          }
+        });
+      }
+    });
   }
 
   onExtranjeroChange(value: string): void {
     this.tieneExtranjero = value;
-  //   if (value === 'no') {
-  //     this.validador.markComplete('paso6');
-  //     this.stepperState.markStepCompleted(['declaraciones', this.activeDeclId, 'paso6']);
-  //   }
+    this._declaracion.guardarRegistro(this.declaranteId, 'bienesInmueblesExtranjero', value === 'si').subscribe({
+      next: (res: any) => {
+        this.toastr.success('Registro actualizado correctamente');
+      },
+      error: (err: any) => {
+        console.error('Error al guardar registro:', err);
+        this.toastr.error('Error al actualizar registro');
+      }
+    });
   }
 
   private buildExtranjeroForm(item?: BienExtranjero): void {
     this.bienExtranjeroForm = this.fb.group({
-      pais         : [item?.pais         || '', Validators.required],
-      direccion    : [item?.direccion    || '', Validators.required],
-      observaciones: [item?.observaciones || '', Validators.required]
+      paisId: [item?.paisId || ''],
+      ciudad: [item?.ciudad || ''],
+      calle: [item?.calle || ''],
+      numero: [item?.numero || ''],
+      departamento: [item?.departamento || ''],
+      valor: [item?.valor || ''],
+      tipoMonedaId: [item?.tipoMonedaId || ''],
+      porcentaje: [item?.porcentaje || 100],
+      fechaAdquisicion: [item?.fechaAdquisicion || ''],
+      claseId: [item?.claseId || ''],
+      noPropietario: [item?.noPropietario || false]
     });
   }
+
+  private isFormValid(ctrl: any): boolean {
+    if (ctrl instanceof FormControl) {
+      const v = ctrl.value;
+      return v !== null && v !== undefined && String(v).trim() !== '';
+    }
+
+    if (ctrl instanceof FormGroup) {
+      return Object.values(ctrl.controls).every(child => this.isFormValid(child));
+    }
+
+    if (ctrl instanceof FormArray) {
+      return ctrl.controls.every(child => this.isFormValid(child));
+    }
+    return true;
+  }
+
 }

@@ -20,8 +20,10 @@
         <div class="col-md-4">
           <mat-form-field appearance="outline" class="w-100">
             <mat-label>Servicio / Entidad</mat-label>
-            <mat-select formControlName="servicio" (selectionChange)="onChangeServicio($event)">
-              <mat-option *ngFor="let s of servicios" [value]="s.id"> {{ s.nombre }} </mat-option>
+            <mat-select formControlName="servicio" (selectionChange)="onServicioChange($event)">
+              <mat-option *ngFor="let s of servicios" [value]="s.id">
+                {{ s.nombre }}
+              </mat-option>
             </mat-select>
           </mat-form-field>
         </div>
@@ -37,7 +39,7 @@
 
         <div class="col-md-2">
           <mat-form-field appearance="outline" class="w-100">
-            <mat-label>Fecha de Asunción en el cargo</mat-label>            
+            <mat-label>Fecha de Asunción en el cargo</mat-label>
             <input matInput type="date" formControlName="fechaAsuncion" />
           </mat-form-field>
         </div>
@@ -45,13 +47,17 @@
 
       <!-- Tipo Sujeto Obligado -->
       <div class="row mb-3 align-items-center">
-        <div class="col-md-12">
-          <mat-form-field appearance="outline" class="w-100">
-            <mat-label>Tipo Sujeto Obligado</mat-label>
-            <mat-select formControlName="tipoSujeto" (selectionChange)="onChangeTipoSujeto($event)">
-              <mat-option *ngFor="let ts of tipoSujetos" [value]="ts.id"> {{ ts.nombre }} </mat-option>
-            </mat-select>
-          </mat-form-field>
+        <div class="row mb-3 align-items-center">
+          <div class="col-md-12">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label>Tipo Sujeto Obligado</mat-label>
+              <mat-select formControlName="tipoSujeto" (selectionChange)="onTipoSujetoChange($event)">
+                <mat-option *ngFor="let ts of tipoSujetos" [value]="ts.id">
+                  {{ ts.nombre }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
         </div>
       </div>
 
@@ -203,62 +209,84 @@
               ii. Hermanos, cuñados y suegros</p>
 
 
-              <div class="container-fluid border">
-                <strong>Datos Parientes</strong>
-                <div class="row text-center">
-                  <div class="col-md-12">
-                    <mat-radio-group formControlName="datosParientes" (change)="onChangeNacionalidad($event.value)">
-                      <mat-radio-button class="me-4" [value]="'true'">Aplica</mat-radio-button>
-                      <mat-radio-button [value]="'false'">No Aplica</mat-radio-button>
-                    </mat-radio-group>
-      
-                  </div>
-                </div>
-                <div class="row">
-                  <div class="col-md-12">
-                    <button mat-raised-button color="primary" class="w-30 float-end m-3">
-                      Agregar Pariente
-                    </button>
-                  </div>
-                </div>
-                <div class="row">
-                  <div class="col-md-12">
+            <div class="container-fluid border">
+              <strong>Datos Parientes</strong>
+              <div class="row text-center">
+                <div class="col-md-12">
+                  <mat-radio-group formControlName="datosParientes" (change)="onChangeNacionalidad($event.value)">
+                    <mat-radio-button class="me-4" [value]="'true'">Aplica</mat-radio-button>
+                    <mat-radio-button [value]="'false'">No Aplica</mat-radio-button>
+                  </mat-radio-group>
 
-                    <table class="table table-bordered">
-                      <thead>
-                        <tr>
-                          <th>Parentesco</th>
-                          <th>R.U.N.</th>
-                          <th>Nombre</th>
-                          <th>Apellido Paterno</th>
-                          <th>Apellido Materno</th>
-                          <th>Fecha Nacimiento</th>
-                          <th>Acciones</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr *ngFor="let pariente of parientes">
-                          <td>{{ pariente.parentesco }}</td>
-                          <td>{{ pariente.rut }}</td>
-                          <td>{{ pariente.nombre }}</td>
-                          <td>{{ pariente.apellidoPaterno }}</td>
-                          <td>{{ pariente.apellidoMaterno }}</td>
-                          <td>{{ pariente.fechaNacimiento }}</td>
-                          <td>
-                            <button mat-icon-button color="primary">
-                              <mat-icon>edit</mat-icon>
-                            </button>
-                            <button mat-icon-button color="warn">
-                              <mat-icon>delete</mat-icon>
-                            </button>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
                 </div>
               </div>
-            
+              <div class="row">
+                <div class="col-md-12">
+                  <button mat-raised-button color="primary" class="w-30 float-end m-3" (click)="onAgregarPariente()">
+                    Agregar Pariente
+                  </button>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-12">
+
+                  <table mat-table [dataSource]="parientes" class="w-100 mat-elevation-z1">
+
+                    <ng-container matColumnDef="parentesco" appResizableColumn>
+                      <th mat-header-cell *matHeaderCellDef>Parentesco</th>
+                      <td mat-cell *matCellDef="let p">{{ p.parentesco }}</td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="rut" appResizableColumn>
+                      <th mat-header-cell *matHeaderCellDef>R.U.N.</th>
+                      <td mat-cell *matCellDef="let p">{{ p.rut }}</td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="nombre" appResizableColumn>
+                      <th mat-header-cell *matHeaderCellDef>Nombre</th>
+                      <td mat-cell *matCellDef="let p">{{ p.nombre }}</td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="apPaterno" appResizableColumn>
+                      <th mat-header-cell *matHeaderCellDef>Apellido Paterno</th>
+                      <td mat-cell *matCellDef="let p">{{ p.apellidoPaterno }}</td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="apMaterno" appResizableColumn>
+                      <th mat-header-cell *matHeaderCellDef>Apellido Materno</th>
+                      <td mat-cell *matCellDef="let p">{{ p.apellidoMaterno }}</td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="fNacimiento" appResizableColumn>
+                      <th mat-header-cell *matHeaderCellDef>F. Nacimiento</th>
+                      <td mat-cell *matCellDef="let p">{{ p.fechaNacimiento }}</td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="acciones">
+                      <th mat-header-cell *matHeaderCellDef>Acciones</th>
+                      <td mat-cell *matCellDef="let p">
+
+                        <button mat-icon-button color="primary">
+                          <mat-icon>edit</mat-icon>
+                        </button>
+                        <button mat-icon-button color="warn">
+                          <mat-icon>delete</mat-icon>
+                        </button>
+                        
+                      </td>
+                    </ng-container>
+
+                    <tr mat-header-row
+                      *matHeaderRowDef="['parentesco', 'rut', 'nombre', 'apPaterno', 'apMaterno', 'fNacimiento', 'acciones']">
+                    </tr>
+                    <tr mat-row
+                      *matRowDef="let row; columns: ['parentesco', 'rut', 'nombre', 'apPaterno', 'apMaterno', 'fNacimiento', 'acciones'];">
+                    </tr>
+                  </table>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
 

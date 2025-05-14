@@ -1,8 +1,6 @@
 import { Component, OnInit, AfterViewInit, Optional, SkipSelf } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
-import { ValidadorDeclaracionService } from '../../../../services/validador-declaracion.service';
-import { StepperStatusService } from 'src/app/modules/declaraciones/services/stepper-status.service';
 import { ProfesionService } from 'src/app/modules/declaraciones/services/profesion.service';
 import { EstadoCivilService } from 'src/app/modules/declaraciones/services/estado-civil.service';
 import { MatStepper } from '@angular/material/stepper';
@@ -10,6 +8,8 @@ import { LocalidadService } from 'src/app/modules/declaraciones/services/localid
 import { RegimenPatrimonialService } from 'src/app/modules/declaraciones/services/regimen-patrimonial.service';
 import { DeclaranteService } from 'src/app/modules/declaraciones/services/declarante.service';
 import { DeclaracionHelperService } from 'src/app/modules/declaraciones/services/declaracion-helper.service';
+import { ToastrService } from 'ngx-toastr';
+import { NgxSpinnerService } from 'ngx-spinner';
 
 @Component({
   selector: 'app-paso-2-datos-personales',
@@ -39,7 +39,8 @@ export class Paso2DatosPersonalesComponent implements OnInit, AfterViewInit {
     private _localidad: LocalidadService,
     private _estadoCivil: EstadoCivilService,
     private _regimen: RegimenPatrimonialService,
-    @Optional() @SkipSelf() private stepper?: MatStepper
+    private _toastr: ToastrService,
+    private _spinner: NgxSpinnerService
   ) {
     this.datosPersonalesForm = this.fb.group({
       rut: ['', Validators.required],
@@ -64,6 +65,9 @@ export class Paso2DatosPersonalesComponent implements OnInit, AfterViewInit {
       declaraConyuge: ['no', Validators.required],
     });
   }
+
+  declaracionId: number = this._declaracionHelper.declaracionId;
+  declaranteId: number = this._declaracionHelper.declaranteId;
 
   ngOnInit(): void {
 
@@ -90,9 +94,8 @@ export class Paso2DatosPersonalesComponent implements OnInit, AfterViewInit {
   }
 
   loadDatosPersonales() {
-    //1319527
 
-    this._declarante.getDatosDeclarante(1319527).subscribe(res => {
+    this._declarante.getDatosDeclarante(this._declaracionHelper.declaracionId).subscribe(res => {
       this.onChangeEstadoCivil(res.estadoCivil);
       this.datosPersonalesForm.patchValue({
         rut: res.rut,
@@ -241,11 +244,52 @@ export class Paso2DatosPersonalesComponent implements OnInit, AfterViewInit {
 
 
   onSubmit(): void {
+    this._spinner.show();
     if (this.datosPersonalesForm.valid) {
-      // Aseguramos la marca en ambos servicios
-      this._declaracionHelper.markStepCompleted(['declarante', 'paso2']);
-      this._declaracionHelper.nextStep();
+      const obj = {
+        rut: this.datosPersonalesForm.value.rut,
+        nombre: this.datosPersonalesForm.value.nombres,
+        apellidoPaterno: this.datosPersonalesForm.value.apellidoPaterno,
+        apellidoMaterno: this.datosPersonalesForm.value.apellidoMaterno,
+        profesionId: this.datosPersonalesForm.value.profesion,
+        direccionChilena: this.datosPersonalesForm.value.lugarReside == 'chile' ? true : false,
+        regionId: this.datosPersonalesForm.value.region,
+        comunaId: this.datosPersonalesForm.value.comuna,
+        calle: this.datosPersonalesForm.value.domicilioCalle,
+        numero: this.datosPersonalesForm.value.domicilioNumero,
+        departamento: this.datosPersonalesForm.value.domicilioDepto,
+        estadoCivil: this.datosPersonalesForm.value.estadoCivil,
+        regimenPatrimonialId: this.datosPersonalesForm.value.regimenPatrimonial,
+        cygDeclaranteId: '',
+        cygRut: this.datosPersonalesForm.value.rutConyuge,
+        cygNombre: this.datosPersonalesForm.value.nombresConyuge,
+        cygApellidoPaterno: this.datosPersonalesForm.value.apellidoPaternoConyuge,
+        cygApellidoMaterno: this.datosPersonalesForm.value.apellidoMaternoConyuge,
+        cygForm: this.datosPersonalesForm.value.declaraConyuge == 'si' ? true : false
+      }
+
+      this._declarante.guardarDeclarante(obj, this.declaracionId).subscribe({
+        next: (response) => {
+          if (response.status == 200) {
+            this._toastr.success('Datos del Declarante guardados correctamente');
+            this._declaracionHelper.markStepCompleted(['declarante', 'paso2']);
+            this._declaracionHelper.nextStep();
+          } else {
+            this._toastr.error('Error al guardar Datos del Declarante');
+            this._declaracionHelper.markStepIncomplete(['declarante', 'paso2']);
+          }
+          this._spinner.hide();
+        },
+        error: (error) => {
+          this._declaracionHelper.markStepIncomplete(['declarante', 'paso2']);
+          console.error('Error al guardar Declarante:', error);
+          this._spinner.hide();
+        }
+      })
+
     } else {
+      this._toastr.error('Error al guardar Datos del Declarante');
+      this._spinner.hide();
       this._declaracionHelper.markStepIncomplete(['declarante', 'paso2']);
     }
   }

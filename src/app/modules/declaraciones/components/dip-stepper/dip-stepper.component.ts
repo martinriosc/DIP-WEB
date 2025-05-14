@@ -6,7 +6,6 @@ import { MatTabChangeEvent, MatTabGroup } from '@angular/material/tabs';
 import { combineLatest, map, Observable, Subject, takeUntil } from 'rxjs';
 
 import { Step } from '../../models/Step';
-import { StepperStatusService } from '../../services/stepper-status.service';
 
 /* ────── Componentes de cada paso ────── */
 import { Paso1DeclaracionComponent } from '../../views/declaracion-detalle/antecedentes-declarante/paso-1-declaracion/paso-1-declaracion.component';
@@ -26,29 +25,26 @@ import { Paso14FuenteConflictoComponent } from '../../views/declaracion-detalle/
 import { Paso15OtrosBienesComponent } from '../../views/declaracion-detalle/intereses-y-patrimonios/paso-15-otros-bienes/paso-15-otros-bienes.component';
 import { Paso16AntecedentesComponent } from '../../views/declaracion-detalle/intereses-y-patrimonios/paso-16-antecedentes/paso-16-antecedentes.component';
 import { DeclaracionHelperService } from '../../services/declaracion-helper.service';
-import { DeclaracionService } from '../../services/declaracion.service';
-import { DeclaranteService } from '../../services/declarante.service';
-import { DatosLaboralesService } from '../../services/datos-laborales.service';
-import { PersonaRelacionadaService } from '../../services/persona-relacionada.service';
+import { NgxSpinnerService } from 'ngx-spinner';
 
 /* Mapa para instanciar dinámicamente el componente de cada paso */
 const COMPONENT_MAP: Record<string, Type<unknown>> = {
-  Paso1DeclaracionComponent,
-  Paso2DatosPersonalesComponent,
-  Paso3EntidadComponent,
-  Paso4TutelaComponent,
-  Paso5ActividadesComponent,
-  Paso6BienesInmueblesComponent,
-  Paso7DerechosAguasComponent,
-  Paso8BienesMueblesComponent,
-  Paso9DerechosAccionesComponent,
-  Paso10ValoresComponent,
-  Paso11ValoresObligatoriosComponent,
-  Paso12MandatoEspecialComponent,
-  Paso13PasivosComponent,
-  Paso14FuenteConflictoComponent,
-  Paso15OtrosBienesComponent,
-  Paso16AntecedentesComponent
+  'Paso1DeclaracionComponent': Paso1DeclaracionComponent,
+  'Paso2DatosPersonalesComponent': Paso2DatosPersonalesComponent,
+  'Paso3EntidadComponent': Paso3EntidadComponent,
+  'Paso4TutelaComponent': Paso4TutelaComponent,
+  'Paso5Component': Paso5ActividadesComponent,
+  'Paso6Component': Paso6BienesInmueblesComponent,
+  'Paso7Component': Paso7DerechosAguasComponent,
+  'Paso8Component': Paso8BienesMueblesComponent,
+  'Paso9Component': Paso9DerechosAccionesComponent,
+  'Paso10Component': Paso10ValoresComponent,
+  'Paso11Component': Paso11ValoresObligatoriosComponent,
+  'Paso12Component': Paso12MandatoEspecialComponent,
+  'Paso13Component': Paso13PasivosComponent,
+  'Paso14Component': Paso14FuenteConflictoComponent,
+  'Paso15Component': Paso15OtrosBienesComponent,
+  'Paso16Component': Paso16AntecedentesComponent
 };
 
 @Component({
@@ -63,7 +59,6 @@ export class DipStepperComponent {
   @ViewChild('intStepper', { static: true }) intStepper!: MatStepper;
   @ViewChild('declContainer', { static: true, read: ElementRef }) declContainer!: ElementRef<HTMLElement>;
   @ViewChild('intContainer', { static: true, read: ElementRef }) intContainer!: ElementRef<HTMLElement>;
-
 
   @ViewChild(MatTabGroup) tabGroup!: MatTabGroup;
 
@@ -91,8 +86,8 @@ export class DipStepperComponent {
   activeComponent: Type<unknown> | null = null;
   showDeclarantesModal = false;
 
-  declaracionId: number = 1319527;
-  declaranteId: number = 2882000;
+  declaracionId: number = 0;
+  declaranteId: number = 0;
 
   /* ───── Interno ───── */
   private destroy$ = new Subject<void>();
@@ -100,20 +95,37 @@ export class DipStepperComponent {
   constructor(
     private readonly state: DeclaracionHelperService,
     private readonly dialog: MatDialog,
-    private readonly cd: ChangeDetectorRef
-
+    private readonly cd: ChangeDetectorRef,
+    private _spinner: NgxSpinnerService
   ) {
+    // Suscripción a los pasos del declarante
     this.state.declaranteSteps$
       .pipe(takeUntil(this.destroy$))
-      .subscribe(s => { this.declSteps = s; this.cd.markForCheck(); });
+      .subscribe(s => {
+        this.declSteps = s;
+        this.cd.markForCheck();
+      });
 
+    // Suscripción a los pasos de intereses
     this.state.interesesSteps$
       .pipe(takeUntil(this.destroy$))
-      .subscribe(s => { this.intSteps = s; this.cd.markForCheck(); });
+      .subscribe(s => {
+        this.intSteps = s;
+        // Solo actualizar el índice si estamos cambiando de pestaña o seleccionando un nuevo declarante
+        if (this.selectedTabIndex === 1 && s.length > 0 && this.intIndex === -1) {
+          setTimeout(() => {
+            this.intStepper.selectedIndex = 0;
+            this.handleIntChange({ selectedIndex: 0 } as StepperSelectionEvent);
+          });
+        }
+        this.cd.markForCheck();
+      });
   }
 
   /* ───────── Ciclo de vida ───────── */
   ngOnInit(): void {
+    // Inicializar con el declarante principal
+    this.state.initializeWithMainDeclarante();
 
     this.state.nextStep$
       .pipe(takeUntil(this.destroy$))
@@ -127,7 +139,7 @@ export class DipStepperComponent {
       .pipe(takeUntil(this.destroy$))
       .subscribe(() => this.cd.markForCheck());
 
-      this.state.currentStepKey$
+    this.state.currentStepKey$
       .pipe(takeUntil(this.destroy$))
       .subscribe(key => this.syncVisualStepper(key));
   }
@@ -143,18 +155,25 @@ export class DipStepperComponent {
   }
 
   private syncVisualStepper(key: string): void {
-
     if (this.currentBlock === 'decl') {
       const idx = this.declSteps.findIndex(s => s.key === key);
-      if (idx >= 0 && this.declStepper.selectedIndex !== idx) {   // ← NUEVO
+      if (idx >= 0 && this.declStepper.selectedIndex !== idx) {
         this.declStepper.selectedIndex = idx;
-        // no llamamos handleDeclChange porque selectionChange
-        // se disparará automáticamente con el nuevo índice
+        this.declIndex = idx;
       }
     } else {
       const idx = this.intSteps.findIndex(s => s.key === key);
-      if (idx >= 0 && this.intStepper.selectedIndex !== idx) {    // ← NUEVO
-        this.intStepper.selectedIndex = idx;
+      if (idx >= 0 && this.intStepper.selectedIndex !== idx) {
+        const step = this.intSteps[idx];
+        if (step && step.enabled) {
+          this.intStepper.selectedIndex = idx;
+          this.intIndex = idx;
+          
+          const componentName = step.component;
+          if (componentName && COMPONENT_MAP[componentName]) {
+            this.activeComponent = COMPONENT_MAP[componentName];
+          }
+        }
       }
     }
   }
@@ -180,11 +199,23 @@ export class DipStepperComponent {
   
     /* ②  Reposicionar el stepper correspondiente */
     if (b === 'decl') {
-      this.declStepper.selectedIndex = 0;
-      this.handleDeclChange({ selectedIndex: 0 } as StepperSelectionEvent);
+      if (this.declSteps && this.declSteps.length > 0) {
+        this.declIndex = 0;
+        this.declStepper.selectedIndex = 0;
+        this.handleDeclChange({ selectedIndex: 0 } as StepperSelectionEvent);
+      } else {
+        this.declIndex = -1;
+        this.declStepper.selectedIndex = -1;
+      }
     } else {
-      this.intStepper.selectedIndex = 0;
-      this.handleIntChange({ selectedIndex: 0 } as StepperSelectionEvent);
+      if (this.intSteps && this.intSteps.length > 0) {
+        this.intIndex = 0;
+        this.intStepper.selectedIndex = 0;
+        this.handleIntChange({ selectedIndex: 0 } as StepperSelectionEvent);
+      } else {
+        this.intIndex = -1;
+        this.intStepper.selectedIndex = -1;
+      }
     }
   }
 
@@ -195,14 +226,29 @@ export class DipStepperComponent {
     switch (ev.index) {
       case 0:  // Antecedentes
         this.state.setActiveBlock('decl');
-        this.declStepper.selectedIndex = 0;
-        this.handleDeclChange({ selectedIndex: 0 } as StepperSelectionEvent);
+        if (this.declSteps && this.declSteps.length > 0) {
+          this.declStepper.selectedIndex = 0;
+          this.handleDeclChange({ selectedIndex: 0 } as StepperSelectionEvent);
+        }
         break;
 
       case 1:  // Intereses
         this.state.setActiveBlock('int');
-        this.intStepper.selectedIndex = 0;
-        this.handleIntChange({ selectedIndex: 0 } as StepperSelectionEvent);
+        this.intIndex = -1;
+        setTimeout(() => {
+          if (this.intSteps && this.intSteps.length > 0) {
+            const firstEnabledStep = this.intSteps.findIndex(step => step.enabled);
+            if (firstEnabledStep >= 0) {
+              this.intStepper.selectedIndex = firstEnabledStep;
+              this.intIndex = firstEnabledStep;
+              const step = this.intSteps[firstEnabledStep];
+              const componentName = step.component;
+              if (componentName && COMPONENT_MAP[componentName]) {
+                this.activeComponent = COMPONENT_MAP[componentName];
+              }
+            }
+          }
+        });
         break;
 
       default: // Confirmación
@@ -222,47 +268,111 @@ export class DipStepperComponent {
     this.dialog.open(this.declaracionModal, { width: '850px' });
   }
 
-  openDeclarantesModal(): void { this.showDeclarantesModal = true; }
+  openDeclarantesModal(): void { 
+    this.dialog.open(this.declaracionModal, {
+      width: '850px',
+      disableClose: true
+    });
+  }
   closeDeclarantesModal(): void { this.showDeclarantesModal = false; }
 
   selectDeclarante(id: string): void {
+    // Actualizar tanto la declaración como el declarante activo
     this.state.setActiveDeclaracion(id);
-    this.closeDeclarantesModal();
-    this.intIndex = 0;
-    this.loadStep('int', 0);
+    this.state.setActiveDeclarante(id);
+    
+    // Cerrar el modal
+    this.dialog.closeAll();
+    
+    // Solo actualizamos el stepper de intereses
+    this.state.setActiveBlock('int');
+    
+    // Resetear el índice para forzar la carga del primer paso
+    this.intIndex = -1;
+    
+    // Esperar a que los pasos estén disponibles
+    setTimeout(() => {
+      if (this.intSteps && this.intSteps.length > 0) {
+        const firstEnabledStep = this.intSteps.findIndex(step => step.enabled);
+        if (firstEnabledStep >= 0) {
+          this.intStepper.selectedIndex = firstEnabledStep;
+          this.intIndex = firstEnabledStep;
+          const step = this.intSteps[firstEnabledStep];
+          const componentName = step.component;
+          if (componentName && COMPONENT_MAP[componentName]) {
+            this.activeComponent = COMPONENT_MAP[componentName];
+          }
+        }
+      } else {
+        this.intIndex = -1;
+        this.intStepper.selectedIndex = -1;
+      }
+    });
   }
 
   /* DECLARANTE */
-handleDeclChange(ev: StepperSelectionEvent): void {
-  this.declIndex = ev.selectedIndex;
+  handleDeclChange(ev: StepperSelectionEvent): void {
+    if (!this.declSteps || this.declSteps.length === 0) {
+      this.declIndex = -1;
+      return;
+    }
 
-  /* ①  usar la key REAL del paso, no calcularla a mano */
-  const key = this.declSteps[this.declIndex].key;
+    // Asegurarnos de que el índice esté dentro de los límites
+    const newIndex = Math.min(Math.max(0, ev.selectedIndex), this.declSteps.length - 1);
+    this.declIndex = newIndex;
 
-  this.activeComponent = COMPONENT_MAP[this.declSteps[this.declIndex].component!];
-  this.state.setCurrentStep(key);
+    const key = this.declSteps[this.declIndex].key;
+    this.activeComponent = COMPONENT_MAP[this.declSteps[this.declIndex].component!];
+    this.state.setCurrentStep(key);
+    this.intStepper.selectedIndex = -1;
+    this.intIndex = -1;
+  }
 
-  this.intStepper.selectedIndex = -1;
-  this.intIndex = -1;
-}
- /* INTERESES */
-handleIntChange(ev: StepperSelectionEvent): void {
-  this.intIndex = ev.selectedIndex;
+  /* INTERESES */
+  handleIntChange(ev: StepperSelectionEvent): void {
+    if (!this.intSteps || this.intSteps.length === 0) {
+      this.intIndex = -1;
+      return;
+    }
 
-  /* ②  idem para intereses */
-  const key = this.intSteps[this.intIndex].key;
+    // Obtener el paso actual y el paso objetivo
+    const currentStep = this.intSteps[this.intIndex];
+    const targetStep = this.intSteps[ev.selectedIndex];
+    
+    // Verificar si el paso existe y está habilitado
+    if (targetStep && targetStep.enabled) {
+      // Actualizar el índice
+      this.intIndex = ev.selectedIndex;
+      
+      // Actualizar el componente activo
+      const componentName = targetStep.component;
+      if (componentName && COMPONENT_MAP[componentName]) {
+        this.activeComponent = COMPONENT_MAP[componentName];
+      }
 
-  this.state.setCurrentStep(key);
-  this.activeComponent = COMPONENT_MAP[this.intSteps[this.intIndex].component!];
+      // Actualizar el paso actual en el estado
+      this.state.setCurrentStep(targetStep.key);
 
-  this.declStepper.selectedIndex = -1;
-  this.declIndex = -1;
-}
+      // Limpiar el stepper de declarante
+      this.declStepper.selectedIndex = -1;
+      this.declIndex = -1;
+    } else {
+      // Si el paso no es válido, mantener el índice actual
+      this.intStepper.selectedIndex = this.intIndex;
+    }
+  }
 
   /* ───────── Helpers de carga ───────── */
   loadStep(type: 'decl' | 'int', idx: number): void {
+    console.log('loadStep', type, idx);
     const step = type === 'decl' ? this.declSteps[idx] : this.intSteps[idx];
-    this.activeComponent = COMPONENT_MAP[step.component!];
+    if (step) {
+      const componentName = step.component;
+      if (componentName && COMPONENT_MAP[componentName]) {
+        this.activeComponent = COMPONENT_MAP[componentName];
+      }
+      this.cd.detectChanges();
+    }
   }
   private loadDeclStep(i: number): void { this.loadStep('decl', i); }
   private loadIntStep(i: number): void { this.loadStep('int', i); }
@@ -275,8 +385,12 @@ handleIntChange(ev: StepperSelectionEvent): void {
       .forEach((hdr, idx) => {
         hdr.style.cursor = 'pointer';
         hdr.addEventListener('click', () => {
-          if (this.declIndex === idx) { this.loadDeclStep(idx); }
-          else { this.declStepper.selectedIndex = idx; }
+          if (this.declIndex === idx) { 
+            this.loadDeclStep(idx); 
+          } else { 
+            this.declStepper.selectedIndex = idx;
+            this.handleDeclChange({ selectedIndex: idx } as StepperSelectionEvent);
+          }
         });
       });
 
@@ -286,8 +400,15 @@ handleIntChange(ev: StepperSelectionEvent): void {
       .forEach((hdr, idx) => {
         hdr.style.cursor = 'pointer';
         hdr.addEventListener('click', () => {
-          if (this.intIndex === idx) { this.loadIntStep(idx); }
-          else { this.intStepper.selectedIndex = idx; }
+          const step = this.intSteps[idx];
+          if (step && step.enabled) {
+            if (this.intIndex === idx) { 
+              this.loadIntStep(idx); 
+            } else { 
+              this.intStepper.selectedIndex = idx;
+              this.handleIntChange({ selectedIndex: idx } as StepperSelectionEvent);
+            }
+          }
         });
       });
   }

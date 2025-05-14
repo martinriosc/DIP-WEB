@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiResponse } from '../../auth/models/ApiResponse';
@@ -23,13 +23,20 @@ export class PensionesService {
   /**
    * Guarda la información de una pensión
    */
-  guardar(data: any, declaranteId: number): Observable<ApiResponse> {
-    const formData = new FormData();
-    formData.append('data', JSON.stringify(data));
-    formData.append('declaranteId', declaranteId.toString());
-    
-    return this.http.post<ApiResponse>(`${this.apiUrl}/pr/service/pensiones/guardar`, formData, { withCredentials: true });
-  }
+  guardar(data: any, declaranteId: number): Observable<any> {
+   const body = new HttpParams()
+       .set('data', JSON.stringify(data))
+       .set('declaranteId', declaranteId);
+ 
+           const headers = new HttpHeaders({
+       'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+     });
+ 
+     return this.http.post<any>(
+       `${this.apiUrl}/pr/service/pensiones/guardar`,
+       body.toString(),                // 👈 importante: string plano
+       { headers, withCredentials: true, observe: 'response' }
+     ); }
 
   /**
    * Elimina una pensión

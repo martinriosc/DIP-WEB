@@ -7,3 +7,12 @@ mat-icon.bg-danger {
   justify-content: center;
   align-items: center;
 }
+
+
+.selectable {
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  &:hover {
+    background-color: #f5f5f5;
+  }
+}

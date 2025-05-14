@@ -1,457 +1,250 @@
 <div class="container-fluid">
-  <!-- Título del componente -->
-  <h2 class="mb-3">Ministro de Fe</h2>
+  <div *ngIf="isLoading" class="loading-spinner-container">
+    <div class="spinner-content">
+      <mat-spinner diameter="50"></mat-spinner>
+      <p class="loading-text">Cargando Ministros de Fe...</p>
+    </div>
+  </div>
+  <!-- ▸ Breadcrumb -->
+  <nav aria-label="breadcrumb" class="mb-2">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a routerLink="/">Inicio</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Ministro de Fe</li>
+    </ol>
+  </nav>
 
-  <!-- Pestañas: Pendientes, Enviadas/Recepcionadas, Archivadas -->
+  <!-- ▸ Título -->
+  <h2 class="component-title mb-3">Ministro de Fe</h2>
+
+  <!-- ▸ Pestañas -->
   <ul class="nav nav-tabs mb-2">
-    <li class="nav-item">
-      <a
-        class="nav-link"
-        [class.active]="currentTab === 'pendientes'"
-        (click)="setTab('pendientes')"
-      >
-        Pendientes ({{ pendientesCount }})
-      </a>
-    </li>
-
- <li class="nav-item">
-      <a
-        class="nav-link"
-        [class.active]="currentTab === 'firma-envio-masivo'"
-        (click)="setTab('firma-envio-masivo')"
-      >
-        Para firma y envío (proceso masivo) ({{ firmaEnvioCount }})
-      </a>
-    </li>
-
-    <li class="nav-item">
-      <a
-        class="nav-link"
-        [class.active]="currentTab === 'enviadas'"
-        (click)="setTab('enviadas')"
-      >
-        Enviadas / Recepcionadas ({{ enviadasCount }})
-      </a>
-    </li>
-
-    <li class="nav-item">
-      <a
-        class="nav-link"
-        [class.active]="currentTab === 'archivo-masivo'"
-        (click)="setTab('archivo-masivo')"
-      >
-        para Archivo (proceso masivo) ({{ archivoMasivoCount }})
-      </a>
-    </li>
-
-    <li class="nav-item">
-      <a
-        class="nav-link"
-        [class.active]="currentTab === 'archivadas'"
-        (click)="setTab('archivadas')"
-      >
-        Archivadas ({{ archivadasCount }})
+    <li class="nav-item" *ngFor="let tab of tabs">
+      <a class="nav-link" [class.active]="currentTab === tab.id" (click)="setTab(tab.id)">
+        {{ tab.label }}&nbsp;({{ tab.count() }})
       </a>
     </li>
   </ul>
 
-  <!-- Filtros -->
-  <div class="row mb-2">
-    <!-- Enviado por -->
-    <div class="col-md-2">
-      <mat-form-field appearance="outline" class="small-form-field w-100">
-        <mat-label>Enviado por</mat-label>
-        <input
-          matInput
-          [formControl]="enviadoPor"
-          placeholder="ENVIADO POR"
-        />
-      </mat-form-field>
-    </div>
+  <!-- ▸ Cabecera filtros -->
+  <div class="filtros-header d-flex align-items-center mb-1 mt-3">
+    <span class="me-2 fw-bold">Filtros avanzados</span>
+    <button class="btn btn-link btn-collapse" (click)="showFilters = !showFilters">
+      <mat-icon *ngIf="!showFilters">keyboard_arrow_down</mat-icon>
+      <mat-icon *ngIf="showFilters">keyboard_arrow_up</mat-icon>
+    </button>
+  </div>
 
-    <!-- Fecha Declaración -->
-    <div class="col-md-2">
-      <mat-form-field appearance="outline" class="small-form-field w-100">
-        <mat-label>Fecha Declaración</mat-label>
-        <input
-          matInput
-          [matDatepicker]="picker"
-          [formControl]="fechaDeclaracion"
-          placeholder="FECHA DECLARACIÓN"
-        />
-        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-        <mat-datepicker #picker></mat-datepicker>
-      </mat-form-field>
-    </div>
+  <!-- ▸ Caja de filtros -->
+  <div class="filtros-caja" [class.collapsed]="!showFilters">
+    <div class="row g-2 mt-2">
+      <!-- ========== Fila 1 ========== -->
+      <div class="col-md-2">
+        <mat-form-field appearance="outline" class="small-form-field w-100">
+          <mat-label>Enviado por</mat-label>
+          <input matInput [formControl]="enviadoPor">
+        </mat-form-field>
+      </div>
 
-    <!-- Tipo Declaración -->
-    <div class="col-md-2">
-      <mat-form-field appearance="outline" class="small-form-field w-100">
-        <mat-label>Tipo</mat-label>
-        <mat-select [formControl]="tipoDeclaracion">
-          <mat-option value="">TODOS</mat-option>
-          <mat-option value="PRIMERA DECLARACIÓN">PRIMERA DECLARACIÓN</mat-option>
-          <mat-option value="DECLARACIÓN VOLUNTARIA">DECLARACIÓN VOLUNTARIA</mat-option>
-          <mat-option value="ACTUALIZACION PERIÓDICA">ACTUALIZACION PERIÓDICA</mat-option>
-        </mat-select>
-      </mat-form-field>
-    </div>
+      <div class="col-md-2">
+        <mat-form-field appearance="outline" class="small-form-field w-100">
+          <mat-label>Fecha Declaración</mat-label>
+          <input matInput [matDatepicker]="pickerDec" [formControl]="fechaDeclaracion">
+          <mat-datepicker-toggle matSuffix [for]="pickerDec"></mat-datepicker-toggle>
+          <mat-datepicker #pickerDec></mat-datepicker>
+        </mat-form-field>
+      </div>
 
-    <!-- RUN -->
-    <div class="col-md-2">
-      <mat-form-field appearance="outline" class="small-form-field w-100">
-        <mat-label>R.U.N.</mat-label>
-        <input
-          matInput
-          [formControl]="run"
-          placeholder="R.U.N."
-        />
-      </mat-form-field>
+      <div class="col-md-2">
+        <mat-form-field appearance="outline" class="small-form-field w-100">
+          <mat-label>Tipo</mat-label>
+          <mat-select [formControl]="tipoDeclaracion">
+            <mat-option *ngFor="let t of tipos" [value]="t.id">{{ t.nombre }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <div class="col-md-2">
+        <mat-form-field appearance="outline" class="small-form-field w-100">
+          <mat-label>R.U.N.</mat-label>
+          <input matInput [formControl]="run">
+        </mat-form-field>
+      </div>
+
+      <div class="col-md-2">
+        <mat-form-field appearance="outline" class="small-form-field w-100">
+          <mat-label>Declarante</mat-label>
+          <input matInput [formControl]="declarante">
+        </mat-form-field>
+      </div>
+
+      <div class="col-md-2">
+        <mat-form-field appearance="outline" class="small-form-field w-100">
+          <mat-label>Servicio</mat-label>
+          <mat-select [formControl]="servicio">
+            <mat-option *ngFor="let s of serviciosCombo" [value]="s.id">{{ s.nombre }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <!-- ========== Fila 2 ========== -->
+      <div class="col-md-2">
+        <mat-form-field appearance="outline" class="small-form-field w-100">
+          <mat-label>Cargo</mat-label>
+          <input matInput [formControl]="cargo">
+        </mat-form-field>
+      </div>
+
+      <div class="col-md-2">
+        <mat-form-field appearance="outline" class="small-form-field w-100">
+          <mat-label>Estado</mat-label>
+          <mat-select [formControl]="estado">
+            <mat-option *ngFor="let e of estados" [value]="e.id">{{ e.nombre }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <div class="col d-flex justify-content-end mt-3">
+        <button mat-raised-button color="primary" class="me-2" (click)="buscar()">
+          <img src="assets/icons/icon-btn-tabla_filtrar.svg" class="icon-invert" alt> Buscar
+        </button>
+        <button mat-raised-button color="warn" class="me-2" (click)="limpiar()">
+          <img src="assets/icons/icon-btn-tabla_eliminar.svg" class="icon-invert" alt> Limpiar
+        </button>
+        <button mat-raised-button color="accent" (click)="exportar()">
+          <img src="assets/icons/icon-btn-tabla_descargar.svg" class="icon-invert" alt> Exportar
+        </button>
+      </div>
     </div>
+  </div>
+
+  <hr>
+
+  <!-- ▸ Título tabla + descarga -->
+  <div class="d-flex float-end mb-2">
+    <!-- <span class="fw-bold">Declaraciones encontradas</span> -->
+    <button mat-raised-button color="primary" (click)="descargarVersionCompleta()">
+      <img src="assets/icons/icon-btn-tabla_descargar.svg" style="width: 20px; height: 20px; filter: invert(1);"
+        alt="Descargar" class="icon-button">
+      Descargar Seleccionados
+    </button>
+  </div>
+
+  <!-- ▸ tabla única -->
+  <table mat-table [dataSource]="getDataSource(currentTab)" class="small-table mat-elevation-z8 w-100">
+
+    <!-- Checkbox -->
+    <ng-container matColumnDef="select">
+      <th mat-header-cell *matHeaderCellDef>
+        <mat-checkbox color="primary" (change)="masterToggle(currentTab)" [checked]="isAllSelected(currentTab)"
+          [indeterminate]="isSomeSelected(currentTab)">
+        </mat-checkbox>
+      </th>
+      <td mat-cell *matCellDef="let element">
+        <mat-checkbox color="primary" (click)="$event.stopPropagation()" (change)="toggle(currentTab, element)"
+          [checked]="isSelected(currentTab, element)">
+        </mat-checkbox>
+      </td>
+    </ng-container>
+
+    <!-- Id -->
+    <ng-container matColumnDef="idDeclaracion" appResizableColumn>
+      <th mat-header-cell *matHeaderCellDef>Id Declaración</th>
+      <td mat-cell *matCellDef="let e">{{ e.id }}</td>
+    </ng-container>
+
+    <!-- Fecha -->
+    <ng-container matColumnDef="fechaDeclaracion" appResizableColumn>
+      <th mat-header-cell *matHeaderCellDef>Fecha Declaración</th>
+      <td mat-cell *matCellDef="let e">{{ e.fechaFirmaDeclarante }}</td>
+    </ng-container>
+
+    <!-- Tipo -->
+    <ng-container matColumnDef="tipoDeclaracion" appResizableColumn>
+      <th mat-header-cell *matHeaderCellDef>Tipo Declaración</th>
+      <td mat-cell *matCellDef="let e">{{ e.declaTipo }}</td>
+    </ng-container>
+
+    <!-- Numeral -->
+    <ng-container matColumnDef="numeral" appResizableColumn>
+      <th mat-header-cell *matHeaderCellDef>Numeral</th>
+      <td mat-cell *matCellDef="let e">{{ e.sujetoObligado }}</td>
+    </ng-container>
+
+    <!-- RUT -->
+    <ng-container matColumnDef="rut" appResizableColumn>
+      <th mat-header-cell *matHeaderCellDef>RUT</th>
+      <td mat-cell *matCellDef="let e">{{ e.rut }}</td>
+    </ng-container>
 
     <!-- Declarante -->
-    <div class="col-md-2">
-      <mat-form-field appearance="outline" class="small-form-field w-100">
-        <mat-label>Declarante</mat-label>
-        <input
-          matInput
-          [formControl]="declarante"
-          placeholder="DECLARANTE"
-        />
-      </mat-form-field>
-    </div>
+    <ng-container matColumnDef="declarante" appResizableColumn>
+      <th mat-header-cell *matHeaderCellDef>Declarante</th>
+      <td mat-cell *matCellDef="let e">{{ e.declarante }}</td>
+    </ng-container>
 
     <!-- Servicio -->
-    <div class="col-md-2">
-      <mat-form-field appearance="outline" class="small-form-field w-100">
-        <mat-label>Servicio</mat-label>
-        <input
-          matInput
-          [formControl]="servicio"
-          placeholder="SERVICIO"
-        />
-      </mat-form-field>
-    </div>
-  </div>
+    <ng-container matColumnDef="servicio" appResizableColumn>
+      <th mat-header-cell *matHeaderCellDef>Servicio</th>
+      <td mat-cell *matCellDef="let e">{{ e.servicio }}</td>
+    </ng-container>
 
-  <div class="row mb-2">
     <!-- Cargo -->
-    <div class="col-md-2">
-      <mat-form-field appearance="outline" class="small-form-field w-100">
-        <mat-label>Cargo</mat-label>
-        <input
-          matInput
-          [formControl]="cargo"
-          placeholder="CARGO"
-        />
-      </mat-form-field>
-    </div>
+    <ng-container matColumnDef="cargo" appResizableColumn>
+      <th mat-header-cell *matHeaderCellDef>Cargo</th>
+      <td mat-cell *matCellDef="let e">{{ e.cargo }}</td>
+    </ng-container>
 
     <!-- Estado -->
-    <div class="col-md-2">
-      <mat-form-field appearance="outline" class="small-form-field w-100">
-        <mat-label>Estado</mat-label>
-        <mat-select [formControl]="estado">
-          <mat-option value="">TODOS</mat-option>
-          <mat-option value="PENDIENTE FIRMAR">PENDIENTE FIRMAR</mat-option>
-          <mat-option value="FIRMADA">FIRMADA</mat-option>
-          <mat-option value="RECEPCIONADA POR DIP">RECEPCIONADA POR DIP</mat-option>
-          <mat-option value="ARCHIVADA">ARCHIVADA</mat-option>
-        </mat-select>
-      </mat-form-field>
-    </div>
+    <ng-container matColumnDef="estado" appResizableColumn>
+      <th mat-header-cell *matHeaderCellDef>Estado</th>
+      <td mat-cell *matCellDef="let e">
+        <span [ngClass]="pillClass(e.declaEstado)" class="estado-pill">{{ e.declaEstado }}</span>
+      </td>
+    </ng-container>
 
-    <!-- Botones de filtros a la derecha -->
-    <div class="col-md-8 d-flex align-items-center justify-content-end">
-      <button
-        mat-raised-button
-        color="primary"
-        class="me-2"
-        (click)="buscar()"
-      >
-        Buscar
-      </button>
-      <button
-        mat-raised-button
-        color="warn"
-        class="me-2"
-        (click)="limpiar()"
-      >
-        Limpiar
-      </button>
-      <button
-        mat-raised-button
-        color="accent"
-        (click)="exportar()"
-      >
-        Exportar
-      </button>
-    </div>
-  </div>
+    <!-- Enviado por -->
+    <ng-container matColumnDef="enviadoPor">
+      <th mat-header-cell *matHeaderCellDef>Enviado por</th>
+      <td mat-cell *matCellDef="let e">{{ e.remitente }}</td>
+    </ng-container>
 
-  <hr />
+    <!-- Acciones -->
+    <ng-container matColumnDef="acciones">
+      <th mat-header-cell *matHeaderCellDef>Acciones</th>
+      <td mat-cell *matCellDef="let e">
 
-  <!-- Título de la tabla (y botón "Descargar versión completa") -->
-  <div class="d-flex justify-content-between mb-2">
-    <div>
-      <span class="fw-bold">Declaraciones Encontradas</span>
-    </div>
-    <div>
-      <button
-        mat-raised-button
-        color="accent"
-        (click)="descargarVersionCompleta()"
-      >
-        Descargar declaración (versión completa)
-      </button>
-    </div>
-  </div>
+        <button mat-icon-button color="primary" (click)="onBitacora()">
+          <img src="assets/icons/icon-btn-tabla_bitacora.svg" alt="Bitacora">
+        </button>
 
-  <!-- TABLA PENDIENTES -->
-  <div *ngIf="currentTab === 'pendientes'">
-    <table mat-table [dataSource]="dataSourcePendientes" class="small-table mat-elevation-z8 w-100">
-      <!-- Columna selección -->
-      <ng-container matColumnDef="select">
-        <th mat-header-cell *matHeaderCellDef>
-          <mat-checkbox
-            (change)="masterTogglePendientes()"
-            [checked]="isAllSelectedPendientes()"
-            [indeterminate]="isSomeSelectedPendientes()"
-            color="primary"
-          >
-          </mat-checkbox>
-        </th>
-        <td mat-cell *matCellDef="let element">
-          <mat-checkbox
-            (click)="$event.stopPropagation()"
-            (change)="$event ? togglePendientes(element) : null"
-            [checked]="selectionPendientes.isSelected(element)"
-            color="primary"
-          >
-          </mat-checkbox>
-        </td>
-      </ng-container>
+        <button mat-icon-button color="accent" (click)="onDerivar()">
+          <img src="assets/icons/icon-btn-tabla_archivar.svg" alt="Derivar">
+        </button>
+        <button mat-icon-button color="warn" (click)="onFirmar()">
+          <img src="assets/icons/icon-btn-tabla_archivar.svg" alt="Firmar">
+        </button>
+        <button mat-icon-button color="primary" (click)="onEnviarOrganismo()">
+          <img src="assets/icons/icon-btn-tabla_archivar.svg" alt="Enviar a Organismo Fiscalizador">
+        </button>
 
-      <!-- Id Declaración -->
-      <ng-container matColumnDef="idDeclaracion">
-        <th mat-header-cell *matHeaderCellDef>Id Declaración</th>
-        <td mat-cell *matCellDef="let element">{{ element.idDeclaracion }}</td>
-      </ng-container>
+      </td>
+    </ng-container>
 
-      <!-- Fecha Declaración -->
-      <ng-container matColumnDef="fechaDeclaracion">
-        <th mat-header-cell *matHeaderCellDef>Fecha Declaración</th>
-        <td mat-cell *matCellDef="let element">{{ element.fechaDeclaracion }}</td>
-      </ng-container>
+    <!-- Filas -->
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+  </table>
 
-      <!-- Tipo Declaración -->
-      <ng-container matColumnDef="tipoDeclaracion">
-        <th mat-header-cell *matHeaderCellDef>Tipo Declaración</th>
-        <td mat-cell *matCellDef="let element">{{ element.tipoDeclaracion }}</td>
-      </ng-container>
+          <div class="d-flex justify-content-center mt-3">
+          <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons [length]="getDataSource(currentTab)?.data?.length"
+            aria-label="Paginador de Declaraciones">
+          </mat-paginator>
+        </div>
 
-      <!-- Numeral -->
-      <ng-container matColumnDef="numeral">
-        <th mat-header-cell *matHeaderCellDef>Numeral</th>
-        <td mat-cell *matCellDef="let element">{{ element.numeral }}</td>
-      </ng-container>
-
-      <!-- RUT -->
-      <ng-container matColumnDef="rut">
-        <th mat-header-cell *matHeaderCellDef>RUT</th>
-        <td mat-cell *matCellDef="let element">{{ element.rut }}</td>
-      </ng-container>
-
-      <!-- Declarante -->
-      <ng-container matColumnDef="declarante">
-        <th mat-header-cell *matHeaderCellDef>Declarante</th>
-        <td mat-cell *matCellDef="let element">{{ element.declarante }}</td>
-      </ng-container>
-
-      <!-- Servicio -->
-      <ng-container matColumnDef="servicio">
-        <th mat-header-cell *matHeaderCellDef>Servicio</th>
-        <td mat-cell *matCellDef="let element">{{ element.servicio }}</td>
-      </ng-container>
-
-      <!-- Cargo -->
-      <ng-container matColumnDef="cargo">
-        <th mat-header-cell *matHeaderCellDef>Cargo</th>
-        <td mat-cell *matCellDef="let element">{{ element.cargo }}</td>
-      </ng-container>
-
-      <!-- Estado -->
-      <ng-container matColumnDef="estado">
-        <th mat-header-cell *matHeaderCellDef>Estado</th>
-        <td mat-cell *matCellDef="let element">{{ element.estado }}</td>
-      </ng-container>
-
-      <!-- Enviado por -->
-      <ng-container matColumnDef="enviadoPor">
-        <th mat-header-cell *matHeaderCellDef>Enviado por</th>
-        <td mat-cell *matCellDef="let element">{{ element.enviadoPor }}</td>
-      </ng-container>
-
-      <!-- Filas header y data -->
-      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-      <tr mat-row        *matRowDef="let row; columns: displayedColumns;"></tr>
-    </table>
-  </div>
-
-  <!-- TABLA ENVIADAS -->
-  <div *ngIf="currentTab === 'enviadas'">
-    <table mat-table [dataSource]="dataSourceEnviadas" class="small-table mat-elevation-z8 w-100">
-      <!-- Columna selección -->
-      <ng-container matColumnDef="select">
-        <th mat-header-cell *matHeaderCellDef>
-          <mat-checkbox
-            (change)="masterToggleEnviadas()"
-            [checked]="isAllSelectedEnviadas()"
-            [indeterminate]="isSomeSelectedEnviadas()"
-            color="primary"
-          >
-          </mat-checkbox>
-        </th>
-        <td mat-cell *matCellDef="let element">
-          <mat-checkbox
-            (click)="$event.stopPropagation()"
-            (change)="$event ? toggleEnviadas(element) : null"
-            [checked]="selectionEnviadas.isSelected(element)"
-            color="primary"
-          >
-          </mat-checkbox>
-        </td>
-      </ng-container>
-
-      <!-- Repetir mismas columnas: idDeclaracion, fechaDeclaracion, etc. -->
-      <ng-container matColumnDef="idDeclaracion">
-        <th mat-header-cell *matHeaderCellDef>Id Declaración</th>
-        <td mat-cell *matCellDef="let element">{{ element.idDeclaracion }}</td>
-      </ng-container>
-      <ng-container matColumnDef="fechaDeclaracion">
-        <th mat-header-cell *matHeaderCellDef>Fecha Declaración</th>
-        <td mat-cell *matCellDef="let element">{{ element.fechaDeclaracion }}</td>
-      </ng-container>
-      <ng-container matColumnDef="tipoDeclaracion">
-        <th mat-header-cell *matHeaderCellDef>Tipo Declaración</th>
-        <td mat-cell *matCellDef="let element">{{ element.tipoDeclaracion }}</td>
-      </ng-container>
-      <ng-container matColumnDef="numeral">
-        <th mat-header-cell *matHeaderCellDef>Numeral</th>
-        <td mat-cell *matCellDef="let element">{{ element.numeral }}</td>
-      </ng-container>
-      <ng-container matColumnDef="rut">
-        <th mat-header-cell *matHeaderCellDef>RUT</th>
-        <td mat-cell *matCellDef="let element">{{ element.rut }}</td>
-      </ng-container>
-      <ng-container matColumnDef="declarante">
-        <th mat-header-cell *matHeaderCellDef>Declarante</th>
-        <td mat-cell *matCellDef="let element">{{ element.declarante }}</td>
-      </ng-container>
-      <ng-container matColumnDef="servicio">
-        <th mat-header-cell *matHeaderCellDef>Servicio</th>
-        <td mat-cell *matCellDef="let element">{{ element.servicio }}</td>
-      </ng-container>
-      <ng-container matColumnDef="cargo">
-        <th mat-header-cell *matHeaderCellDef>Cargo</th>
-        <td mat-cell *matCellDef="let element">{{ element.cargo }}</td>
-      </ng-container>
-      <ng-container matColumnDef="estado">
-        <th mat-header-cell *matHeaderCellDef>Estado</th>
-        <td mat-cell *matCellDef="let element">{{ element.estado }}</td>
-      </ng-container>
-      <ng-container matColumnDef="enviadoPor">
-        <th mat-header-cell *matHeaderCellDef>Enviado por</th>
-        <td mat-cell *matCellDef="let element">{{ element.enviadoPor }}</td>
-      </ng-container>
-
-      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-      <tr mat-row        *matRowDef="let row; columns: displayedColumns;"></tr>
-    </table>
-  </div>
-
-  <!-- TABLA ARCHIVADAS -->
-  <div *ngIf="currentTab === 'archivadas'">
-    <table mat-table [dataSource]="dataSourceArchivadas" class="small-table mat-elevation-z8 w-100">
-      <!-- Columna selección -->
-      <ng-container matColumnDef="select">
-        <th mat-header-cell *matHeaderCellDef>
-          <mat-checkbox
-            (change)="masterToggleArchivadas()"
-            [checked]="isAllSelectedArchivadas()"
-            [indeterminate]="isSomeSelectedArchivadas()"
-            color="primary"
-          >
-          </mat-checkbox>
-        </th>
-        <td mat-cell *matCellDef="let element">
-          <mat-checkbox
-            (click)="$event.stopPropagation()"
-            (change)="$event ? toggleArchivadas(element) : null"
-            [checked]="selectionArchivadas.isSelected(element)"
-            color="primary"
-          >
-          </mat-checkbox>
-        </td>
-      </ng-container>
-
-      <!-- Mismas columnas: idDeclaracion, fechaDeclaracion, etc. -->
-      <ng-container matColumnDef="idDeclaracion">
-        <th mat-header-cell *matHeaderCellDef>Id Declaración</th>
-        <td mat-cell *matCellDef="let element">{{ element.idDeclaracion }}</td>
-      </ng-container>
-      <ng-container matColumnDef="fechaDeclaracion">
-        <th mat-header-cell *matHeaderCellDef>Fecha Declaración</th>
-        <td mat-cell *matCellDef="let element">{{ element.fechaDeclaracion }}</td>
-      </ng-container>
-      <ng-container matColumnDef="tipoDeclaracion">
-        <th mat-header-cell *matHeaderCellDef>Tipo Declaración</th>
-        <td mat-cell *matCellDef="let element">{{ element.tipoDeclaracion }}</td>
-      </ng-container>
-      <ng-container matColumnDef="numeral">
-        <th mat-header-cell *matHeaderCellDef>Numeral</th>
-        <td mat-cell *matCellDef="let element">{{ element.numeral }}</td>
-      </ng-container>
-      <ng-container matColumnDef="rut">
-        <th mat-header-cell *matHeaderCellDef>RUT</th>
-        <td mat-cell *matCellDef="let element">{{ element.rut }}</td>
-      </ng-container>
-      <ng-container matColumnDef="declarante">
-        <th mat-header-cell *matHeaderCellDef>Declarante</th>
-        <td mat-cell *matCellDef="let element">{{ element.declarante }}</td>
-      </ng-container>
-      <ng-container matColumnDef="servicio">
-        <th mat-header-cell *matHeaderCellDef>Servicio</th>
-        <td mat-cell *matCellDef="let element">{{ element.servicio }}</td>
-      </ng-container>
-      <ng-container matColumnDef="cargo">
-        <th mat-header-cell *matHeaderCellDef>Cargo</th>
-        <td mat-cell *matCellDef="let element">{{ element.cargo }}</td>
-      </ng-container>
-      <ng-container matColumnDef="estado">
-        <th mat-header-cell *matHeaderCellDef>Estado</th>
-        <td mat-cell *matCellDef="let element">{{ element.estado }}</td>
-      </ng-container>
-      <ng-container matColumnDef="enviadoPor">
-        <th mat-header-cell *matHeaderCellDef>Enviado por</th>
-        <td mat-cell *matCellDef="let element">{{ element.enviadoPor }}</td>
-      </ng-container>
-
-      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-      <tr mat-row        *matRowDef="let row; columns: displayedColumns;"></tr>
-    </table>
-  </div>
-
-  <!-- BARRA DE ACCIONES AL FINAL -->
-  <div class="mt-3 d-flex align-items-center gap-2 justify-content-end">
-    <button mat-raised-button color="accent" (click)="onDerivar()">
-      Derivar
-    </button>
-    <button mat-raised-button color="primary" (click)="onFirmar()">
-      Firmar
-    </button>
-    <button mat-raised-button color="warn" (click)="onEnviarOrganismo()">
-      Enviar a Organismo Fiscalizador
-    </button>
-  </div>
+  <!-- ▸ Barra de acciones -->
+  <!-- <div class="mt-3 d-flex align-items-center gap-2 justify-content-end">
+    <button mat-raised-button color="accent" (click)="onDerivar()">Derivar</button>
+    <button mat-raised-button color="primary" (click)="onFirmar()">Firmar</button>
+    <button mat-raised-button color="warn" (click)="onEnviarOrganismo()">Enviar a Organismo Fiscalizador</button>
+  </div> -->
 </div>

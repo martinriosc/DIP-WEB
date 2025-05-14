@@ -28,7 +28,7 @@
       <div *ngIf="tieneDeudaPension === 'si'">
         <div class="row mb-3">
           <div class="col-md-12 text-end">
-            <button mat-raised-button color="primary" (click)="openAddModal()">
+            <button mat-raised-button color="primary" (click)="openAddPensionModal()">
               Agregar Deuda
             </button>
           </div>
@@ -36,51 +36,53 @@
 
         <table mat-table [dataSource]="deduasPensionAlimento" class="w-100 mat-elevation-z8">
           <!-- Monto Total -->
-          <ng-container matColumnDef="montoTotal">
+          <ng-container matColumnDef="monto" appResizableColumn>
             <th mat-header-cell *matHeaderCellDef>Monto total adeudado por cada pensión a que está obligado (en pesos chilenos)</th>
             <td mat-cell *matCellDef="let p">
-              {{ p.montoTotal | currency }}
+              {{ p.monto | currency }}
+            </td>
+          </ng-container>
+
+          <!-- Tipo Obligación -->
+          <ng-container matColumnDef="tipoObligacion" appResizableColumn>
+            <th mat-header-cell *matHeaderCellDef>Tipo de Obligación o Deuda</th>
+            <td mat-cell *matCellDef="let p">
+              {{ p.tipoId }}
             </td>
           </ng-container>
 
           <!-- Registra Inscripción -->
-          <ng-container matColumnDef="registraInscripcion">
+          <ng-container matColumnDef="registroNacional" appResizableColumn>
             <th mat-header-cell *matHeaderCellDef>¿Esta deuda Registra Inscripción vigente en el Registro Nacional de Deudores de Pensiones de ALimentos?</th>
             <td mat-cell *matCellDef="let p">
-              {{ p.registraInscripcion }}
+              {{ p.registroNacional ? 'Sí' : 'No' }}
             </td>
           </ng-container>
 
           <!-- Estado -->
-          <ng-container matColumnDef="estado">
+          <ng-container matColumnDef="estado" appResizableColumn>
             <th mat-header-cell *matHeaderCellDef>Estado</th>
-            <td mat-cell *matCellDef="let p">
-              {{ p.porcentaje == 100 ? 'Completo' : 'Pendiente' }}
-            </td>
+            <td mat-cell *matCellDef="let p">{{ !p.borrador ? 'completo' : 'incompleto' }}</td>
           </ng-container>
 
           <!-- Acciones -->
           <ng-container matColumnDef="acciones">
             <th mat-header-cell *matHeaderCellDef>Acciones</th>
             <td mat-cell *matCellDef="let p">
-              <button mat-icon-button color="accent" (click)="openEditModal(p)">
-                <mat-icon>edit</mat-icon>
+              <button mat-icon-button color="accent" (click)="openEditPensionModal(p)">
+                <img src="assets/icons/icon-btn-tabla_editar.svg" alt="Editar">
               </button>
-              <button mat-icon-button color="warn" (click)="eliminarPasivo(p)">
-                <mat-icon>delete</mat-icon>
+              <button mat-icon-button color="warn" (click)="eliminarPension(p)">
+                <img src="assets/icons/icon-btn-tabla_eliminar.svg" alt="Eliminar">
               </button>
             </td>
           </ng-container>
 
-          <tr mat-header-row *matHeaderRowDef="['montoTotal','registraInscripcion','estado','acciones']"></tr>
-          <tr mat-row *matRowDef="let row; columns: ['montoTotal','registraInscripcion','estado','acciones'];"></tr>
+          <tr mat-header-row *matHeaderRowDef="displayedColumnsPensiones"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumnsPensiones;" [ngClass]="{'fila-incompleta': row.borrador}"></tr>
         </table>
       </div>
     </div>
-
-
-
-
 
     <div class="border p-3 mb-3">
       <div class="row mb-3 align-items-center">
@@ -101,9 +103,7 @@
         <div class="col-md-12">
           <mat-form-field class="w-100">
             <mat-label>Monto global en pesos</mat-label>
-            <mat-select [(ngModel)]="montoGlobal" name="montoGlobal">
-              <mat-option value="si">Si</mat-option>
-            </mat-select>
+            <input matInput type="number" [(ngModel)]="montoGlobal" name="montoGlobal" (change)="onMontoGlobalChange($any($event.target).value)">
             <mat-hint align="start">Ingrese un número entero, no se permite el uso de puntos ni comas. Ej: 123456</mat-hint>
           </mat-form-field>
         </div>
@@ -112,7 +112,7 @@
       <div *ngIf="tienePasivos === 'si'">
         <div class="row mb-3">
           <div class="col-md-12 text-end">
-            <button mat-raised-button color="primary" (click)="openAddModal()">
+            <button mat-raised-button color="primary" (click)="openAddPasivoModal()">
               Declarar Deuda
             </button>
           </div>
@@ -121,58 +121,53 @@
         <table mat-table [dataSource]="deudasMayor100UTM" class="w-100 mat-elevation-z8">
        
           <!-- Tipo Obligación -->
-          <ng-container matColumnDef="tipoObligacion">
-            <th mat-header-cell *matHeaderCellDef>Tipo Obligación</th>
+          <ng-container matColumnDef="tipoObligacion" appResizableColumn>
+            <th mat-header-cell *matHeaderCellDef>Tipo de Obligación o Deuda</th>
             <td mat-cell *matCellDef="let p">
-              {{ p.tipoObligacion }}
+              {{ p.tipoId }}
             </td>
           </ng-container>
 
           <!-- Monto en Pesos -->
-          <ng-container matColumnDef="montoEnPesos">
-            <th mat-header-cell *matHeaderCellDef>Monto en Pesos</th>
+          <ng-container matColumnDef="monto" appResizableColumn>
+            <th mat-header-cell *matHeaderCellDef>Monto Adeudado en Pesos</th>
             <td mat-cell *matCellDef="let p">
-              {{ p.montoEnPesos | currency }}
+              {{ p.monto | currency }}
             </td>
           </ng-container>
 
           <!-- Razon Social -->
-          <ng-container matColumnDef="razonSocial"> 
-            <th mat-header-cell *matHeaderCellDef>Razón Social</th>
+          <ng-container matColumnDef="razonSocial" appResizableColumn> 
+            <th mat-header-cell *matHeaderCellDef>Nombre o Razón Social del Acreedor</th>
             <td mat-cell *matCellDef="let p">
               {{ p.razonSocial }}
             </td>
           </ng-container>
 
-        
           <!-- Estado -->
-          <ng-container matColumnDef="estado">
+          <ng-container matColumnDef="estado" appResizableColumn>
             <th mat-header-cell *matHeaderCellDef>Estado</th>
-            <td mat-cell *matCellDef="let p">
-              {{ p.porcentaje == 100 ? 'Completo' : 'Pendiente' }}
-            </td>
+            <td mat-cell *matCellDef="let p">{{ !p.borrador ? 'completo' : 'incompleto' }}</td>
           </ng-container>
 
           <!-- Acciones -->
           <ng-container matColumnDef="acciones">
             <th mat-header-cell *matHeaderCellDef>Acciones</th>
             <td mat-cell *matCellDef="let p">
-              <button mat-icon-button color="accent" (click)="openEditModal(p)">
-                <mat-icon>edit</mat-icon>
+              <button mat-icon-button color="accent" (click)="openEditPasivoModal(p)">
+                <img src="assets/icons/icon-btn-tabla_editar.svg" alt="Editar">
               </button>
               <button mat-icon-button color="warn" (click)="eliminarPasivo(p)">
-                <mat-icon>delete</mat-icon>
+                <img src="assets/icons/icon-btn-tabla_eliminar.svg" alt="Eliminar">
               </button>
             </td>
           </ng-container>
 
-          <tr mat-header-row *matHeaderRowDef="['tipoObligacion','montoEnPesos','razonSocial','estado','acciones']"></tr>
-          <tr mat-row *matRowDef="let row; columns: ['tipoObligacion','montoEnPesos','razonSocial','estado','acciones'];"></tr>
+          <tr mat-header-row *matHeaderRowDef="displayedColumnsPasivos"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumnsPasivos;" [ngClass]="{'fila-incompleta': row.borrador}"></tr>
         </table>
       </div>
     </div>
-
-
 
   </div>
   <!-- Botón Guardar -->
@@ -183,48 +178,83 @@
   </mat-card-actions>
 </mat-card>
 
-<!-- MODAL inline para Pasivo -->
+<!-- MODAL para Pasivo -->
 <ng-template #pasivoModal let-dialogRef>
   <h2 mat-dialog-title>
-    {{ editMode ? 'Editar Pasivo' : 'Agregar Pasivo' }}
+    {{ editPasivoMode ? 'Editar Pasivo' : 'Agregar Pasivo' }}
   </h2>
 
   <mat-dialog-content>
     <form [formGroup]="pasivoForm">
-      <!-- Tipo Pasivo -->
+      <!-- Tipo Obligación -->
       <mat-form-field appearance="fill" class="w-100 mb-3">
-        <mat-label>Tipo de Pasivo</mat-label>
-        <mat-select formControlName="tipoPasivo">
-          <mat-option value="CREDITO">Crédito</mat-option>
-          <mat-option value="HIPOTECA">Hipoteca</mat-option>
-          <mat-option value="OTROS">Otros</mat-option>
+        <mat-label>Tipo de Obligación o deuda</mat-label>
+        <mat-select formControlName="tipoId">
+          <mat-option *ngFor="let tipo of tipoObligacion" [value]="tipo.id">
+            {{tipo.nombre}}
+          </mat-option>
         </mat-select>
-      </mat-form-field>
-
-      <!-- Institución -->
-      <mat-form-field appearance="fill" class="w-100 mb-3">
-        <mat-label>Institución</mat-label>
-        <input matInput formControlName="institucion" />
+        <mat-error *ngIf="pasivoForm.get('tipoId')?.hasError('required')">
+          El tipo de obligación es requerido
+        </mat-error>
       </mat-form-field>
 
       <!-- Monto -->
       <mat-form-field appearance="fill" class="w-100 mb-3">
-        <mat-label>Monto</mat-label>
+        <mat-label>Monto Adeudado en Pesos</mat-label>
         <input matInput type="number" formControlName="monto" />
+        <mat-error *ngIf="pasivoForm.get('monto')?.hasError('required')">
+          El monto es requerido
+        </mat-error>
       </mat-form-field>
 
-      <!-- Fecha Adquisición -->
+      <!-- Razón Social -->
       <mat-form-field appearance="fill" class="w-100 mb-3">
-        <mat-label>Fecha Adquisición</mat-label>
-        <input matInput formControlName="fechaAdquisicion" />
+        <mat-label>Nombre o Razón Social del Acreedor</mat-label>
+        <input matInput formControlName="razonSocial" />
+        <mat-error *ngIf="pasivoForm.get('razonSocial')?.hasError('required')">
+          La razón social es requerida
+        </mat-error>
       </mat-form-field>
     </form>
   </mat-dialog-content>
 
   <mat-dialog-actions align="end">
-    <button mat-button (click)="dialogRef.close()">Cancelar</button>
-    <button mat-raised-button color="primary" (click)="savePasivo(dialogRef)">
-      Guardar
-    </button>
+    <button mat-button (click)="closeDialog()">Cancelar</button>
+    <button mat-raised-button color="primary" (click)="savePasivo()">Guardar</button>
+  </mat-dialog-actions>
+</ng-template>
+
+<!-- MODAL para Pensión -->
+<ng-template #pensionModal let-dialogRef>
+  <h2 mat-dialog-title>
+    {{ editPensionMode ? 'Editar Pensión' : 'Agregar Pensión' }}
+  </h2>
+
+  <mat-dialog-content>
+    <form [formGroup]="pensionForm">
+      <!-- Monto -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>Monto Adeudado en Pesos</mat-label>
+        <input matInput type="number" formControlName="monto" />
+        <mat-error *ngIf="pensionForm.get('monto')?.hasError('required')">
+          El monto es requerido
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Registro Nacional -->
+      <mat-form-field appearance="fill" class="w-100 mb-3">
+        <mat-label>¿Esta deuda registra Inscripción vigente en el Registro Nacional de Deudores de Alimentos?</mat-label>
+        <mat-select formControlName="registroNacional">
+          <mat-option [value]="true">Sí</mat-option>
+          <mat-option [value]="false">No</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="closeDialog()">Cancelar</button>
+    <button mat-raised-button color="primary" (click)="savePension()">Guardar</button>
   </mat-dialog-actions>
 </ng-template>

@@ -5,7 +5,9 @@ import {
   TemplateRef
 } from '@angular/core';
 import {
+  FormArray,
   FormBuilder,
+  FormControl,
   FormGroup,
   Validators
 } from '@angular/forms';
@@ -13,20 +15,20 @@ import {
   MatDialog,
   MatDialogRef
 } from '@angular/material/dialog';
+import { ToastrService } from 'ngx-toastr';
+import Swal from 'sweetalert2';
 
-import { ValidadorDeclaracionService } from '../../../../services/validador-declaracion.service';
-import { StepperStatusService }        from 'src/app/modules/declaraciones/services/stepper-status.service';
 import { OtrosBienesService } from 'src/app/modules/declaraciones/services/otros-bienes.service';
 import { ComunService } from 'src/app/modules/declaraciones/services/comun.service';
 import { DeclaracionHelperService } from 'src/app/modules/declaraciones/services/declaracion-helper.service';
+import { DeclaracionService } from 'src/app/modules/declaraciones/services/declaracion.service';
 
 interface OtroBien {
-  tipo: string;
+  id?: string;
+  tipoBienId: string;
+  monto: string;
   descripcion: string;
-  valor: number;
-  fecha: string;
-  observaciones: string;
-  estado: string;
+  borrador: boolean;
 }
 
 @Component({
@@ -38,35 +40,36 @@ interface OtroBien {
 export class Paso15OtrosBienesComponent implements OnInit {
   @ViewChild('otrosBienesModal') otrosBienesModal!: TemplateRef<any>;
 
+  displayedColumns = ['tipoBien', 'monto', 'descripcion','estado', 'acciones'];
+
   tieneOtrosBienes = 'no';
   otrosBienesForm!: FormGroup;
   editMode = false;
   currentItem: OtroBien | null = null;
-  dialogRef: MatDialogRef<any> | null = null;
+  private dialogRef: any;
 
   private activeDeclId!: string;
   private readonly key = 'paso15';
 
-  otrosBienes: any[] = [];
-  tiposBienes:any[] = [];
+  otrosBienes: OtroBien[] = [];
+  tiposBienes: any[] = [];
 
-  declaracionId: number = 1319527;    //1319527
-  declaranteId: number = 2882000;
+  declaracionId: number = this._declaracionHelper.declaracionId;
+  declaranteId: number = this._declaracionHelper.declaranteId;
 
   constructor(
     private fb: FormBuilder,
     private dialog: MatDialog,
     private _otrosBienes: OtrosBienesService,
     private _comun: ComunService,
-    private _declaracionHelper: DeclaracionHelperService
+    private _declaracionHelper: DeclaracionHelperService,
+    private _declaracion: DeclaracionService,
+    private toastr: ToastrService
   ) {}
 
   ngOnInit(): void {
-    // construye formulario inicial
     this.buildForm();
-    // obtiene declaración activa
     this._declaracionHelper.activeId$.subscribe(id => this.activeDeclId = id);
-    // opcional: marca inicialmente incompleto
     this._declaracionHelper.markStepIncomplete(['declaraciones', this.activeDeclId, this.key]);
 
     this.loadOtrosBienes();
@@ -77,37 +80,36 @@ export class Paso15OtrosBienesComponent implements OnInit {
     this.loadRegistro();
   }
 
-  
-  loadRegistro(){
+  loadRegistro() {
     this._declaracionHelper.declaracionesFlag$.subscribe(data => {
-      
       this.tieneOtrosBienes = data.otrosBienes ? 'si' : 'no';
-    })
+    });
   }
 
-  loadOtrosBienes(){
-    this._otrosBienes.listar(this.declaracionId).subscribe({
-      next: (data:any) => {
+  loadOtrosBienes() {
+    this._otrosBienes.listar(this.declaranteId).subscribe({
+      next: (data: any) => {
         this.otrosBienes = data;
       },
       error: (error) => {
         console.error('Error al cargar otros bienes:', error);
+        this.toastr.error('Error al cargar otros bienes');
       }
     });
   }
 
-  loadTipoBien(){
-    this._comun.listarEntity('','TipoBien').subscribe({
-      next: (data:any) => {
+  loadTipoBien() {
+    this._comun.listarEntity('', 'TipoBien').subscribe({
+      next: (data: any) => {
         this.tiposBienes = data;
       },
       error: (error) => {
-        console.error('Error al cargar otros bienes:', error);
+        console.error('Error al cargar tipos de bien:', error);
+        this.toastr.error('Error al cargar tipos de bien');
       }
     });
   }
 
-  /** Maneja click "Guardar / Siguiente" */
   onSubmit(): void {
     const ok =
       this.tieneOtrosBienes === 'no' ||
@@ -122,10 +124,19 @@ export class Paso15OtrosBienesComponent implements OnInit {
     }
   }
 
-  /** Radio "¿Tiene otros bienes?" */
   onTieneOtrosBienesChange(value: string): void {
     this.tieneOtrosBienes = value;
     const path = ['declaraciones', this.activeDeclId, this.key];
+
+    this._declaracion.guardarRegistro(this.declaranteId, 'otrosBienes', value === 'si').subscribe({
+      next: (res: any) => {
+        console.log('Registro guardado exitosamente');
+      },
+      error: (err: any) => {
+        console.error('Error al guardar registro:', err);
+        this.toastr.error('Error al guardar registro');
+      }
+    });
 
     if (value === 'no') {
       this._declaracionHelper.markStepCompleted(path);
@@ -138,7 +149,6 @@ export class Paso15OtrosBienesComponent implements OnInit {
     }
   }
 
-  /** Abre modal para agregar un nuevo bien */
   openAddModal(): void {
     this.editMode = false;
     this.currentItem = null;
@@ -146,7 +156,6 @@ export class Paso15OtrosBienesComponent implements OnInit {
     this.dialogRef = this.dialog.open(this.otrosBienesModal, { width: '800px' });
   }
 
-  /** Abre modal para editar un bien existente */
   openEditModal(item: OtroBien): void {
     this.editMode = true;
     this.currentItem = item;
@@ -154,50 +163,87 @@ export class Paso15OtrosBienesComponent implements OnInit {
     this.dialogRef = this.dialog.open(this.otrosBienesModal, { width: '800px' });
   }
 
-  /** Construye o resetea el formulario */
+  closeDialog(): void {
+    if (this.dialogRef) {
+      this.dialogRef.close();
+    }
+  }
+
   private buildForm(item?: OtroBien): void {
     this.otrosBienesForm = this.fb.group({
-      tipo: [item?.tipo || ''],
+      tipoBienId: [item?.tipoBienId || ''],
+      monto: [item?.monto || ''],
       descripcion: [item?.descripcion || ''],
-      valor: [item?.valor || 0, [Validators.min(0)]],
-      fecha: [item?.fecha || ''],
-      observaciones: [item?.observaciones || ''],
-      estado: [item?.estado || 'Activo']
+      borrador: [item?.borrador || true]
     });
   }
 
-  /** Guarda o actualiza un bien */
-  saveOtroBien(dialogRef: any): void {
-    const key = 'paso15';
-    const path = ['declaraciones', this.activeDeclId, key];
+  saveOtroBien(): void {
+    if (this.otrosBienesForm.valid) {
+      const formValue = this.otrosBienesForm.value;
+      const payload = {
+        id: this.editMode ? this.currentItem?.id : '',
+        tipoBienId: formValue.tipoBienId,
+        monto: formValue.monto,
+        descripcion: formValue.descripcion,
+        borrador: !this.isFormValid(this.otrosBienesForm)
+      };
 
-    if (this.otrosBienesForm.invalid) {
-      this._declaracionHelper.markStepIncomplete(path);
-      return;
+      this._otrosBienes.guardar(payload, this.declaranteId).subscribe({
+        next: (res: any) => {
+          this.loadOtrosBienes();
+          this.toastr.success('Otro bien guardado correctamente');
+          this.closeDialog();
+        },
+        error: (err) => {
+          console.error('Error al guardar otro bien:', err);
+          this.toastr.error('Error al guardar otro bien');
+        }
+      });
     }
-
-    const b = this.otrosBienesForm.value as any;
-    if (this.editMode && this.currentItem) {
-      const idx = this.otrosBienes.indexOf(this.currentItem);
-      if (idx >= 0) this.otrosBienes[idx] = b;
-    } else {
-      this.otrosBienes.push(b);
-    }
-    dialogRef.close();
-
-    // Marca completo si hay al menos uno
-    this._declaracionHelper.markStepCompleted(path);
   }
 
-  /** Elimina un bien y actualiza estado */
   eliminarOtroBien(item: OtroBien): void {
-    const path = ['declaraciones', this.activeDeclId, this.key];
-    this.otrosBienes = this.otrosBienes.filter(x => x !== item);
+    if (!item.id) return;
 
-    if (this.otrosBienes.length > 0) {
-      this._declaracionHelper.markStepCompleted(path);
-    } else {
-      this._declaracionHelper.markStepIncomplete(path);
-    }
+    Swal.fire({
+      title: '¿Estás seguro?',
+      text: 'Esta acción eliminará el bien seleccionado.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this._otrosBienes.eliminar(Number(item.id)).subscribe({
+          next: (res: any) => {
+            this.loadOtrosBienes();
+            this.toastr.success('Otro bien eliminado correctamente');
+          },
+          error: (err) => {
+            console.error('Error al eliminar otro bien:', err);
+            this.toastr.error('Error al eliminar otro bien');
+          }
+        });
+      }
+    });
   }
+
+   private isFormValid(ctrl: any): boolean {
+      if (ctrl instanceof FormControl) {
+        const v = ctrl.value;
+        return v !== null && v !== undefined && String(v).trim() !== '';
+      }
+  
+      if (ctrl instanceof FormGroup) {
+        return Object.values(ctrl.controls).every(child => this.isFormValid(child));
+      }
+  
+      if (ctrl instanceof FormArray) {
+        return ctrl.controls.every(child => this.isFormValid(child));
+      }
+      return true;
+    }
 }

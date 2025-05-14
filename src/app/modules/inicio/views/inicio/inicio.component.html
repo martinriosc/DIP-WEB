@@ -4,6 +4,8 @@
   <div><strong>Ley de Probidad de la Función Pública</strong></div>
 </div>
 
+
+
 <div class="container mt-4">
   <div class="row g-4">
     <!-- Columna Izquierda -->
@@ -32,10 +34,10 @@
             <button mat-raised-button color="primary" (click)="openModalNuevaDeclaracion()" class="w-100 w-md-auto">
               <mat-icon class="me-1">add</mat-icon> Nueva Declaración
             </button>
-            <button mat-raised-button color="primary" class="w-100 w-md-auto">
+            <button mat-raised-button color="primary" (click)="continuarPendiente()" class="w-100 w-md-auto">
               <mat-icon class="me-1">play_arrow</mat-icon> Continuar declaración pendiente
             </button>
-            <button mat-raised-button color="primary" class="w-100 w-md-auto">
+            <button mat-raised-button color="primary" (click)="openModalRectificarDeclaracion()" class="w-100 w-md-auto">
               <mat-icon class="me-1">check_circle</mat-icon> Rectificar declaración
             </button>
           </div>
@@ -74,15 +76,112 @@
   <h2 mat-dialog-title>Nueva declaración</h2>
   <mat-dialog-content>
     <div class="d-grid gap-2 mt-2">
-      <button mat-flat-button color="primary" class="text-start" (click)="crearNuevaDeclaracion(dialogRef)">
+      <button mat-flat-button color="primary" class="text-start" (click)="crearNuevaDeclaracion()">
         Nueva declaración
         <mat-icon class="float-end">chevron_right</mat-icon>
       </button>
 
-      <button mat-stroked-button color="primary" class="text-start" (click)="crearConDatosAnteriores(dialogRef)">
+      <button mat-stroked-button color="primary" class="text-start" (click)="nuevaDeclaracionConDatosAnteriores()">
         Nueva declaración con datos usados anteriormente
         <mat-icon class="float-end">chevron_right</mat-icon>
       </button>
     </div>
+  </mat-dialog-content>
+</ng-template>
+
+<!-- MODAL NUEVA DECLARACION -->
+<ng-template #rectificarDeclaracionModal let-dialogRef>
+  <h2 mat-dialog-title>Rectificar declaración</h2>
+  <mat-dialog-content>
+    <div class="d-grid gap-2 mt-2">
+      <button mat-flat-button color="primary" class="text-start" (click)="crearConUltimosDatos()">
+       Rectificar utilizando los datos de mi última declaración.
+        <mat-icon class="float-end">chevron_right</mat-icon>
+      </button>
+
+      <button mat-stroked-button color="primary" class="text-start" (click)="listarDatosAnteriores()">
+       Rectificar utilizando datos usados anteriormente.
+        <mat-icon class="float-end">chevron_right</mat-icon>
+      </button>
+    </div>
+  </mat-dialog-content>
+</ng-template>
+
+
+<!-- MODAL ULTIMOS DATOS O DATOS ANTERIORES -->
+<ng-template #ultimosDatosModal let-dialogRef>
+  <h2 mat-dialog-title>Últimos datos o datos usados anteriormente</h2>
+  <mat-dialog-content>
+    <div class="d-grid gap-2 mt-2">
+      <button mat-flat-button color="primary" class="text-start" (click)="crearConUltimosDatos()">
+        Registrar utilizando los datos de mi última declaración.
+        <mat-icon class="float-end">chevron_right</mat-icon>
+      </button>
+
+      <button mat-stroked-button color="primary" class="text-start" (click)="listarDatosAnteriores()">
+        Registrar utilizando los datos de declaraciones anteriores.
+        <mat-icon class="float-end">chevron_right</mat-icon>
+      </button>
+    </div>
+  </mat-dialog-content>
+</ng-template>
+
+<!-- MODAL CON TABLA QUE LISTA DECLARACIONES ANTERIORES EN UN MATERIAL TABLE -->
+<ng-template #listadoDeclaracionesModal let-dialogRef>
+  <h2 mat-dialog-title>Declaraciones anteriores</h2>
+  <mat-dialog-content>
+      <div *ngIf="isLoading" class="loading-spinner-container">
+    <div class="spinner-content">
+      <mat-spinner diameter="50"></mat-spinner>
+      <p class="loading-text">Cargando declaraciones anteriores...</p>
+    </div>
+  </div>
+
+    <table mat-table [dataSource]="dataSource" class="small-table mat-elevation-z8 w-100">
+      <ng-container matColumnDef="id" appResizableColumn>
+        <th mat-header-cell *matHeaderCellDef> ID </th>
+        <td mat-cell *matCellDef="let element"> {{ element.id }} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="fecha" appResizableColumn>
+        <th mat-header-cell *matHeaderCellDef> Fecha de Declaración</th>
+        <td mat-cell *matCellDef="let element"> {{ element.fecha }} </td>
+      </ng-container>
+
+      <!-- Tipo -->
+      <ng-container matColumnDef="tipo" appResizableColumn>
+        <th mat-header-cell *matHeaderCellDef> Tipo </th>
+        <td mat-cell *matCellDef="let element">
+          {{ element.declaTipo }}
+        </td>
+      </ng-container>
+
+      <!-- Servicio -->
+      <ng-container matColumnDef="servicio" appResizableColumn>
+        <th mat-header-cell *matHeaderCellDef> Servicio </th>
+        <td mat-cell *matCellDef="let element">
+          {{ element.servicio }}
+        </td>
+      </ng-container>
+
+      <!-- Cargo -->
+      <ng-container matColumnDef="cargo" appResizableColumn>
+        <th mat-header-cell *matHeaderCellDef> Cargo </th>
+        <td mat-cell *matCellDef="let element">
+          {{ element.cargo }}
+        </td>
+      </ng-container>
+
+      <!-- Estado -->
+      <ng-container matColumnDef="estado" appResizableColumn>
+        <th mat-header-cell *matHeaderCellDef> Estado </th>
+        <td mat-cell *matCellDef="let element">
+          {{ element.declaEstado }}
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="['id','fecha','tipo','servicio','cargo','estado']"></tr>
+      <tr mat-row *matRowDef="let row; columns: ['id','fecha','tipo','servicio','cargo','estado'];" (click)="crearConDatosAnteriores(row)" class="selectable"></tr>
+    </table>
   </mat-dialog-content>
 </ng-template>

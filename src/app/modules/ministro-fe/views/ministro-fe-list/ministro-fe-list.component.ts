@@ -2,132 +2,80 @@ import { Component, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { MatTableDataSource } from '@angular/material/table';
 import { SelectionModel } from '@angular/cdk/collections';
+import {
+  DeclaracionService,
+  EstadoDeclaracion,
+  TipoDeclaracion
+} from 'src/app/modules/declaraciones/services/declaracion.service';
+import { merge, debounceTime, switchMap, tap } from 'rxjs';
 
-/**
- * Interfaz que representa cada “Declaración” que mostrará
- * el Ministro de Fe en sus diferentes bandejas (Pendientes, Enviadas, Archivadas).
- */
+/* Modelo de fila */
 export interface DeclaracionMinistroFe {
   idDeclaracion: number;
-  fechaDeclaracion: string;   // Ej.: '08/04/2024 12:14:11'
-  tipoDeclaracion: string;    // Ej.: 'PRIMERA DECLARACIÓN', 'ACTUALIZACION PERIÓDICA'
+  fechaDeclaracion: string;
+  tipoDeclaracion: string;
   numeral: number | string;
-  rut: string;                // Ej.: '15381086-9'
-  declarante: string;         // Nombre del declarante
-  servicio: string;           // Servicio o institución
-  cargo: string;              // Cargo del declarante
-  estado: string;             // Ej.: 'PENDIENTE FIRMAR'
-  enviadoPor: string;         // Quién envió la declaración
+  rut: string;
+  declarante: string;
+  servicio: string;
+  cargo: string;
+  estado: string;
+  enviadoPor: string;
 }
+
+type TabId =
+  | 'pendientes'
+  | 'firma-envio-masivo'
+  | 'enviadas'
+  | 'archivo-masivo'
+  | 'archivadas';
 
 @Component({
   selector: 'app-ministro-fe-list',
+  standalone:false,
   templateUrl: './ministro-fe-list.component.html',
   styleUrls: ['./ministro-fe-list.component.scss']
 })
 export class MinistroFeListComponent implements OnInit {
+  /* ──────────────────────────── Tabs ──────────────────────────── */
+  pendientesCount = 0;
+  firmaEnvioCount = 0;
+  enviadasCount   = 0;
+  archivoMasivoCount = 0;
+  archivadasCount = 0;
 
-  /**
-   * Para controlar cuál de las 3 pestañas está activa:
-   *  - 'pendientes'
-   *  - 'enviadas'
-   *  - 'archivadas'
-   */
-  currentTab: 'pendientes' | 'firma-envio-masivo' | 'enviadas' | 'archivo-masivo' | 'archivadas' = 'pendientes';
-
-  // Conteo que se muestra en las pestañas
-  pendientesCount = 14;
-  firmaEnvioCount = 5;
-  enviadasCount = 35;
-  archivoMasivoCount = 10;
-  archivadasCount = 10;
-
-  // Filtros (FormControls para usar en la plantilla)
-  enviadoPor = new FormControl('');
-  fechaDeclaracion = new FormControl();
-  tipoDeclaracion = new FormControl('');
-  run = new FormControl('');
-  declarante = new FormControl('');
-  servicio = new FormControl('');
-  cargo = new FormControl('');
-  estado = new FormControl('');
-
-  // Datos de ejemplo para cada pestaña (ajusta según tu backend)
-  dataPendientes: DeclaracionMinistroFe[] = [
-    {
-      idDeclaracion: 1222004,
-      fechaDeclaracion: '08/04/2024 12:14:11',
-      tipoDeclaracion: 'ACTUALIZACION PERIÓDICA',
-      numeral: 22,
-      rut: '15381086-9',
-      declarante: 'CHRISTIAN ALEJANDRO SALAS',
-      servicio: 'CONTRALORÍA GENERAL - TESTING CGR',
-      cargo: 'JEFE DE UNIDAD',
-      estado: 'PENDIENTE FIRMAR',
-      enviadoPor: 'DECLARANTE',
-    },
-    {
-      idDeclaracion: 1221789,
-      fechaDeclaracion: '08/04/2024 10:03:25',
-      tipoDeclaracion: 'PRIMERA DECLARACIÓN',
-      numeral: 22,
-      rut: '15381086-9',
-      declarante: 'CHRISTIAN ALEJANDRO SALAS',
-      servicio: 'CONTRALORÍA GENERAL - TESTING CGR',
-      cargo: 'JEFE DE UNIDAD',
-      estado: 'PENDIENTE FIRMAR',
-      enviadoPor: 'DECLARANTE',
-    },
+  tabs = [
+    { id: 'pendientes' as TabId,         label: 'Pendientes',                              count: () => this.pendientesCount == 0 ? '' : this.pendientesCount },
+    { id: 'firma-envio-masivo' as TabId, label: 'Para firma y envío (proceso masivo)',     count: () => this.firmaEnvioCount == 0 ? '' : this.firmaEnvioCount  },
+    { id: 'enviadas' as TabId,           label: 'Enviadas / Recepcionadas',                count: () => this.enviadasCount == 0 ? '' : this.enviadasCount },
+    { id: 'archivo-masivo' as TabId,     label: 'Para Archivo (proceso masivo)',           count: () => this.archivoMasivoCount == 0 ? '' : this.archivoMasivoCount },
+    { id: 'archivadas' as TabId,         label: 'Archivadas',                              count: () => this.archivadasCount == 0 ? '' : this.archivadasCount }
   ];
 
-  dataEnviadas: DeclaracionMinistroFe[] = [
-    {
-      idDeclaracion: 1319557,
-      fechaDeclaracion: '06/02/2025 13:42:31',
-      tipoDeclaracion: 'ACTUALIZACION PERIÓDICA (MARZO)',
-      numeral: 19,
-      rut: '15381086-9',
-      declarante: 'CHRISTIAN ALEJANDRO SALAS',
-      servicio: 'CONTRALORÍA GENERAL - TESTING CGR',
-      cargo: 'JEFE DE UNIDAD',
-      estado: 'RECEPCIONADA POR DIP',
-      enviadoPor: 'DECLARANTE',
-    },
-    {
-      idDeclaracion: 1319558,
-      fechaDeclaracion: '07/02/2025 09:15:10',
-      tipoDeclaracion: 'PRIMERA DECLARACIÓN',
-      numeral: 22,
-      rut: '15400000-0',
-      declarante: 'MARÍA FERNANDA PÉREZ',
-      servicio: 'CONTRALORÍA GENERAL',
-      cargo: 'ANALISTA',
-      estado: 'RECEPCIONADA POR DIP',
-      enviadoPor: 'DECLARANTE',
-    },
-  ];
+  currentTab: TabId = 'pendientes';
 
-  dataArchivadas: DeclaracionMinistroFe[] = [
-    {
-      idDeclaracion: 1319525,
-      fechaDeclaracion: '06/02/2025 11:50:39',
-      tipoDeclaracion: 'ACTUALIZACION VOLUNTARIA',
-      numeral: 14,
-      rut: '15381086-9',
-      declarante: 'CHRISTIAN ALEJANDRO SALAS',
-      servicio: 'CONTRALORÍA GENERAL - TESTING CGR',
-      cargo: 'JEFE DE UNIDAD',
-      estado: 'ARCHIVADA',
-      enviadoPor: 'DECLARANTE',
-    },
-  ];
+  /* ──────────────────────────── Filtros ───────────────────────── */
+  enviadoPor        = new FormControl('');
+  fechaDeclaracion  = new FormControl<Date | null>(null);
+  tipoDeclaracion   = new FormControl('');
+  run               = new FormControl('');
+  declarante        = new FormControl('');
+  servicio          = new FormControl('');
+  cargo             = new FormControl('');
+  estado            = new FormControl('');
 
-  // DataSources para las tablas (1 por pestaña)
-  dataSourcePendientes = new MatTableDataSource<DeclaracionMinistroFe>(this.dataPendientes);
-  dataSourceEnviadas   = new MatTableDataSource<DeclaracionMinistroFe>(this.dataEnviadas);
-  dataSourceArchivadas = new MatTableDataSource<DeclaracionMinistroFe>(this.dataArchivadas);
+  tipos: TipoDeclaracion[] = [];
+  estados: EstadoDeclaracion[] = [];
+  serviciosCombo: any[] = [];
 
-  // Columnas de la tabla
+  showFilters = false;
+isLoading   = false;
+
+  /* ──────────────────────── Datasources / selección ───────────── */
+  dataSourcePendientes  = new MatTableDataSource<DeclaracionMinistroFe>([]);
+  dataSourceEnviadas    = new MatTableDataSource<DeclaracionMinistroFe>([]);
+  dataSourceArchivadas  = new MatTableDataSource<DeclaracionMinistroFe>([]);
+
   displayedColumns: string[] = [
     'select',
     'idDeclaracion',
@@ -140,114 +88,194 @@ export class MinistroFeListComponent implements OnInit {
     'cargo',
     'estado',
     'enviadoPor',
+    'acciones'
+    
   ];
 
-  // Selección múltiple por pestaña
   selectionPendientes = new SelectionModel<DeclaracionMinistroFe>(true, []);
   selectionEnviadas   = new SelectionModel<DeclaracionMinistroFe>(true, []);
   selectionArchivadas = new SelectionModel<DeclaracionMinistroFe>(true, []);
 
-  constructor() {}
+  /* ──────────────────────────── Constructor ───────────────────── */
+  constructor(private _declaracion: DeclaracionService) {}
 
-  ngOnInit(): void {}
+  /* ───────────────────────────── Lifecycle ────────────────────── */
+  ngOnInit(): void {
+    /* combos */
+    this._declaracion.obtenerTiposDeclaracion().subscribe(t => (this.tipos = t));
+    this._declaracion.obtenerServicios('15381086-9', 3).subscribe(r => (this.serviciosCombo = r.data));
+    this._declaracion.obtenerEstadosDeclaracion(1, 3).subscribe(e => (this.estados = e));
 
-  // Cambia la pestaña actual
-  setTab(tab: 'pendientes' | 'firma-envio-masivo' | 'enviadas' | 'archivo-masivo' | 'archivadas'): void {
+    /* primera carga + filtros reactivos */
+    this.loadBandeja();
+    this.wireFilters();
+  }
+
+  /* ──────────────────────────── Carga remota ──────────────────── */
+  private loadBandeja(page = 0, limit = 100): void {
+     this.isLoading = true;
+    const bandejaMap: Record<TabId, number> = {
+      'pendientes': 1,
+      'firma-envio-masivo': 6,
+      'enviadas': 2,
+      'archivo-masivo': 7,
+      'archivadas': 5
+    };
+
+    const filtro = {
+      remitente:            this.enviadoPor.value ?? '',
+      fechaRecepcion:       '',
+      fechaFirmaDeclarante: this.fechaDeclaracion.value
+                              ? this.fechaDeclaracion.value.toISOString().slice(0, 10)
+                              : '',
+      tipoId:               this.tipoDeclaracion.value ?? '',
+      rut:                  this.run.value ?? '',
+      declarante:           this.declarante.value ?? '',
+      servicioId:           this.servicio.value ?? '',
+      cargo:                this.cargo.value ?? '',
+      estadoId:             this.estado.value ? +this.estado.value : 0,
+      rol:                  3,
+      tipobandeja:          bandejaMap[this.currentTab]
+    };
+
+    this._declaracion
+      .listar<DeclaracionMinistroFe>(filtro, 'id', page, limit)
+      .pipe(
+        tap((resp:any) => this.bindToDatasource(resp.data)),
+        switchMap(() => this._declaracion.totalDeclaraciones(filtro))
+      )
+      .subscribe(totalResp => {
+        this.updateCounter(totalResp.data ?? 0);
+        this.isLoading = false;
+      });
+  }
+
+    getDataSource(tab: TabId): MatTableDataSource<DeclaracionMinistroFe> {
+    if (tab === 'enviadas')                    return this.dataSourceEnviadas;
+    if (tab === 'archivadas' || tab === 'archivo-masivo')
+                                               return this.dataSourceArchivadas;
+    return this.dataSourcePendientes;          // pendientes + firma/envío
+  }
+
+
+  private bindToDatasource(arr: DeclaracionMinistroFe[]): void {
+    if (['pendientes', 'firma-envio-masivo'].includes(this.currentTab)) {
+      this.dataSourcePendientes.data = arr;
+    } else if (this.currentTab === 'enviadas') {
+      this.dataSourceEnviadas.data = arr;
+    } else {
+      /* archivadas + archivo masivo */
+      this.dataSourceArchivadas.data = arr;
+    }
+  }
+
+  private updateCounter(total: number): void {
+    switch (this.currentTab) {
+      case 'pendientes':            this.pendientesCount     = total; break;
+      case 'firma-envio-masivo':    this.firmaEnvioCount     = total; break;
+      case 'enviadas':              this.enviadasCount       = total; break;
+      case 'archivo-masivo':        this.archivoMasivoCount  = total; break;
+      case 'archivadas':            this.archivadasCount     = total; break;
+    }
+  }
+
+  private wireFilters(): void {
+    merge(
+      this.enviadoPor.valueChanges,
+      this.fechaDeclaracion.valueChanges,
+      this.tipoDeclaracion.valueChanges,
+      this.run.valueChanges,
+      this.declarante.valueChanges,
+      this.servicio.valueChanges,
+      this.cargo.valueChanges,
+      this.estado.valueChanges
+    )
+    .pipe(debounceTime(300))
+    .subscribe(() => this.loadBandeja());
+  }
+
+  /* ──────────────────────────── Tabs ──────────────────────────── */
+  setTab(tab: TabId): void {
+    if (this.currentTab === tab) return;
     this.currentTab = tab;
+    this.estados = [];
+    /* limpiamos selecciones al cambiar de bandeja */
+    this.selectionPendientes.clear();
+    this.selectionEnviadas.clear();
+    this.selectionArchivadas.clear();
+    let nroTab = 0;
+    if(tab === 'pendientes') nroTab = 1;
+    if(tab === 'firma-envio-masivo') nroTab = 6;
+    if(tab === 'enviadas') nroTab = 2;
+    if(tab === 'archivo-masivo') nroTab = 7;
+    if(tab === 'archivadas') nroTab = 5;
+    this._declaracion.obtenerEstadosDeclaracion(nroTab, 3).subscribe(e => (this.estados = e));
+    this.loadBandeja();
+    
   }
 
-  // ---------- Pestaña Pendientes ----------
-  masterTogglePendientes() {
-    const ds = this.dataSourcePendientes.data;
-    this.isAllSelectedPendientes()
-      ? this.selectionPendientes.clear()
-      : ds.forEach(row => this.selectionPendientes.select(row));
-  }
-  isAllSelectedPendientes() {
-    const numSelected = this.selectionPendientes.selected.length;
-    const numRows = this.dataSourcePendientes.data.length;
-    return numSelected === numRows;
-  }
-  isSomeSelectedPendientes() {
-    return (
-      this.selectionPendientes.selected.length > 0 &&
-      !this.isAllSelectedPendientes()
-    );
-  }
-  togglePendientes(row: DeclaracionMinistroFe) {
-    this.selectionPendientes.toggle(row);
+  /* ───────────────────── Selección genérica (checkbox) ────────── */
+  private getSelection(tab: TabId): SelectionModel<DeclaracionMinistroFe> {
+    if (tab === 'enviadas') return this.selectionEnviadas;
+    if (tab === 'archivadas' || tab === 'archivo-masivo') return this.selectionArchivadas;
+    return this.selectionPendientes; // pendientes + firma/envío
   }
 
-  // ---------- Pestaña Enviadas ----------
-  masterToggleEnviadas() {
-    const ds = this.dataSourceEnviadas.data;
-    this.isAllSelectedEnviadas()
-      ? this.selectionEnviadas.clear()
-      : ds.forEach(row => this.selectionEnviadas.select(row));
-  }
-  isAllSelectedEnviadas() {
-    const numSelected = this.selectionEnviadas.selected.length;
-    const numRows = this.dataSourceEnviadas.data.length;
-    return numSelected === numRows;
-  }
-  isSomeSelectedEnviadas() {
-    return (
-      this.selectionEnviadas.selected.length > 0 &&
-      !this.isAllSelectedEnviadas()
-    );
-  }
-  toggleEnviadas(row: DeclaracionMinistroFe) {
-    this.selectionEnviadas.toggle(row);
+  masterToggle(tab: TabId): void {
+    const sel = this.getSelection(tab);
+    const ds  = this.getDataSource(tab).data;
+    this.isAllSelected(tab) ? sel.clear() : ds.forEach(r => sel.select(r));
   }
 
-  // ---------- Pestaña Archivadas ----------
-  masterToggleArchivadas() {
-    const ds = this.dataSourceArchivadas.data;
-    this.isAllSelectedArchivadas()
-      ? this.selectionArchivadas.clear()
-      : ds.forEach(row => this.selectionArchivadas.select(row));
-  }
-  isAllSelectedArchivadas() {
-    const numSelected = this.selectionArchivadas.selected.length;
-    const numRows = this.dataSourceArchivadas.data.length;
-    return numSelected === numRows;
-  }
-  isSomeSelectedArchivadas() {
-    return (
-      this.selectionArchivadas.selected.length > 0 &&
-      !this.isAllSelectedArchivadas()
-    );
-  }
-  toggleArchivadas(row: DeclaracionMinistroFe) {
-    this.selectionArchivadas.toggle(row);
+  isAllSelected(tab: TabId): boolean {
+    const sel = this.getSelection(tab);
+    const ds  = this.getDataSource(tab).data;
+    return sel.selected.length === ds.length;
   }
 
-  // ---------- Acciones principales ----------
-  onDerivar() {
-    console.log('Derivar declaraciones seleccionadas en la pestaña:', this.currentTab);
-  }
-  onFirmar() {
-    console.log('Firmar declaraciones seleccionadas en la pestaña:', this.currentTab);
-  }
-  onEnviarOrganismo() {
-    console.log('Enviar a Organismo Fiscalizador desde pestaña:', this.currentTab);
+  isSomeSelected(tab: TabId): boolean {
+    const sel = this.getSelection(tab);
+    return sel.selected.length > 0 && !this.isAllSelected(tab);
   }
 
-  // ---------- Filtros ----------
-  buscar() {
-    // Aquí harías la lógica real de filtrado:
-    console.log('Buscar con filtros:', {
-      enviadoPor: this.enviadoPor.value,
-      fechaDeclaracion: this.fechaDeclaracion.value,
-      tipoDeclaracion: this.tipoDeclaracion.value,
-      run: this.run.value,
-      declarante: this.declarante.value,
-      servicio: this.servicio.value,
-      cargo: this.cargo.value,
-      estado: this.estado.value,
+  toggle(tab: TabId, row: DeclaracionMinistroFe): void {
+    this.getSelection(tab).toggle(row);
+  }
+
+  isSelected(tab: TabId, row: DeclaracionMinistroFe): boolean {
+    return this.getSelection(tab).isSelected(row);
+  }
+
+  /* ────────────────────── Barra de acciones ───────────────────── */
+
+  onBitacora(){
+
+  }
+  onFirmar(): void {
+    const ids = this.selectionPendientes.selected.map(d => d.idDeclaracion);
+    if (!ids.length) return;
+    this._declaracion.validarProcesoActivo().subscribe(flag => {
+      if (flag.data) { alert('Hay un proceso masivo activo'); return; }
+      this._declaracion.archivarDeclaracion(ids[0]).subscribe(() => this.loadBandeja());
     });
   }
-  limpiar() {
+
+  onDerivar(): void {
+    const ids = this.selectionPendientes.selected.map(d => d.idDeclaracion);
+    if (!ids.length) return;
+    this._declaracion.confirmarDatos(ids[0]).subscribe(() => this.loadBandeja());
+  }
+
+  onEnviarOrganismo(): void {
+    const ids = this.selectionPendientes.selected.map(d => d.idDeclaracion);
+    if (!ids.length) return;
+    this._declaracion.descargarDeclaracion(ids[0]).subscribe(() => {});
+  }
+
+  /* ─────────────────────── Filtros / export ───────────────────── */
+  buscar(): void { this.loadBandeja(); }
+
+  limpiar(): void {
     this.enviadoPor.reset();
     this.fechaDeclaracion.reset();
     this.tipoDeclaracion.reset();
@@ -256,17 +284,25 @@ export class MinistroFeListComponent implements OnInit {
     this.servicio.reset();
     this.cargo.reset();
     this.estado.reset();
-    // Limpia selecciones
-    this.selectionPendientes.clear();
-    this.selectionEnviadas.clear();
-    this.selectionArchivadas.clear();
-  }
-  exportar() {
-    console.log('Exportar declaraciones (CSV/Excel/etc.)...');
+    this.buscar();
   }
 
-  // Descargar declaración (versión completa)
-  descargarVersionCompleta() {
-    console.log('Descargar declaración (versión completa) de la pestaña:', this.currentTab);
+  exportar(): void {
+    /* lógica de exportación */
+    console.log('exportar');
+  }
+
+  descargarVersionCompleta(): void {
+    console.log('descargar versión completa - tab', this.currentTab);
+  }
+
+  /* ─────────────────────── Pills de estado ────────────────────── */
+  pillClass(estado: string): string {
+    switch ((estado || '').toUpperCase()) {
+      case 'RECEPCIONADA': return 'pill pill-success';
+      case 'ARCHIVADA':    return 'pill pill-secondary';
+      case 'RECIBIDA':     return 'pill pill-warning';
+      default:             return 'pill pill-default';
+    }
   }
 }

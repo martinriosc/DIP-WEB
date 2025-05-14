@@ -46,4 +46,30 @@ export class ActividadProfesionalService {
       withCredentials: true 
     });
   }
+
+    /**
+   * Crea o actualiza una actividad (grupos 1, 2 ó 3).
+   * Si `datos.id` es '', el back-end la trata como nueva.
+   */
+    guardarActividad(datos: any, declaranteId: number) {
+      const body = new HttpParams()
+        .set('datos', JSON.stringify(datos))
+        .set('declaranteId', declaranteId);
+  
+      return this.http.post<any>(
+        `${this.apiUrl}/pr/service/actividadprofesional/actividades/guardar`,
+        body,
+        { withCredentials: true }
+      );
+    }
+  
+    /**
+     * Elimina una actividad por ID.
+     */
+    eliminarActividad(id: number) {
+      return this.http.get<any>(
+        `${this.apiUrl}/pr/service/actividadprofesional/actividades/eliminar/${id}`,
+        { withCredentials: true }
+      );
+    }
 } 

@@ -19,6 +19,8 @@ import { PersonaRelacionadaService } from '../../services/persona-relacionada.se
 import { PublicacionService } from '../../services/publicacion.service';
 import { ValoresObligatoriosService } from '../../services/valores-obligatorios.service';
 import { DeclaracionHelperService } from '../../services/declaracion-helper.service';
+import { ToastrService } from 'ngx-toastr';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-declaracion-list',
@@ -45,7 +47,7 @@ export class DeclaracionListComponent implements AfterViewInit, OnInit {
 
   dataSource = new MatTableDataSource<Declaracion>([]);
   totalItems: number = 0;
-  pageSize: number = 10;
+  pageSize: number = 1;
   currentPage: number = 0;
 
   displayedColumns: string[] = [
@@ -76,7 +78,8 @@ export class DeclaracionListComponent implements AfterViewInit, OnInit {
     private _publicacion: PublicacionService,
     private _valoresObligatorios: ValoresObligatoriosService,
     private _auth: AuthService,
-    private _declaracionHelper: DeclaracionHelperService
+    private _declaracionHelper: DeclaracionHelperService,
+    private _toastr: ToastrService
   ) { }
 
   ngOnInit(): void {
@@ -119,7 +122,7 @@ export class DeclaracionListComponent implements AfterViewInit, OnInit {
         }
       });
 
-    const tipoBandeja = 3; 
+    const tipoBandeja = 3;
     this._declaracion.obtenerEstadosDeclaracion(tipoBandeja, userRol)
       .subscribe({
         next: (estados) => {
@@ -188,7 +191,22 @@ export class DeclaracionListComponent implements AfterViewInit, OnInit {
   }
 
   crear() {
-    this.router.navigate(['/declaraciones/detalle']);
+    this._declaracion.validarNuevaDeclaracion().subscribe({
+      next: (res: any) => {
+        if (!res.data) {
+          this._declaracionHelper.setDeclaracionId(0);
+          this._declaracionHelper.setDeclaranteId(this._auth.currentUser?.idDeclarante ?? 0);
+          this.dialog.closeAll();
+          this.router.navigate(['declaraciones', 'detalle']);
+        } else {
+          this._toastr.error('No se puede crear una nueva declaración. Ya existe una declaración con estado BORRADOR.')
+        }
+      },
+      error: (err: any) => {
+        console.log(err);
+        this._toastr.error('No se puede crear una nueva declaración. Ya existe una declaración con estado BORRADOR.')
+      }
+    })
   }
 
   // Devuelve la clase/pill para el estado
@@ -211,7 +229,15 @@ export class DeclaracionListComponent implements AfterViewInit, OnInit {
   }
 
   editar(element: Declaracion) {
-    this._declaracionHelper.setDeclaracionId(element.id);
+    const declaracionId = Number(element.id);
+    this._declaracionHelper.setDeclaracionId(declaracionId);
+
+    const possibleDeclaranteId =
+      (element as any).declaranteId ?? (element as any).idDeclarante;
+    if (possibleDeclaranteId !== undefined && possibleDeclaranteId !== null) {
+      this._declaracionHelper.setDeclaranteId(Number(possibleDeclaranteId));
+    }
+
     this.router.navigate(['/declaraciones/detalle']);
   }
 
@@ -247,19 +273,32 @@ export class DeclaracionListComponent implements AfterViewInit, OnInit {
   }
 
   eliminar(element: Declaracion) {
-    if (confirm('¿Está seguro de eliminar esta declaración?')) {
-      this._declaracion.eliminarDeclaracion(Number(element.id))
-        .subscribe({
-          next: (response) => {
-            if (response.success) {
-              this.cargarDeclaraciones();
+
+    Swal.fire({
+      title: '¿Estas seguro de eliminar esta declaración?',
+      text: 'Esta acción no se puede deshacer.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Si, eliminar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this._declaracion.eliminarDeclaracion(Number(element.id))
+          .subscribe({
+            next: (response) => {
+              if (response) {
+                this.cargarDeclaraciones();
+              }
+            },
+            error: (error) => {
+              console.error('Error al eliminar declaración:', error);
             }
-          },
-          error: (error) => {
-            console.error('Error al eliminar declaración:', error);
-          }
-        });
-    }
+          });
+      }
+    })
+    
   }
 
   descargarDeclaracion(element: Declaracion, tipo: 'completa' | 'publica' = 'completa') {

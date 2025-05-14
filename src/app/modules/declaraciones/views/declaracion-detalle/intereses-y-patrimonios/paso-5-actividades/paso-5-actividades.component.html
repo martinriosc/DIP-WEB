@@ -11,9 +11,6 @@
 
   <!-- Separador -->
   <hr class="separador" />
-
-
-
   <div class="contenido-form">
 
 
@@ -41,40 +38,40 @@
             <table mat-table [dataSource]="actividades12Meses" class="w-100 mat-elevation-z8">
 
               <!-- Tipo Actividad -->
-              <ng-container matColumnDef="tipoActividad">
+              <ng-container matColumnDef="tipoActividad" appResizableColumn>
                 <th mat-header-cell *matHeaderCellDef> Tipo de Actividad </th>
                 <td mat-cell *matCellDef="let act">{{ act.tipoActividad }}</td>
               </ng-container>
 
               <!-- Rubro/Área -->
-              <ng-container matColumnDef="rubroArea">
+              <ng-container matColumnDef="rubroArea" appResizableColumn>
                 <th mat-header-cell *matHeaderCellDef>Rubro, Área o Tipo de Actividad</th>
                 <td mat-cell *matCellDef="let act">{{ act.rubro }}</td>
               </ng-container>
 
               <!-- Naturaleza del vínculo -->
-              <ng-container matColumnDef="vinculo">
+              <ng-container matColumnDef="vinculo" appResizableColumn>
                 <th mat-header-cell *matHeaderCellDef>Naturaleza del vínculo</th>
                 <td mat-cell *matCellDef="let act">{{ act.vinculo }}</td>
               </ng-container>
 
               <!-- Objeto Entidad -->
-              <ng-container matColumnDef="objetoEntidad">
+              <ng-container matColumnDef="objetoEntidad" appResizableColumn>
                 <th mat-header-cell *matHeaderCellDef>Objeto Entidad</th>
                 <td mat-cell *matCellDef="let act">{{ act.objetoEntidad }}</td>
               </ng-container>
 
               <!-- Data Sensible -->
-              <ng-container matColumnDef="dataSensible">
+              <ng-container matColumnDef="dataSensible" appResizableColumn>
                 <th mat-header-cell *matHeaderCellDef>Data Sensible</th>
-                <td mat-cell *matCellDef="let act">{{act.rbDatoSensible ? 'Dato Sensible' : 'No' }}
+                <td mat-cell *matCellDef="let act">{{act.rbDatoSensible ? 'SI' : 'NO' }}
                 </td>
               </ng-container>
 
               <!-- Estado -->
-              <ng-container matColumnDef="estado">
+              <ng-container matColumnDef="estado" appResizableColumn>
                 <th mat-header-cell *matHeaderCellDef>Estado</th>
-                <td mat-cell *matCellDef="let act">{{ act.estado || 'completo' }}
+                <td mat-cell *matCellDef="let act">{{ !act.borrador ? 'COMPLETO' : 'INCOMPLETO' }}
                 </td>
               </ng-container>
 
@@ -82,17 +79,18 @@
               <ng-container matColumnDef="acciones">
                 <th mat-header-cell *matHeaderCellDef>Acciones</th>
                 <td mat-cell *matCellDef="let act">
-                  <button mat-icon-button color="accent" (click)="openEditModal('12meses',act)">
-                    <mat-icon>edit</mat-icon>
+                  <button mat-icon-button color="accent" (click)="openEditModal('12meses',act)" matTooltip="Editar">
+                    <img src="assets/icons/icon-btn-tabla_editar.svg">
                   </button>
-                  <button mat-icon-button color="warn" (click)="eliminarActividad(act)">
-                    <mat-icon>delete</mat-icon>
+
+                  <button mat-icon-button color="warn" (click)="eliminarActividad(act)" matTooltip="Eliminar">
+                    <img src="assets/icons/icon-btn-tabla_eliminar.svg">
                   </button>
                 </td>
               </ng-container>
 
               <tr mat-header-row *matHeaderRowDef="displayedColumnActividad12Meses"></tr>
-              <tr mat-row *matRowDef="let row; columns: displayedColumnActividad12Meses;"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumnActividad12Meses;" [ngClass]="{'fila-incompleta': row.borrador}"></tr>
             </table>
           </div>
         </div>
@@ -123,52 +121,52 @@
             <table mat-table [dataSource]="actividadesRealiza" class="w-100 mat-elevation-z8">
 
               <!-- Tipo Actividad -->
-              <ng-container matColumnDef="tipoActividad">
+              <ng-container matColumnDef="tipoActividad" appResizableColumn>
                 <th mat-header-cell *matHeaderCellDef> Tipo de Actividad </th>
                 <td mat-cell *matCellDef="let act">{{ act.tipoActividad }}</td>
               </ng-container>
 
               <!-- Rubro/Área -->
-              <ng-container matColumnDef="rubroArea">
+              <ng-container matColumnDef="rubroArea" appResizableColumn>
                 <th mat-header-cell *matHeaderCellDef>Rubro, Área o Tipo de Actividad</th>
                 <td mat-cell *matCellDef="let act">{{ act.rubroArea }}</td>
               </ng-container>
 
               <!-- Naturaleza del vínculo -->
-              <ng-container matColumnDef="vinculo">
+              <ng-container matColumnDef="vinculo" appResizableColumn>
                 <th mat-header-cell *matHeaderCellDef>Naturaleza del vínculo</th>
                 <td mat-cell *matCellDef="let act">{{ act.vinculo }}</td>
               </ng-container>
 
               <!-- Objeto Entidad -->
-              <ng-container matColumnDef="objetoVinculo">
+              <ng-container matColumnDef="objetoVinculo" appResizableColumn>
                 <th mat-header-cell *matHeaderCellDef>Objeto Vinculo</th>
                 <td mat-cell *matCellDef="let act">{{ act.objetoVinculo }}</td>
               </ng-container>
 
               <!-- Fecha Inicio -->
-              <ng-container matColumnDef="fechaInicio">
+              <ng-container matColumnDef="fechaInicio" appResizableColumn>
                 <th mat-header-cell *matHeaderCellDef>Fecha Inicio</th>
                 <td mat-cell *matCellDef="let act">{{ act.fechaInicio }}</td>
               </ng-container>
 
               <!-- Beneficiario -->
-              <ng-container matColumnDef="beneficiario">
+              <ng-container matColumnDef="beneficiario" appResizableColumn>
                 <th mat-header-cell *matHeaderCellDef>Beneficiario</th>
                 <td mat-cell *matCellDef="let act">{{ act.beneficiario }}</td>
               </ng-container>
 
               <!-- Data Sensible -->
-              <ng-container matColumnDef="dataSensible">
+              <ng-container matColumnDef="dataSensible" appResizableColumn>
                 <th mat-header-cell *matHeaderCellDef>Data Sensible</th>
-                <td mat-cell *matCellDef="let act">{{act.dataSensible}}
+                <td mat-cell *matCellDef="let act">{{act.rbDatoSensible ? 'SI' : 'NO' }}
                 </td>
               </ng-container>
 
               <!-- Estado -->
-              <ng-container matColumnDef="estado">
+              <ng-container matColumnDef="estado" appResizableColumn>
                 <th mat-header-cell *matHeaderCellDef>Estado</th>
-                <td mat-cell *matCellDef="let act">{{ act.estado }}
+                <td mat-cell *matCellDef="let act">{{ !act.borrador ? 'COMPLETO' : 'INCOMPLETO' }}
                 </td>
               </ng-container>
 
@@ -176,17 +174,20 @@
               <ng-container matColumnDef="acciones">
                 <th mat-header-cell *matHeaderCellDef>Acciones</th>
                 <td mat-cell *matCellDef="let act">
-                  <button mat-icon-button color="accent" (click)="openEditModal('realiza',act)">
-                    <mat-icon>edit</mat-icon>
+
+                  <button mat-icon-button color="accent" (click)="openEditModal('realiza',act)" matTooltip="Editar">
+                    <img src="assets/icons/icon-btn-tabla_editar.svg">
                   </button>
-                  <button mat-icon-button color="warn" (click)="eliminarActividad(act)">
-                    <mat-icon>delete</mat-icon>
+
+                  <button mat-icon-button color="warn" (click)="eliminarActividad(act)" matTooltip="Eliminar">
+                    <img src="assets/icons/icon-btn-tabla_eliminar.svg">
                   </button>
+                  
                 </td>
               </ng-container>
 
               <tr mat-header-row *matHeaderRowDef="displayedColumnsActividadesRealiza"></tr>
-              <tr mat-row *matRowDef="let row; columns: displayedColumnsActividadesRealiza;"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumnsActividadesRealiza;" [ngClass]="{'fila-incompleta': row.borrador}"></tr>
             </table>
           </div>
         </div>
@@ -217,54 +218,54 @@
             <table mat-table [dataSource]="actividadesConyugeData" class="w-100 mat-elevation-z8">
 
               <!-- Tipo Actividad -->
-              <ng-container matColumnDef="tipoActividad">
+              <ng-container matColumnDef="tipoActividad" appResizableColumn>
                 <th mat-header-cell *matHeaderCellDef> Tipo de Actividad </th>
                 <td mat-cell *matCellDef="let act">{{ act.tipoActividad }}</td>
               </ng-container>
 
               <!-- Rubro/Área -->
-              <ng-container matColumnDef="rubroArea">
+              <ng-container matColumnDef="rubroArea" appResizableColumn>
                 <th mat-header-cell *matHeaderCellDef>Rubro, Área o Tipo de Actividad</th>
                 <td mat-cell *matCellDef="let act">{{ act.rubroArea }}</td>
               </ng-container>
 
               <!-- Fecha Inicio -->
-              <ng-container matColumnDef="fechaInicio">
+              <ng-container matColumnDef="fechaInicio" appResizableColumn>
                 <th mat-header-cell *matHeaderCellDef>Fecha Inicio</th>
                 <td mat-cell *matCellDef="let act">{{ act.fechaInicio }}</td>
               </ng-container>
 
 
               <!-- Clasificación -->
-              <ng-container matColumnDef="clasificacion">
+              <ng-container matColumnDef="clasificacion" appResizableColumn>
                 <th mat-header-cell *matHeaderCellDef>Clasificación</th>
                 <td mat-cell *matCellDef="let act">{{ act.clasificacion }}</td>
               </ng-container>
 
               <!-- Beneficiario -->
-              <ng-container matColumnDef="beneficiario">
+              <ng-container matColumnDef="beneficiario" appResizableColumn>
                 <th mat-header-cell *matHeaderCellDef>Beneficiario</th>
                 <td mat-cell *matCellDef="let act">{{ act.beneficiario }}</td>
               </ng-container>
 
               <!-- Rut Beneficiario -->
-              <ng-container matColumnDef="rutBeneficiario">
+              <ng-container matColumnDef="rutBeneficiario" appResizableColumn>
                 <th mat-header-cell *matHeaderCellDef>Rut Beneficiario</th>
                 <td mat-cell *matCellDef="let act">{{ act.rutBeneficiario }}</td>
               </ng-container>
 
 
               <!-- Data Sensible -->
-              <ng-container matColumnDef="dataSensible">
+              <ng-container matColumnDef="dataSensible" appResizableColumn>
                 <th mat-header-cell *matHeaderCellDef>Data Sensible</th>
-                <td mat-cell *matCellDef="let act">{{act.dataSensible}}
+                <td mat-cell *matCellDef="let act">{{act.rbDatoSensible ? 'SI' : 'NO' }}
                 </td>
               </ng-container>
 
               <!-- Estado -->
-              <ng-container matColumnDef="estado">
+              <ng-container matColumnDef="estado" appResizableColumn>
                 <th mat-header-cell *matHeaderCellDef>Estado</th>
-                <td mat-cell *matCellDef="let act">{{ act.estado }}
+                <td mat-cell *matCellDef="let act">{{ !act.borrador ? 'COMPLETO' : 'INCOMPLETO' }}
                 </td>
               </ng-container>
 
@@ -272,17 +273,20 @@
               <ng-container matColumnDef="acciones">
                 <th mat-header-cell *matHeaderCellDef>Acciones</th>
                 <td mat-cell *matCellDef="let act">
-                  <button mat-icon-button color="accent" (click)="openEditModal('conyuge',act)">
-                    <mat-icon>edit</mat-icon>
+
+                  <button mat-icon-button color="accent" (click)="openEditModal('conyuge',act)" matTooltip="Editar">
+                    <img src="assets/icons/icon-btn-tabla_editar.svg">
                   </button>
-                  <button mat-icon-button color="warn" (click)="eliminarActividad(act)">
-                    <mat-icon>delete</mat-icon>
+
+                  <button mat-icon-button color="warn" (click)="eliminarActividad(act)" matTooltip="Eliminar">
+                    <img src="assets/icons/icon-btn-tabla_eliminar.svg">
                   </button>
+
                 </td>
               </ng-container>
 
               <tr mat-header-row *matHeaderRowDef="displayedColumnsActividadesConyuge"></tr>
-              <tr mat-row *matRowDef="let row; columns: displayedColumnsActividadesConyuge;"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumnsActividadesConyuge;" [ngClass]="{'fila-incompleta': row.borrador}"></tr>
             </table>
           </div>
         </div>
@@ -304,42 +308,41 @@
   <h2 mat-dialog-title>{{ edit12MesesMode ? 'Editar Actividad' : 'Agregar Actividad' }}</h2>
 
   <mat-dialog-content>
-    <form [formGroup]="actividades12MesesForm">
-      <!-- Tipo Actividad -->
-      <mat-form-field appearance="outline" class="w-100 mb-3">
-        <mat-label>Tipo de Actividad</mat-label>
-        <mat-select formControlName="tipoActividad">
-          <mat-option *ngFor="let tipoActividad of tiposActividades" [value]="tipoActividad.id"> {{tipoActividad.nombre}}</mat-option>
-        </mat-select>
-      </mat-form-field>
+    <!-- Modal: Actividades últimos 12 meses -->
+<form [formGroup]="actividades12MesesForm">
+  <mat-form-field class="w-100 mb-3">
+    <mat-label>Tipo de Actividad</mat-label>
+    <mat-select formControlName="tipoActividadId">
+      <mat-option *ngFor="let t of tiposActividades" [value]="t.id">{{ t.nombre }}</mat-option>
+    </mat-select>
+  </mat-form-field>
 
-      <!-- Rubro/Área -->
-      <mat-form-field appearance="outline" class="w-100 mb-3">
-        <mat-label>Rubro, Área o Tipo de Actividad</mat-label>
-        <mat-select formControlName="rubroArea">
-          <mat-option *ngFor="let rubroArea of actividadesProfesionales" [value]="rubroArea.id"> {{rubroArea.nombre}}</mat-option>
-        </mat-select>
-      </mat-form-field>
+  <mat-form-field class="w-100 mb-3">
+    <mat-label>Rubro, Área o Tipo de Actividad</mat-label>
+    <mat-select formControlName="rubroId">
+      <mat-option *ngFor="let r of actividadesProfesionales" [value]="r.id">{{ r.nombre }}</mat-option>
+    </mat-select>
+  </mat-form-field>
 
-      <!-- Naturaleza del vínculo -->
-      <mat-form-field appearance="outline" class="w-100 mb-3">
-        <mat-label>Descripción de la Actividad</mat-label>
-        <textarea matInput formControlName="descripcion" rows="3"></textarea>
-      </mat-form-field>
+  <mat-form-field class="w-100 mb-3">
+    <mat-label>Descripción de la Actividad</mat-label>
+    <textarea matInput formControlName="descripcionActividad" rows="3"></textarea>
+  </mat-form-field>
 
-      <mat-form-field appearance="outline" class="w-100 mb-3">
-        <mat-label>Considera esta información dato sensible conforme a la Ley 19.628 (*)</mat-label>
-        <mat-select formControlName="datoSensible">
-          <mat-option value="Si" class="me-4">Si</mat-option>
-          <mat-option value="No">No</mat-option>
-        </mat-select>
-      </mat-form-field>
-    </form>
+  <mat-form-field class="w-100 mb-3">
+    <mat-label>¿Dato sensible según Ley 19.628?</mat-label>
+    <mat-select formControlName="rbDatoSensible">
+      <mat-option [value]="true">Sí</mat-option>
+      <mat-option [value]="false">No</mat-option>
+    </mat-select>
+  </mat-form-field>
+</form>
+
   </mat-dialog-content>
 
   <mat-dialog-actions align="end">
-    <button mat-button (click)="dialogRef.close()">Cancelar</button>
-    <button mat-raised-button color="primary" (click)="saveActividad('12meses',dialogRef)">Guardar</button>
+    <button mat-button (click)="closeDialog()">Cancelar</button>
+    <button mat-raised-button color="primary" (click)="saveActividad('12meses')">Guardar</button>
   </mat-dialog-actions>
 </ng-template>
 
@@ -348,72 +351,76 @@
   <h2 mat-dialog-title>{{ editRealizaMode ? 'Editar Actividad' : 'Agregar Actividad' }}</h2>
 
   <mat-dialog-content>
-    <form [formGroup]="actividadesRealizaForm">
-      <!-- Tipo Actividad -->
-      <mat-form-field appearance="outline" class="w-100 mb-3">
-        <mat-label>Tipo de Actividad</mat-label>
-        <mat-select formControlName="tipoActividad">
-          <mat-option *ngFor="let tipoActividad of tiposActividades" [value]="tipoActividad.id"> {{tipoActividad.nombre}}</mat-option>
-        </mat-select>
-      </mat-form-field>
+    <!-- Modal: Actividades que realiza a la fecha -->
+<form [formGroup]="actividadesRealizaForm">
+  <!-- Tipo de Actividad -->
+  <mat-form-field class="w-100 mb-3">
+    <mat-label>Tipo de Actividad</mat-label>
+    <mat-select formControlName="tipoActividadId">
+      <mat-option *ngFor="let t of tiposActividades" [value]="t.id">{{ t.nombre }}</mat-option>
+    </mat-select>
+  </mat-form-field>
 
-      <!-- Rubro/Área -->
-      <mat-form-field appearance="outline" class="w-100 mb-3">
-        <mat-label>Rubro, Área o Tipo de Actividad</mat-label>
-        <mat-select formControlName="rubroArea">
-          <mat-option *ngFor="let rubroArea of actividadesProfesionales" [value]="rubroArea.id"> {{rubroArea.nombre}}</mat-option>
-        </mat-select>
-      </mat-form-field>
+  <!-- Rubro / Área -->
+  <mat-form-field class="w-100 mb-3">
+    <mat-label>Rubro, Área o Tipo de Actividad</mat-label>
+    <mat-select formControlName="rubroId">
+      <mat-option *ngFor="let r of actividadesProfesionales" [value]="r.id">{{ r.nombre }}</mat-option>
+    </mat-select>
+  </mat-form-field>
 
-      <!-- Fecha Inicio -->
-      <mat-form-field appearance="outline" class="w-100 mb-3">
-        <mat-label>Fecha de Inicio</mat-label>
-        <input matInput [matDatepicker]="picker" formControlName="fechaInicio">
-        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-        <mat-datepicker #picker></mat-datepicker>
-      </mat-form-field>
+  <!-- Fecha Inicio -->
+  <mat-form-field class="w-100 mb-3">
+    <mat-label>Fecha de Inicio</mat-label>
+    <input matInput [matDatepicker]="pickerR" formControlName="fechaInicio">
+    <mat-datepicker-toggle matSuffix [for]="pickerR"></mat-datepicker-toggle>
+    <mat-datepicker #pickerR></mat-datepicker>
+  </mat-form-field>
 
-      <!-- Clasificación -->
-      <mat-form-field appearance="outline" class="w-100 mb-3">
-        <mat-label>Clasificación</mat-label>
-        <mat-select formControlName="clasificacion">
-          <mat-option *ngFor="let clasificacion of clasificaciones" [value]="clasificacion.id"> {{clasificacion.nombre}}</mat-option>
-        </mat-select>
-      </mat-form-field>
+  <!-- Clasificación -->
+  <mat-form-field class="w-100 mb-3">
+    <mat-label>Clasificación</mat-label>
+    <mat-select formControlName="clasificacionId">
+      <mat-option *ngFor="let c of clasificaciones" [value]="c.id">{{ c.nombre }}</mat-option>
+    </mat-select>
+  </mat-form-field>
 
-      <!-- Nombre o razon social del beneficiario -->
-      <mat-form-field appearance="outline" class="w-100 mb-3">
-        <mat-label>Nombre o razón social del beneficiario</mat-label>
-        <input matInput formControlName="beneficiario" />
-      </mat-form-field>
+  <!-- Beneficiario -->
+  <mat-form-field class="w-100 mb-3">
+    <mat-label>Nombre o razón social del beneficiario</mat-label>
+    <input matInput formControlName="beneficiario" />
+  </mat-form-field>
 
-      <!-- Checkbox de selector RUN o RUT -->
-      <mat-form-field appearance="outline" class="w-100 mb-3">
-        <mat-label>R.U.T. o R.U.N</mat-label>
-        <mat-select formControlName="rutOrun">
-          <mat-option value="rut" class="me-4">R.U.T</mat-option>
-          <mat-option value="run">R.U.N</mat-option>
-        </mat-select>
-      </mat-form-field>
-      <!-- RUT -->
-      <mat-form-field appearance="outline" class="w-100 mb-3">
-        <mat-label>R.U.T o R.U.N. del Beneficiario</mat-label>
-        <input matInput formControlName="rutBeneficiario" />
-      </mat-form-field>
+  <!-- RUT / RUN selector -->
+  <mat-form-field class="w-100 mb-3">
+    <mat-label>R.U.T. o R.U.N.</mat-label>
+    <mat-select formControlName="rbRunRut">
+      <mat-option value="rut">R.U.T.</mat-option>
+      <mat-option value="run">R.U.N.</mat-option>
+    </mat-select>
+  </mat-form-field>
 
-      <mat-form-field appearance="outline" class="w-100 mb-3">
-        <mat-label>Considera esta información dato sensible conforme a la Ley 19.628 (*)</mat-label>
-        <mat-select formControlName="datoSensible">
-          <mat-option value="Si" class="me-4">Si</mat-option>
-          <mat-option value="No">No</mat-option>
-        </mat-select>
-      </mat-form-field>
-    </form>
+  <!-- RUT / RUN -->
+  <mat-form-field class="w-100 mb-3">
+    <mat-label>Número</mat-label>
+    <input matInput formControlName="rut" />
+  </mat-form-field>
+
+  <!-- Dato sensible -->
+  <mat-form-field class="w-100 mb-3">
+    <mat-label>¿Dato sensible según Ley 19.628?</mat-label>
+    <mat-select formControlName="rbDatoSensible">
+      <mat-option [value]="true">Sí</mat-option>
+      <mat-option [value]="false">No</mat-option>
+    </mat-select>
+  </mat-form-field>
+</form>
+
   </mat-dialog-content>
 
   <mat-dialog-actions align="end">
-    <button mat-button (click)="dialogRef.close()">Cancelar</button>
-    <button mat-raised-button color="primary" (click)="saveActividad('reliza',dialogRef)">Guardar</button>
+    <button mat-button (click)="closeDialog()">Cancelar</button>
+    <button mat-raised-button color="primary" (click)="saveActividad('realiza')">Guardar</button>
   </mat-dialog-actions>
 </ng-template>
 
@@ -424,70 +431,72 @@
 
   <mat-dialog-content>
     <form [formGroup]="actividadesConyugeForm">
-      <!-- Tipo Actividad -->
-      <mat-form-field appearance="outline" class="w-100 mb-3">
-        <mat-label>Tipo de Actividad</mat-label>
-        <mat-select formControlName="tipoActividad">
-          <mat-option *ngFor="let tipoActividad of tiposActividades" [value]="tipoActividad.id"> {{tipoActividad.nombre}}</mat-option>
-        </mat-select>
-      </mat-form-field>
+        <!-- Tipo de Actividad -->
+  <mat-form-field class="w-100 mb-3">
+    <mat-label>Tipo de Actividad</mat-label>
+    <mat-select formControlName="tipoActividadId">
+      <mat-option *ngFor="let t of tiposActividades" [value]="t.id">{{ t.nombre }}</mat-option>
+    </mat-select>
+  </mat-form-field>
 
-      <!-- Rubro/Área -->
-      <mat-form-field appearance="outline" class="w-100 mb-3">
-        <mat-label>Rubro, Área o Tipo de Actividad</mat-label>
-        <mat-select formControlName="rubroArea">
-          <mat-option *ngFor="let rubroArea of actividadesProfesionales" [value]="rubroArea.id"> {{rubroArea.nombre}}</mat-option>
-        </mat-select>
-      </mat-form-field>
+  <!-- Rubro / Área -->
+  <mat-form-field class="w-100 mb-3">
+    <mat-label>Rubro, Área o Tipo de Actividad</mat-label>
+    <mat-select formControlName="rubroId">
+      <mat-option *ngFor="let r of actividadesProfesionales" [value]="r.id">{{ r.nombre }}</mat-option>
+    </mat-select>
+  </mat-form-field>
 
-      <!-- Fecha Inicio -->
-      <mat-form-field appearance="outline" class="w-100 mb-3">
-        <mat-label>Fecha de Inicio</mat-label>
-        <input matInput [matDatepicker]="picker" formControlName="fechaInicio">
-        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-        <mat-datepicker #picker></mat-datepicker>
-      </mat-form-field>
+  <!-- Fecha Inicio -->
+  <mat-form-field class="w-100 mb-3">
+    <mat-label>Fecha de Inicio</mat-label>
+    <input matInput [matDatepicker]="pickerR" formControlName="fechaInicio">
+    <mat-datepicker-toggle matSuffix [for]="pickerR"></mat-datepicker-toggle>
+    <mat-datepicker #pickerR></mat-datepicker>
+  </mat-form-field>
 
-      <!-- Clasificación -->
-      <mat-form-field appearance="outline" class="w-100 mb-3">
-        <mat-label>Clasificación</mat-label>
-        <mat-select formControlName="clasificacion">
-          <mat-option *ngFor="let clasificacion of clasificaciones" [value]="clasificacion.id"> {{clasificacion.nombre}}</mat-option>
-        </mat-select>
-      </mat-form-field>
+  <!-- Clasificación -->
+  <mat-form-field class="w-100 mb-3">
+    <mat-label>Clasificación</mat-label>
+    <mat-select formControlName="clasificacionId">
+      <mat-option *ngFor="let c of clasificaciones" [value]="c.id">{{ c.nombre }}</mat-option>
+    </mat-select>
+  </mat-form-field>
 
-      <!-- Nombre o razon social del beneficiario -->
-      <mat-form-field appearance="outline" class="w-100 mb-3">
-        <mat-label>Nombre o razón social del beneficiario</mat-label>
-        <input matInput formControlName="beneficiario" />
-      </mat-form-field>
+  <!-- Beneficiario -->
+  <mat-form-field class="w-100 mb-3">
+    <mat-label>Nombre o razón social del beneficiario</mat-label>
+    <input matInput formControlName="beneficiario" />
+  </mat-form-field>
 
-      <!-- Checkbox de selector RUN o RUT -->
-      <mat-form-field appearance="outline" class="w-100 mb-3">
-        <mat-label>R.U.T. o R.U.N</mat-label>
-        <mat-select formControlName="rutOrun">
-          <mat-option value="rut" class="me-4">R.U.T</mat-option>
-          <mat-option value="run">R.U.N</mat-option>
-        </mat-select>
-      </mat-form-field>
-      <!-- RUT -->
-      <mat-form-field appearance="outline" class="w-100 mb-3">
-        <mat-label>R.U.T o R.U.N. del Beneficiario</mat-label>
-        <input matInput formControlName="rutBeneficiario" />
-      </mat-form-field>
+  <!-- RUT / RUN selector -->
+  <mat-form-field class="w-100 mb-3">
+    <mat-label>R.U.T. o R.U.N.</mat-label>
+    <mat-select formControlName="rbRunRut">
+      <mat-option value="rut">R.U.T.</mat-option>
+      <mat-option value="run">R.U.N.</mat-option>
+    </mat-select>
+  </mat-form-field>
 
-      <mat-form-field appearance="outline" class="w-100 mb-3">
-        <mat-label>Considera esta información dato sensible conforme a la Ley 19.628 (*)</mat-label>
-        <mat-select formControlName="datoSensible">
-          <mat-option value="Si" class="me-4">Si</mat-option>
-          <mat-option value="No">No</mat-option>
-        </mat-select>
-      </mat-form-field>
+  <!-- RUT / RUN -->
+  <mat-form-field class="w-100 mb-3">
+    <mat-label>Número</mat-label>
+    <input matInput formControlName="rut" />
+  </mat-form-field>
+
+  <!-- Dato sensible -->
+  <mat-form-field class="w-100 mb-3">
+    <mat-label>¿Dato sensible según Ley 19.628?</mat-label>
+    <mat-select formControlName="rbDatoSensible">
+      <mat-option [value]="true">Sí</mat-option>
+      <mat-option [value]="false">No</mat-option>
+    </mat-select>
+  </mat-form-field>
     </form>
   </mat-dialog-content>
 
   <mat-dialog-actions align="end">
-    <button mat-button (click)="dialogRef.close()">Cancelar</button>
-    <button mat-raised-button color="primary" (click)="saveActividad('conyuge',dialogRef)">Guardar</button>
+    <button mat-button (click)="closeDialog()">Cancelar</button>
+    <button mat-raised-button color="primary" (click)="saveActividad('conyuge')">Guardar</button>
   </mat-dialog-actions>
 </ng-template>

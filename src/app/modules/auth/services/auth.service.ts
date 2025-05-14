@@ -80,7 +80,8 @@ export class AuthService {
   }
 
   getCurrentUserRol(): number {
-    return this.currentUser?.roles[0].id || 1;
+    // return this.currentUser?.roles[0].id || 1;
+    return 1;
   }
 
   isAuthenticated(): boolean {

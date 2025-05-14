@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiResponse } from '../../auth/models/ApiResponse';
@@ -10,7 +10,7 @@ import { environment } from 'src/environments/environment';
 export class InmuebleService {
   // URL base de la API
   private apiUrl = environment.apiUrl;
-  
+
   constructor(private http: HttpClient) { }
 
   /**
@@ -18,23 +18,31 @@ export class InmuebleService {
    */
   listarAtributos(tipo: string, tipoGravamen: string = ''): Observable<ApiResponse> {
     let url = `${this.apiUrl}/pr/service/inmueble/atributo/listar?tipo=${tipo}`;
-    
+
     if (tipoGravamen) {
       url += `&tipoGravamen=${tipoGravamen}`;
     }
-    
+
     return this.http.get<ApiResponse>(url, { withCredentials: true });
   }
 
   /**
    * Guarda la información de bien inmueble
    */
-  guardarBienInmueble(data: any, declaranteId: number): Observable<ApiResponse> {
-    const formData = new FormData();
-    formData.append('data', JSON.stringify(data));
-    formData.append('declaranteId', declaranteId.toString());
-    
-    return this.http.post<ApiResponse>(`${this.apiUrl}/pr/service/inmueble/bieninmueble/guardar`, formData, { withCredentials: true });
+  guardarBienInmueble(data: any, declaranteId: number): Observable<any> {
+    const body = new HttpParams()
+      .set('data', JSON.stringify(data))
+      .set('declaranteId', declaranteId.toString());
+
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+    });
+
+    return this.http.post(
+      `${this.apiUrl}/pr/service/inmueble/bieninmueble/guardar`,
+      body.toString(),                  // ← string plano
+      { headers, withCredentials: true }
+    );
   }
 
   /**
@@ -42,11 +50,11 @@ export class InmuebleService {
    */
   listarBienesInmuebles(declaranteId: number, controlador: boolean = false, idDerecho?: number): Observable<ApiResponse> {
     let url = `${this.apiUrl}/pr/service/inmueble/bieninmueble/listar?declaranteId=${declaranteId}&controlador=${controlador}`;
-    
+
     if (idDerecho) {
       url += `&idDerecho=${idDerecho}`;
     }
-    
+
     return this.http.get<ApiResponse>(url, { withCredentials: true });
   }
 
@@ -55,11 +63,11 @@ export class InmuebleService {
    */
   listarBienesInmueblesExtranjero(declaranteId: number, controlador: boolean = false, idDerecho?: number): Observable<ApiResponse> {
     let url = `${this.apiUrl}/pr/service/inmueble/bieninmuebleExtranjero/listar?declaranteId=${declaranteId}&controlador=${controlador}`;
-    
+
     if (idDerecho) {
       url += `&idDerecho=${idDerecho}`;
     }
-    
+
     return this.http.get<ApiResponse>(url, { withCredentials: true });
   }
 
@@ -90,7 +98,7 @@ export class InmuebleService {
   eliminarInmueble(inmuebleId: number): Observable<ApiResponse> {
     const formData = new FormData();
     formData.append('inmuebleId', inmuebleId.toString());
-    
+
     return this.http.post<ApiResponse>(`${this.apiUrl}/pr/service/inmueble/bieninmueble/eliminar`, formData, { withCredentials: true });
   }
 
@@ -100,18 +108,9 @@ export class InmuebleService {
   eliminarGravamen(degravamenId: number): Observable<ApiResponse> {
     const formData = new FormData();
     formData.append('degravamenId', degravamenId.toString());
-    
+
     return this.http.post<ApiResponse>(`${this.apiUrl}/pr/service/inmueble/bieninmueble/degravamen/eliminar`, formData, { withCredentials: true });
   }
 
-  /**
-   * Guarda la información de bien inmueble en el extranjero
-   */
-  guardarBienInmuebleExtranjero(data: any, declaranteId: number): Observable<ApiResponse> {
-    const formData = new FormData();
-    formData.append('data', JSON.stringify(data));
-    formData.append('declaranteId', declaranteId.toString());
-    
-    return this.http.post<ApiResponse>(`${this.apiUrl}/pr/service/inmueble/bieninmuebleExtranjero/guardar`, formData, { withCredentials: true });
-  }
+
 } 
