@@ -119,8 +119,12 @@ export class Paso13PasivosComponent implements OnInit {
   
   loadRegistro() {
     this._declaracionHelper.declaracionesFlag$.subscribe(data => {
-      this.tienePasivos = data.pasivos ? 'si' : 'no';
-      this.tieneDeudaPension = data.pensiones ? 'si' : 'no';
+      if(data.pasivos != undefined) {
+        this.tienePasivos = data.pasivos ? 'si' : 'no';
+      }
+      if(data.pensiones != undefined) {
+        this.tieneDeudaPension = data.pensiones ? 'si' : 'no';
+      }
     });
   }
 
@@ -174,14 +178,25 @@ export class Paso13PasivosComponent implements OnInit {
   }
 
   onTienePasivosChange(value: string): void {
+    if (value === 'no' && this.pasivoForm?.valid) {
+      Swal.fire({
+        title: 'No se puede cambiar',
+        text: 'Debe eliminar todos los registros antes de cambiar a "No Tiene"',
+        icon: 'warning',
+        confirmButtonText: 'Aceptar'
+      });
+      this.tienePasivos = 'si';
+      return;
+    }
     this.tienePasivos = value;
+    const path = ['declaraciones', this.activeDeclId, 'paso13'];
     this._declaracion.guardarRegistro(this.declaranteId, 'pasivos', value === 'si').subscribe({
       next: (res: any) => {
-        this.toastr.success('Registro actualizado exitosamente');
+        console.log('Registro guardado exitosamente');
       },
       error: (err: any) => {
         console.error('Error al guardar registro:', err);
-        this.toastr.error('Error al actualizar el registro');
+        this.toastr.error('Error al guardar registro');
       }
     });
   }

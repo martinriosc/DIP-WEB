@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, filter, combineLatest, forkJoin, map, Subject, distinctUntilChanged } from 'rxjs';
+import { BehaviorSubject, filter, combineLatest, forkJoin, map, Subject, distinctUntilChanged, mergeMap, of } from 'rxjs';
 import { DeclaracionService } from './declaracion.service';
 import { DatosLaboralesService } from './datos-laborales.service';
 import { DeclaranteService } from './declarante.service';
@@ -172,18 +172,25 @@ function buildFormState(api: any, flags: any): FormState {
       if (itemsStep.length > 0) {
         const subSteps: Step[] = [];
         const subStepMap = SUB_STEP[stepKey];
-        
+
         if (subStepMap) {
           Object.entries(subStepMap).forEach(([label, subKey]) => {
             const item = itemsStep.find(it => it.item.trim() === label);
             if (item) {
+              // Nueva lógica de validación para subpasos
+              const tieneRegistros = item.tiene !== 'No Tiene';
+              const todosNoAplica = item.tiene === 'No Tiene';
+              const registrosCompletos = !item.incompleto;
+
+              const isCompleted = todosNoAplica || (tieneRegistros && registrosCompletos);
+
               subSteps.push({
                 label,
                 key: subKey,
                 order: item.orden,
-                completed: !item.incompleto,
-                enabled: item.tiene !== 'No Tiene',
-                status: !item.incompleto ? 'completed' : item.incompleto ? 'incomplete' : 'pending',
+                completed: isCompleted,
+                enabled: tieneRegistros,
+                status: isCompleted ? 'completed' : 'incomplete',
                 subSteps: []
               });
             }
@@ -193,25 +200,34 @@ function buildFormState(api: any, flags: any): FormState {
         // Caso especial para paso-12 que no tiene subpasos en la API pero necesitamos mantener la estructura
         if (stepKey === 'paso12' && itemsStep.length > 0) {
           const mainItem = itemsStep[0];
+          const tieneRegistros = mainItem.tiene !== 'No Tiene';
+          const todosNoAplica = mainItem.tiene === 'No Tiene';
+          const registrosCompletos = !mainItem.incompleto;
+
+          const isCompleted = todosNoAplica || (tieneRegistros && registrosCompletos);
+
           subSteps.push({
             label: 'Contratos de Mandato Especial',
             key: 'paso12-1',
             order: mainItem.orden,
-            completed: !mainItem.incompleto,
-            enabled: mainItem.tiene !== 'No Tiene',
-            status: !mainItem.incompleto ? 'completed' : mainItem.incompleto ? 'incomplete' : 'pending',
+            completed: isCompleted,
+            enabled: tieneRegistros,
+            status: isCompleted ? 'completed' : 'incomplete',
             subSteps: []
           });
         }
 
         const mainItem = itemsStep[0];
+        // Validar si todos los subpasos están completos
+        const allSubStepsCompleted = subSteps.every(subStep => subStep.completed);
+
         intereses.push({
           label: mainItem.item.split(' - ')[0],
           key: stepKey,
           order: mainItem.orden,
-          completed: !mainItem.incompleto,
+          completed: allSubStepsCompleted,
           enabled: true,
-          status: !mainItem.incompleto ? 'completed' : mainItem.incompleto ? 'incomplete' : 'pending',
+          status: allSubStepsCompleted ? 'completed' : 'incomplete',
           component: `Paso${stepKey.replace('paso', '')}Component`,
           subSteps
         });
@@ -299,6 +315,9 @@ export class DeclaracionHelperService {
   );
   readonly activeDeclarante$ = this.activeDeclaranteSubject.asObservable();
 
+  private readonly isCreatingFlag = new BehaviorSubject<any>(null);
+  readonly isCreating$ = this.isCreatingFlag.asObservable();
+
   /* Flags / Steps (sin cambios de lógica) */
   private readonly declaracionesFlagSubject = new BehaviorSubject<any>(null);
   declaracionesFlag$ = this.declaracionesFlagSubject.asObservable();
@@ -329,8 +348,6 @@ export class DeclaracionHelperService {
     private _datosLaborales: DatosLaboralesService,
     private _personaRelacionada: PersonaRelacionadaService,
   ) {
-    // Cargar datos iniciales
-    this.loadInitialData(this.declaracionId, this.declaranteId);
 
     combineLatest([
       this.activeDeclaracion$,
@@ -349,7 +366,6 @@ export class DeclaracionHelperService {
       );
   }
 
-  /* ══════ SETTERS / GETTERS de ID ══════ */
   setDeclaracionId(id: number): void {
     if (this.activeDeclaracionSubject.value !== id) {
       this.activeDeclaracionSubject.next(id);
@@ -368,85 +384,149 @@ export class DeclaracionHelperService {
     return this.activeDeclaranteSubject.value;
   }
 
-  private loadInitialData(
-    declaracionId: number,
-    declaranteId: number,
-    preserveActiveDeclarante: boolean = false
-  ): void {
+  setIsCreating(isCreating: boolean): void {
+    if (this.isCreatingFlag.value !== isCreating) {
+      this.isCreatingFlag.next(isCreating);
+    }
+  }
+
+  get isCreating(): boolean {
+    return this.isCreatingFlag.value;
+  }
+
+  private loadInitialData(declaracionId: number, declaranteId: number, preserveActiveDeclarante: boolean = false): void {
+    // Si es una nueva declaración, inicializar el estado sin hacer llamadas al servidor
+    if (declaracionId === 0) {
+      const nuevoState = {
+        declarante: this._state$.value.declarante,
+        declaraciones: [],
+        activeDeclaracionId: ''
+      };
+      this._state$.next(nuevoState);
+      this.declaracionesFlagSubject.next(null);
+      this.isCreatingFlag.next(true);
+      return;
+    }
+
+    // Si es una declaración existente, proceder con la carga normal
+    this.isCreatingFlag.next(false);
+
+    // Emitir un estado inicial con progreso undefined para mostrar el loader
+    const initialState = {
+      ...this._state$.value,
+      declaraciones: [] // Limpiar las declaraciones para forzar el estado de carga
+    };
+    this._state$.next(initialState);
+
+    // Iniciar la carga de datos
     forkJoin([
       this._declaracion.confirmarDatos(declaracionId),
       this._declaracion.obtenerRegistro(declaranteId),
     ]).subscribe({
       next: ([confirm, registro]) => {
-        console.log(registro)
         this.declaracionesFlagSubject.next(registro);
-
         const nuevoState = buildFormState(confirm, registro);
-        
-        // Solo establecer el declarante principal como activo si no estamos preservando el activo
+
         if (!preserveActiveDeclarante) {
           const mainDeclarante = nuevoState.declaraciones.find(d => d.esDeclarante);
           if (mainDeclarante) {
             nuevoState.activeDeclaracionId = mainDeclarante.id;
           }
         } else {
-          // Mantener el declarante activo actual
           nuevoState.activeDeclaracionId = this._state$.value.activeDeclaracionId;
         }
 
         this._state$.next(nuevoState);
 
-        /* Validar pasos del declarante con los nuevos IDs */
-        this.validarPasosDeclarante(declaranteId, declaracionId);
+        console.log("nuevoState", nuevoState)
+
+        // Validar el progreso después de cargar los datos iniciales
+        this.validateAndUpdateStepProgress(declaracionId, declaranteId);
       },
       error: (err) => {
         console.error('Error al cargar datos iniciales:', err);
+        // En caso de error, mantener el estado actual
+        this._state$.next(this._state$.value);
       },
     });
   }
 
-
-  validarPasosDeclarante(declaranteId: number, declaracionId: number) {
-    this._declaracion.obtenerRegistro(declaranteId).subscribe({
-      next: (res) => {
-        if (res) {
-          this.markStepCompleted(['declarante', 'paso1'])
-        }
-      }
-    })
-
-    this._declarante.getDatosDeclarante(declaracionId).subscribe({
-      next: (res) => {
-        if (res) {
-          this.markStepCompleted(['declarante', 'paso2'])
-        }
-      }
-    })
-
-    this._datosLaborales.getDatosLaborales(declaracionId).subscribe({
-      next: (res) => {
-        if (res) {
-          this.markStepCompleted(['declarante', 'paso3'])
-        }
-      }
-    })
-
-    this._declaracion.obtenerAplica(declaracionId).subscribe({
-      next: (res) => {
-        if (res) {
-          this._personaRelacionada.listar(declaracionId).subscribe({
-            next: (res: any) => {
-              if (res.length > 0) {
-                this.markStepCompleted(['declarante', 'paso4'])
-              }
-            }
-          })
+  private validateAndUpdateStepProgress(declaracionId: number, declaranteId: number): void {
+    forkJoin([
+      this._declaracion.getDeclaracion(declaracionId),
+      this._declarante.getDatosDeclarante(declaracionId),
+      this._datosLaborales.getDatosLaborales(declaracionId),
+      this._declaracion.obtenerAplica(declaracionId),
+      this._personaRelacionada.listar(declaracionId)
+    ]).subscribe({
+      next: ([declaracion, datosDeclarante, datosLaborales, aplica, personasRelacionadas]) => {
+        // Validar paso 1 - Datos de la Declaración
+        if (declaracion && 
+            declaracion.tipoDeclaracion && 
+            declaracion.rbLugarDeclaracion !== undefined && 
+            declaracion.region && 
+            declaracion.comuna) {
+          this.markStepCompleted(['declarante', 'paso1']);
         } else {
-          this.markStepCompleted(['declarante', 'paso4'])
+          this.markStepIncomplete(['declarante', 'paso1']);
         }
-      }
-    })
+
+        // Validar paso 2 - Datos Personales
+        if (datosDeclarante && 
+            datosDeclarante.rut && 
+            datosDeclarante.nombre && 
+            datosDeclarante.apellidoPaterno && 
+            datosDeclarante.apellidoMaterno && 
+            datosDeclarante.profesionId && 
+            datosDeclarante.calle && 
+            datosDeclarante.estadoCivil && 
+            datosDeclarante.regimenPatrimonialId) {
+          this.markStepCompleted(['declarante', 'paso2']);
+        } else {
+          this.markStepIncomplete(['declarante', 'paso2']);
+        }
+
+        // Validar paso 3 - Datos de la Entidad
+        if (datosLaborales?.data && 
+            datosLaborales.data.ServPublicoId && 
+            datosLaborales.data.cargoNombre && 
+            datosLaborales.data.remuneracionTipo && 
+            datosLaborales.data.ServGradoId && 
+            datosLaborales.data.fechaAsuncion && 
+            datosLaborales.data.rbLugarDesempeno !== undefined && 
+            datosLaborales.data.regionId && 
+            datosLaborales.data.comunaId) {
+          this.markStepCompleted(['declarante', 'paso3']);
+        } else {
+          this.markStepIncomplete(['declarante', 'paso3']);
+        }
+
+        // Validar paso 4 - Hijos bajo Patria Potestad
+        // Si no aplica o si tiene personas relacionadas válidas
+
+        console.log(personasRelacionadas)
+        console.log(aplica)
+        if (!aplica.data || (personasRelacionadas.data && personasRelacionadas.length > 0)) {
+          this.markStepCompleted(['declarante', 'paso4']);
+        } else {
+          this.markStepIncomplete(['declarante', 'paso4']);
+        }
+
+        // Actualizar el estado de creación basado en el progreso
+        const allStepsComplete = this.isComplete('paso1') &&
+          this.isComplete('paso2') &&
+          this.isComplete('paso3') &&
+          this.isComplete('paso4');
+
+        // Solo actualizamos isCreating si es una nueva declaración
+        if (declaracionId === 0) {
+          this.setIsCreating(!allStepsComplete);
+        }
+      },
+      error: (err) => console.error('Error validando progreso:', err)
+    });
   }
+
 
 
   ngOnInit(): void {
@@ -456,8 +536,8 @@ export class DeclaracionHelperService {
 
   getConfirmacionDatos() {
     this._declaracion.confirmarDatos(this.declaranteId).subscribe({
-      next: (res: any) => {},
-      error: (err) => {}
+      next: (res: any) => { },
+      error: (err) => { }
     })
   }
   getDeclaracionesFlag(declaranteId: number) {
@@ -466,7 +546,7 @@ export class DeclaracionHelperService {
         this.declaracionesFlagSubject.next(res)
         this.getConfirmacionDatos()
       },
-      error: (err) => {}
+      error: (err) => { }
     })
   }
 
@@ -512,7 +592,7 @@ export class DeclaracionHelperService {
           const next = rootDecl[currentIdx + 1];
           this.currentStepKeySubject.next(next.key);
           this.nextStepSubject.next();
-        } 
+        }
         // Si es el último paso del declarante y hay pasos de intereses
         else if (rootInt.length > 0) {
           this.blockSubject.next('int');
@@ -521,7 +601,7 @@ export class DeclaracionHelperService {
           this.nextStepSubject.next();
         }
       }
-    } 
+    }
     // Si estamos en el bloque de intereses
     else {
       const currentIdx = rootInt.findIndex(p => p.key === activeKey);
@@ -635,7 +715,7 @@ export class DeclaracionHelperService {
     if (declaracion) {
       // Actualizar el ID del declarante activo
       this.activeDeclaranteSubject.next(declaracion.idDeclarante);
-      
+
       // Actualizar el estado manteniendo el declarante activo
       this._state$.next({
         ...state,
@@ -728,6 +808,28 @@ export class DeclaracionHelperService {
       ...st.declaraciones.flatMap(d => flatten(d.intereses))
     ];
     return all.length ? Math.round(all.filter(x => x.completed).length / all.length * 100) : 0;
+  }
+
+  resetState(): void {
+    // Reiniciar el estado principal
+    this._state$.next({
+      declarante: [
+        { label: 'Datos de la Declaración', key: 'paso1', order: 1, completed: false, enabled: true, component: 'Paso1DeclaracionComponent', status: 'pending', subSteps: [] },
+        { label: 'Datos Personales', key: 'paso2', order: 2, completed: false, enabled: true, component: 'Paso2DatosPersonalesComponent', status: 'pending', subSteps: [] },
+        { label: 'Datos de la Entidad', key: 'paso3', order: 3, completed: false, enabled: true, component: 'Paso3EntidadComponent', status: 'pending', subSteps: [] },
+        { label: 'Hijos bajo Patria Potestad', key: 'paso4', order: 4, completed: false, enabled: true, component: 'Paso4TutelaComponent', status: 'pending', subSteps: [] }
+      ],
+      declaraciones: [],
+      activeDeclaracionId: ''
+    });
+
+    // Reiniciar otros subjects
+    this.activeDeclaracionSubject.next(0);
+    this.activeDeclaranteSubject.next(0);
+    this.isCreatingFlag.next(false);
+    this.declaracionesFlagSubject.next(null);
+    this.currentStepKeySubject.next('paso1');
+    this.blockSubject.next('decl');
   }
 }
 

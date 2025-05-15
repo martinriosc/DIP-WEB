@@ -1,8 +1,28 @@
 <div class="container-fluid">
+  <!-- Loader -->
+  <div *ngIf="isLoading" class="loading-spinner-container">
+    <div class="spinner-content">
+      <mat-spinner diameter="50"></mat-spinner>
+      <p class="loading-text">Cargando progreso...</p>
+    </div>
+  </div>
+
+  <!-- Progress bar global -->
+  <div class="progress-container" [class.hidden]="isLoading">
+    <mat-progress-bar 
+      mode="determinate" 
+      [value]="(globalProgress$ | async)! * 100">
+    </mat-progress-bar>
+  </div>
+
   <div class="row">
     <div class="col">
       <div class="dual-container">
-        <mat-tab-group (selectedTabChange)="onTabChange($event)" [(selectedIndex)]="selectedTabIndex">
+        <mat-tab-group 
+          [selectedIndex]="selectedTabIndex" 
+          (selectedIndexChange)="onTabChange($event)"
+          [disableRipple]="true">
+          
           <mat-tab label="Antecedentes del Declarante">
             <div class="stepper-section">
 
@@ -57,7 +77,9 @@
           </mat-tab>
 
 
-          <mat-tab label="Intereses y Patrimonios">
+          <mat-tab 
+            label="Intereses y Patrimonios" 
+            [disabled]="isCreating && !areAntecedentesComplete()">
             <div class="stepper-section">
 
 
@@ -130,7 +152,9 @@
             </div>
           </mat-tab>
 
-          <mat-tab label="Confirmación de Datos">
+          <mat-tab 
+            label="Confirmación de Datos"
+            [disabled]="isCreating && !areAntecedentesComplete()">
             <app-confirmacion-datos></app-confirmacion-datos>
           </mat-tab>
         </mat-tab-group>

@@ -65,7 +65,7 @@ export class Paso14FuenteConflictoComponent implements OnInit {
   ngOnInit(): void {
     this.buildForm();
     this._declaracionHelper.activeId$.subscribe(id => this.activeDeclId = id);
-    this._declaracionHelper.markStepIncomplete(['declaraciones', this.activeDeclId, this.key]);
+    // this._declaracionHelper.markStepIncomplete(['declaraciones', this.activeDeclId, this.key]);
 
     this.loadOtrasFuentes();
   }
@@ -76,7 +76,9 @@ export class Paso14FuenteConflictoComponent implements OnInit {
 
   loadRegistro() {
     this._declaracionHelper.declaracionesFlag$.subscribe(data => {
-      this.tieneFuenteConflicto = data.otraFuente ? 'si' : 'no';
+      if(data.otraFuente != undefined) {
+        this.tieneFuenteConflicto = data.otraFuente ? 'si' : 'no';
+      }
     });
   }
 
@@ -173,9 +175,28 @@ export class Paso14FuenteConflictoComponent implements OnInit {
     }
   }
 
-  onTieneFuenteConflictoChange(val: 'si' | 'no') {
-    this.tieneFuenteConflicto = val;
-    this._declaracion.guardarRegistro(this.declaranteId, 'otraFuente', val === 'si').subscribe();
+  onTieneFuenteConflictoChange(value: string): void {
+    if (value === 'no' && this.conflictoForm?.valid) {
+      Swal.fire({
+        title: 'No se puede cambiar',
+        text: 'Debe eliminar todos los registros antes de cambiar a "No Tiene"',
+        icon: 'warning',
+        confirmButtonText: 'Aceptar'
+      });
+      this.tieneFuenteConflicto = 'si';
+      return;
+    }
+    this.tieneFuenteConflicto = value;
+    const path = ['declaraciones', this.activeDeclId, 'paso14'];
+    this._declaracion.guardarRegistro(this.declaranteId, 'otraFuente', value === 'si').subscribe({
+      next: (res: any) => {
+        console.log('Registro guardado exitosamente');
+      },
+      error: (err: any) => {
+        console.error('Error al guardar registro:', err);
+        this.toastr.error('Error al guardar registro');
+      }
+    });
   }
 
   onSubmit() {

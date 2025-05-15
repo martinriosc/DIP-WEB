@@ -90,17 +90,27 @@ export class Paso5ActividadesComponent implements OnInit, AfterViewInit {
     this._spinner.show();
     this.buildAllForms();
     this.helper.activeId$.subscribe(id => (this.activeDeclId = id));
+    this.declaracionId = this.helper.declaracionId
+    this.declaranteId = this.helper.declaranteId
 
     this.loadCatalogos();
     this.validarConyuge();
     this.loadActividades();
   }
 
+
   ngAfterViewInit(): void {
     this.helper.declaracionesFlag$.subscribe(flag => {
-      this.actividadesUltimos12Meses = flag.actividadesIndividuales ? 'si' : 'no';
-      this.actividadesQueRealiza = flag.actividadesDependientes ? 'si' : 'no';
-      this.actividadesConyuge = flag.actividadesGremiales ? 'si' : 'no';
+      console.log(flag.actividadesIndividuales)
+      if(flag.actividadesIndividuales != undefined) {
+        this.actividadesUltimos12Meses = flag.actividadesIndividuales ? 'si' : 'no';
+      }
+      if(flag.actividadesDependientes != undefined) {
+        this.actividadesQueRealiza = flag.actividadesDependientes ? 'si' : 'no';
+      }
+      if(flag.actividadesGremiales != undefined) {
+        this.actividadesConyuge = flag.actividadesGremiales ? 'si' : 'no';
+      }
     });
   }
 
@@ -432,19 +442,76 @@ export class Paso5ActividadesComponent implements OnInit, AfterViewInit {
   /* ===================================================================
      RADIO – Tiene/No tiene
   =================================================================== */
-  onTieneActividad12MesesChange(val: 'si' | 'no') {
-    this.actividadesUltimos12Meses = val;
-    this.declaracionSrv.guardarRegistro(this.declaranteId, 'actividadesIndividuales', val === 'si').subscribe();
+  onTieneActividad12MesesChange(value: string): void {
+    if (value === 'no' && this.actividades12Meses.length > 0) {
+      Swal.fire({
+        title: 'No se puede cambiar',
+        text: 'Debe eliminar todos los registros antes de cambiar a "No Tiene"',
+        icon: 'warning',
+        confirmButtonText: 'Aceptar'
+      });
+      this.actividadesUltimos12Meses = 'si';
+      return;
+    }
+    this.actividadesUltimos12Meses = value;
+    const path = ['declaraciones', this.activeDeclId, 'paso5'];
+    this.declaracionSrv.guardarRegistro(this.declaranteId, 'actividadesIndividuales', value === 'si').subscribe({
+      next: (res: any) => {
+        console.log('Registro guardado exitosamente');
+      },
+      error: (err: any) => {
+        console.error('Error al guardar registro:', err);
+        this.toastr.error('Error al guardar registro');
+      }
+    });
   }
 
-  onTieneActividadRealizaChange(val: 'si' | 'no') {
-    this.actividadesQueRealiza = val;
-    this.declaracionSrv.guardarRegistro(this.declaranteId, 'actividadesDependientes', val === 'si').subscribe();
+  onTieneActividadRealizaChange(value: string): void {
+    if (value === 'no' && this.actividadesRealiza.length > 0) {
+      Swal.fire({
+        title: 'No se puede cambiar',
+        text: 'Debe eliminar todos los registros antes de cambiar a "No Tiene"',
+        icon: 'warning',
+        confirmButtonText: 'Aceptar'
+      });
+      this.actividadesQueRealiza = 'si';
+      return;
+    }
+    this.actividadesQueRealiza = value;
+    const path = ['declaraciones', this.activeDeclId, 'paso5'];
+    this.declaracionSrv.guardarRegistro(this.declaranteId, 'actividadesDependientes', value === 'si').subscribe({
+      next: (res: any) => {
+        console.log('Registro guardado exitosamente');
+      },
+      error: (err: any) => {
+        console.error('Error al guardar registro:', err);
+        this.toastr.error('Error al guardar registro');
+      }
+    });
   }
 
-  onTieneActividadConyugeChange(val: 'si' | 'no') {
-    this.actividadesConyuge = val;
-    this.declaracionSrv.guardarRegistro(this.declaranteId, 'actividadesGremiales', val === 'si').subscribe();
+  onTieneActividadConyugeChange(value: string): void {
+    if (value === 'no' && this.actividadesConyugeData.length > 0) {
+      Swal.fire({
+        title: 'No se puede cambiar',
+        text: 'Debe eliminar todos los registros antes de cambiar a "No Tiene"',
+        icon: 'warning',
+        confirmButtonText: 'Aceptar'
+      });
+      this.actividadesConyuge = 'si';
+      return;
+    }
+    this.actividadesConyuge = value;
+    const path = ['declaraciones', this.activeDeclId, 'paso5'];
+    this.declaracionSrv.guardarRegistro(this.declaranteId, 'actividadesGremiales', value === 'si').subscribe({
+      next: (res: any) => {
+        console.log('Registro guardado exitosamente');
+      },
+      error: (err: any) => {
+        console.error('Error al guardar registro:', err);
+        this.toastr.error('Error al guardar registro');
+      }
+    });
   }
 
   /* ===================================================================
@@ -458,6 +525,7 @@ export class Paso5ActividadesComponent implements OnInit, AfterViewInit {
 
     if (!listo) {
       this.helper.markStepIncomplete(['declaraciones', 'paso5']);
+      this.helper.nextStep();
       return;
     }
 

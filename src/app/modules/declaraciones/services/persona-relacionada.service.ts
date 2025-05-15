@@ -16,8 +16,8 @@ export class PersonaRelacionadaService {
   /**
    * Obtiene la lista de personas relacionadas por declarante
    */
-  listar(declaracionId: number): Observable<ApiResponse> {
-    return this.http.get<ApiResponse>(`${this.apiUrl}/pr/service/personarelacionada/listar?declaracionId=${declaracionId}`, { withCredentials: true });
+  listar(declaracionId: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/pr/service/personarelacionada/listar?declaracionId=${declaracionId}`, { withCredentials: true });
   }
 
   /**
@@ -99,7 +99,15 @@ export class PersonaRelacionadaService {
   /**
    * Cambia el estado de una persona relacionada (activa/inactiva "aplica")
    */
-  changePersonaRelacionada(data: any): Observable<ApiResponse> {
-    return this.http.post<ApiResponse>(`${this.apiUrl}/pr/service/declaracion/changePersonaRelacionada`, data, { withCredentials: true });
+  changePersonaRelacionada(declaracionId: number, data: any): Observable<any> {
+    const body = new HttpParams()
+      .set('declaracionId', declaracionId.toString())
+      .set('valor', data.toString());
+
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+    });
+
+    return this.http.post<any>(`${this.apiUrl}/pr/service/declaracion/changePersonaRelacionada`, body.toString(), { headers, withCredentials: true });
   }
 } 

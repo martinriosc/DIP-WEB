@@ -18,8 +18,7 @@ export class Paso1DeclaracionComponent implements OnInit {
 
   isNueva: boolean = false;
   formDeclaracion!: FormGroup;
-
-
+  
   tipos: any = [];
   periodos: any = [2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025];
   regiones: any = [];
@@ -42,7 +41,7 @@ export class Paso1DeclaracionComponent implements OnInit {
     this.formDeclaracion = this.fb.group({
       tipo: ['', Validators.required],
       periodo: ['', Validators.required],
-      lugar: ['Chile', Validators.required],
+      lugar: ['', Validators.required],
       region: [''],
       comuna: [''],
       pais: [''],
@@ -56,30 +55,30 @@ export class Paso1DeclaracionComponent implements OnInit {
   }
 
   ngAfterViewInit(): void {
-   
 
-    this.formDeclaracion.statusChanges.subscribe(status => {
-      if (status === 'VALID') {
-        this._declaracionHelper.markStepCompleted(['declarante', 'paso1']);
-      } else {
-        this._declaracionHelper.markStepIncomplete(['declarante', 'paso1']);
-      }
-    });
+
+    // this.formDeclaracion.statusChanges.subscribe(status => {
+    //   if (status === 'VALID') {
+    //     this._declaracionHelper.markStepCompleted(['declarante', 'paso1']);
+    //   } else {
+    //     this._declaracionHelper.markStepIncomplete(['declarante', 'paso1']);
+    //   }
+    // });
   }
 
 
 
   loadDeclaracion() {
 
-
     if (this.declaracionId == 0 && this.declaranteId != 0) {
-      this.isNueva = true;
+      this._declaracionHelper.setIsCreating(true);
     } else if (this.declaracionId == 0 && this.declaranteId == 0) {
       this._router.navigate(['declaraciones']);
     } else {
       this._declaracion.getDeclaracion(this.declaracionId).subscribe({
         next: (response: any) => {
           if (response) {
+
             this.formDeclaracion.patchValue({
               tipo: response.tipoDeclaracion,
               periodo: response.periodo,
@@ -190,6 +189,7 @@ export class Paso1DeclaracionComponent implements OnInit {
           console.log(response)
           if (response.success) {
             this._toastr.success('Datos de la Declaración guardados correctamente');
+            this._declaracionHelper.setDeclaracionId(response.data.declaracionId);
             this._declaracionHelper.markStepCompleted(['declarante', 'paso1']);
             this._declaracionHelper.nextStep();
           } else {

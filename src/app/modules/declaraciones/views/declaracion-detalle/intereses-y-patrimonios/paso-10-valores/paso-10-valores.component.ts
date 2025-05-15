@@ -102,8 +102,12 @@ export class Paso10ValoresComponent implements OnInit {
 
   loadRegistro() {
     this._declaracionHelper.declaracionesFlag$.subscribe(data => {
-      this.tieneValoresChile = data.instrumento ? 'si' : 'no';
-      this.tieneValoresExtranjero = data.instrumentoExtranjero ? 'si' : 'no';
+      if(data.instrumento != undefined) {
+        this.tieneValoresChile = data.instrumento ? 'si' : 'no';
+      }
+      if(data.instrumentoExtranjero != undefined) {
+        this.tieneValoresExtranjero = data.instrumentoExtranjero ? 'si' : 'no';
+      }
     })
   }
 
@@ -220,7 +224,7 @@ export class Paso10ValoresComponent implements OnInit {
 
     const payload = {
       ...this.valorForm.value,
-      tipoId: 3,                         // siempre “3” para Valores
+      tipoId: 3,                         // siempre "3" para Valores
       extranjero: this.isExtranjero,     // ← se envía correctamente
       borrador: !this.isFormValid(this.valorForm),
       controlador: false
@@ -266,26 +270,50 @@ export class Paso10ValoresComponent implements OnInit {
     });
   }
 
-  onTieneValoresChileChange(value: string) {
+  onTieneValoresChileChange(value: string): void {
+    if (value === 'no' && this.valoresChile.length > 0) {
+      Swal.fire({
+        title: 'No se puede cambiar',
+        text: 'Debe eliminar todos los registros antes de cambiar a "No Tiene"',
+        icon: 'warning',
+        confirmButtonText: 'Aceptar'
+      });
+      this.tieneValoresChile = 'si';
+      return;
+    }
     this.tieneValoresChile = value;
-    this._declaracion.guardarRegistro(this.declaranteId, 'intrumento', value === 'si').subscribe({
+    const path = ['declaraciones', this.activeDeclId, 'paso10'];
+    this._declaracion.guardarRegistro(this.declaranteId, 'instrumento', value === 'si').subscribe({
       next: (res: any) => {
         console.log('Registro guardado exitosamente');
       },
       error: (err: any) => {
         console.error('Error al guardar registro:', err);
+        this._toastr.error('Error al guardar registro');
       }
     });
   }
 
-  onTieneValoresExtranjeroChange(value: string) {
+  onTieneValoresExtranjeroChange(value: string): void {
+    if (value === 'no' && this.valoresExtranjero.length > 0) {
+      Swal.fire({
+        title: 'No se puede cambiar',
+        text: 'Debe eliminar todos los registros antes de cambiar a "No Tiene"',
+        icon: 'warning',
+        confirmButtonText: 'Aceptar'
+      });
+      this.tieneValoresExtranjero = 'si';
+      return;
+    }
     this.tieneValoresExtranjero = value;
-    this._declaracion.guardarRegistro(this.declaranteId, 'intrumentoExtranjero', value === 'si').subscribe({
+    const path = ['declaraciones', this.activeDeclId, 'paso10'];
+    this._declaracion.guardarRegistro(this.declaranteId, 'instrumentoExtranjero', value === 'si').subscribe({
       next: (res: any) => {
         console.log('Registro guardado exitosamente');
       },
       error: (err: any) => {
         console.error('Error al guardar registro:', err);
+        this._toastr.error('Error al guardar registro');
       }
     });
   }

@@ -70,7 +70,7 @@ export class Paso15OtrosBienesComponent implements OnInit {
   ngOnInit(): void {
     this.buildForm();
     this._declaracionHelper.activeId$.subscribe(id => this.activeDeclId = id);
-    this._declaracionHelper.markStepIncomplete(['declaraciones', this.activeDeclId, this.key]);
+    // this._declaracionHelper.markStepIncomplete(['declaraciones', this.activeDeclId, this.key]);
 
     this.loadOtrosBienes();
     this.loadTipoBien();
@@ -82,7 +82,9 @@ export class Paso15OtrosBienesComponent implements OnInit {
 
   loadRegistro() {
     this._declaracionHelper.declaracionesFlag$.subscribe(data => {
-      this.tieneOtrosBienes = data.otrosBienes ? 'si' : 'no';
+      if(data.otrosBienes != undefined) {
+        this.tieneOtrosBienes = data.otrosBienes ? 'si' : 'no';
+      }
     });
   }
 
@@ -125,9 +127,18 @@ export class Paso15OtrosBienesComponent implements OnInit {
   }
 
   onTieneOtrosBienesChange(value: string): void {
+    if (value === 'no' && this.otrosBienes.length > 0) {
+      Swal.fire({
+        title: 'No se puede cambiar',
+        text: 'Debe eliminar todos los registros antes de cambiar a "No Tiene"',
+        icon: 'warning',
+        confirmButtonText: 'Aceptar'
+      });
+      this.tieneOtrosBienes = 'si';
+      return;
+    }
     this.tieneOtrosBienes = value;
-    const path = ['declaraciones', this.activeDeclId, this.key];
-
+    const path = ['declaraciones', this.activeDeclId, 'paso15'];
     this._declaracion.guardarRegistro(this.declaranteId, 'otrosBienes', value === 'si').subscribe({
       next: (res: any) => {
         console.log('Registro guardado exitosamente');
@@ -137,16 +148,6 @@ export class Paso15OtrosBienesComponent implements OnInit {
         this.toastr.error('Error al guardar registro');
       }
     });
-
-    if (value === 'no') {
-      this._declaracionHelper.markStepCompleted(path);
-    } else {
-      if (this.otrosBienes.length > 0) {
-        this._declaracionHelper.markStepCompleted(path);
-      } else {
-        this._declaracionHelper.markStepIncomplete(path);
-      }
-    }
   }
 
   openAddModal(): void {

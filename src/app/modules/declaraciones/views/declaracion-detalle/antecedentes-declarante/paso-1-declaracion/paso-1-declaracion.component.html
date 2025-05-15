@@ -100,7 +100,7 @@
   </div>
 
   <mat-card-actions class="acciones">
-    <button mat-raised-button color="primary" (click)="onSubmit()">
+    <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="!formDeclaracion.valid">
       Guardar / Siguiente
     </button>
   </mat-card-actions>

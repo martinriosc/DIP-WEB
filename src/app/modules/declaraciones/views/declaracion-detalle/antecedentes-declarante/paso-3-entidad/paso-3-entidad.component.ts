@@ -1,6 +1,6 @@
 import { DeclaranteService } from 'src/app/modules/declaraciones/services/declarante.service';
 import { Component, OnInit, AfterViewInit, Optional, SkipSelf } from '@angular/core';
-import { FormGroup, FormControl, Validators } from '@angular/forms';
+import { FormGroup, FormControl, Validators, AbstractControl } from '@angular/forms';
 
 import { ServicioService } from 'src/app/modules/declaraciones/services/servicio.service';
 import { MonedaService } from 'src/app/modules/declaraciones/services/moneda.service';
@@ -17,6 +17,7 @@ import { DeclaracionHelperService } from 'src/app/modules/declaraciones/services
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastrService } from 'ngx-toastr';
 import { MatSelectChange } from '@angular/material/select';
+import { MatOptionSelectionChange } from '@angular/material/core';
 
 @Component({
   selector: 'app-paso-3-entidad',
@@ -25,6 +26,31 @@ import { MatSelectChange } from '@angular/material/select';
   styleUrls: ['./paso-3-entidad.component.scss']
 })
 export class Paso3EntidadComponent implements OnInit, AfterViewInit {
+
+  /** ──────────── NUEVAS REGLAS ──────────── */
+  /** IDs que SÍ muestran el control Subnumeral */
+  private readonly TS_SUBNUMERAL = [1, 4, 19];
+
+  /** Combinaciones que activan Valores Obligatorios Adicionales */
+  private readonly COMBOS_VALORES_ADICIONALES: {
+    ts: number;
+    sn: number[];
+  }[] = [
+      { ts: 1, sn: [1, 2, 7, 8, 10] }, // PRESIDENTE
+      { ts: 4, sn: [1] }, // ALCALDE
+      { ts: 19, sn: [2] }, // CONTRALOR
+    ];
+
+  /** Tipo Sujeto Obligado que disparan el mensaje “¡IMPORTANTE!” */
+  private readonly TS_IMPORTANTE = [
+    1, 2, 3, 4, 13, 15, 16, 17, 18, 19, 20, 21, 23,
+  ];
+
+  /** Flags que la vista consume */
+  showSubnumeral = false;
+  showValoresAdicionales = false;
+  showImportanteMensaje = false;
+
   entidadForm!: FormGroup;
 
   servicios: any[] = [];
@@ -192,11 +218,33 @@ export class Paso3EntidadComponent implements OnInit, AfterViewInit {
   }
 
   onTipoSujetoChange(ev: MatSelectChange): void {
-    this._subnumeral
-      .getBySujetoObligado(ev.value)
-      .subscribe({ next: r => (this.subnumerales = r.data || []) });
+    const tsId = ev.value;
+
+    /** ① Mostrar / ocultar Subnumeral */
+    this.showSubnumeral = this.TS_SUBNUMERAL.includes(tsId);
+    this.toggleSubnumeralValidators(this.showSubnumeral);
+
+    /** ② Mensaje IMPORTANTE */
+    this.showImportanteMensaje = this.TS_IMPORTANTE.includes(tsId);
+
+    /** ③ Cargar subnumerales solo si corresponde */
+    if (this.showSubnumeral) {
+      this._subnumeral
+        .getBySujetoObligado(tsId)
+        .subscribe({ next: (r) => (this.subnumerales = r.data || []) });
+    } else {
+      this.subnumerales = [];
+      this.entidadForm.patchValue({ subnumeral: null });
+    }
+
+    /** ④ Re-evaluar Valores Obligatorios Adicionales */
+    this.evalValoresObligatorios();
   }
 
+  onChangeSubnumeral(ev: MatOptionSelectionChange | MatSelectChange): void {
+    /* Solo re-evaluamos la regla de Valores Obligatorios Adicionales */
+    this.evalValoresObligatorios();
+  }
   onRegionChange(): void {
     const regionId = this.entidadForm.value.regionDesempeno;
     if (regionId) {
@@ -205,6 +253,27 @@ export class Paso3EntidadComponent implements OnInit, AfterViewInit {
         error: e => console.error(e)
       });
     }
+  }
+
+  /* ╭───────────────────────── REGLAS DINÁMICAS ─────────────────╮ */
+  /** Activa/Desactiva el validador “required” de subnumeral */
+  private toggleSubnumeralValidators(visible: boolean): void {
+    const control = this.entidadForm.get('subnumeral') as AbstractControl;
+    if (visible) {
+      control.setValidators(Validators.required);
+    } else {
+      control.clearValidators();
+    }
+    control.updateValueAndValidity();
+  }
+
+  /** Regla: combinación TS + SN ⇒ mostrar Valores Obligatorios Adicionales */
+  private evalValoresObligatorios(): void {
+    const ts: number = +this.entidadForm.value.tipoSujeto || 0;
+    const sn: number = +this.entidadForm.value.subnumeral || 0;
+
+    const combo = this.COMBOS_VALORES_ADICIONALES.find((c) => c.ts === ts);
+    this.showValoresAdicionales = combo ? combo.sn.includes(sn) : false;
   }
 
   /* ─────────────────────────── DATOS ORIGINALES ─────────────────────── */
@@ -235,6 +304,7 @@ export class Paso3EntidadComponent implements OnInit, AfterViewInit {
           jefeServicio: d.jefeServicio,
           datosParientes: d.rbAplicaParientes ? 'true' : 'false'
         });
+
 
         /* disparar catálogos dependientes */
         this.onServicioChange({ value: d.ServPublicoId } as MatSelectChange);
@@ -370,9 +440,6 @@ export class Paso3EntidadComponent implements OnInit, AfterViewInit {
     })
   }
 
-  onChangeSubnumeral(event: any) {
-  }
-
 
   onSubmit(): void {
     if (this.entidadForm.invalid) {
@@ -382,6 +449,7 @@ export class Paso3EntidadComponent implements OnInit, AfterViewInit {
     }
 
     this._spinner.show();
+
 
     /* construir payload según reglas del backend */
     const f = this.entidadForm.value;
@@ -437,7 +505,7 @@ export class Paso3EntidadComponent implements OnInit, AfterViewInit {
   }
 
   getIdCargoByNombreCargo(cargo: string) {
-    return this.cargos.find(c => c.cargo === cargo)?.id;
+    return this.cargos.find(c => c.nombre === cargo)?.id;
   }
 
   /* ──────────────────────── PARIENTES ──────────────────────── */

@@ -3,7 +3,7 @@ import { ChangeDetectorRef, Component, ElementRef, TemplateRef, Type, ViewChild 
 import { MatStepper } from '@angular/material/stepper';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTabChangeEvent, MatTabGroup } from '@angular/material/tabs';
-import { combineLatest, map, Observable, Subject, takeUntil } from 'rxjs';
+import { combineLatest, map, Observable, Subject, takeUntil, take, finalize } from 'rxjs';
 
 import { Step } from '../../models/Step';
 
@@ -26,6 +26,7 @@ import { Paso15OtrosBienesComponent } from '../../views/declaracion-detalle/inte
 import { Paso16AntecedentesComponent } from '../../views/declaracion-detalle/intereses-y-patrimonios/paso-16-antecedentes/paso-16-antecedentes.component';
 import { DeclaracionHelperService } from '../../services/declaracion-helper.service';
 import { NgxSpinnerService } from 'ngx-spinner';
+import { AuthService } from 'src/app/modules/auth/services/auth.service';
 
 /* Mapa para instanciar dinámicamente el componente de cada paso */
 const COMPONENT_MAP: Record<string, Type<unknown>> = {
@@ -70,6 +71,8 @@ export class DipStepperComponent {
   editMode = false;
   currentItem: any | null = null;
 
+  isCreating: boolean = false;
+
   /* ───── Streams (async pipes en template) ───── */
   declaraciones$ = this.state.declaraciones$;
   activeId$ = this.state.activeId$;
@@ -92,12 +95,18 @@ export class DipStepperComponent {
   /* ───── Interno ───── */
   private destroy$ = new Subject<void>();
 
+  isLoading: boolean = true;
+
   constructor(
     private readonly state: DeclaracionHelperService,
     private readonly dialog: MatDialog,
     private readonly cd: ChangeDetectorRef,
+    private _auth: AuthService,
     private _spinner: NgxSpinnerService
   ) {
+    // Por defecto, mostrar el loader
+    this.isLoading = true;
+
     // Suscripción a los pasos del declarante
     this.state.declaranteSteps$
       .pipe(takeUntil(this.destroy$))
@@ -120,10 +129,52 @@ export class DipStepperComponent {
         }
         this.cd.markForCheck();
       });
+
+    // Suscripción al estado isCreating para manejar nueva declaración
+    this.state.isCreating$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(isCreating => {
+        console.log("isCreating suscripcion isCreating", this.isCreating)
+        this.isCreating = isCreating;
+        // Si es una nueva declaración, desactivamos el loader inmediatamente
+        if (isCreating) {
+          // this.isLoading = false;
+          this.cd.detectChanges();
+        }
+      });
+
+    // Suscripción al progreso global para controlar el loader
+    this.globalProgress$
+      .pipe(
+        takeUntil(this.destroy$)
+      )
+      .subscribe(progress => {
+        console.log("isCreating suscripcion globalProgress", this.isCreating)
+        // Solo manejamos el loader si NO es una nueva declaración
+        if (!this.isCreating) {
+
+          this.cd.detectChanges();
+        }
+      });
   }
 
   /* ───────── Ciclo de vida ───────── */
   ngOnInit(): void {
+    // Inicializar loader como visible
+    this.isLoading = true;
+    this.cd.detectChanges();
+
+    // Suscripción al estado isCreating
+    this.state.isCreating$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(isCreating => {
+        this.isCreating = isCreating;
+        // Si es una nueva declaración, desactivamos el loader
+        if (isCreating) {
+          this.cd.detectChanges();
+        }
+      });
+
     // Inicializar con el declarante principal
     this.state.initializeWithMainDeclarante();
 
@@ -137,11 +188,20 @@ export class DipStepperComponent {
 
     this.state.state$
       .pipe(takeUntil(this.destroy$))
-      .subscribe(() => this.cd.markForCheck());
+      .subscribe(() => {
+        if (!this.isCreating) {
+          this.validateAntecedentesProgress();
+        }
+        this.cd.markForCheck();
+      });
 
     this.state.currentStepKey$
       .pipe(takeUntil(this.destroy$))
       .subscribe(key => this.syncVisualStepper(key));
+
+    setTimeout(() => {
+      this.isLoading = false
+    }, 2500)
   }
 
   ngAfterViewInit(): void {
@@ -168,7 +228,7 @@ export class DipStepperComponent {
         if (step && step.enabled) {
           this.intStepper.selectedIndex = idx;
           this.intIndex = idx;
-          
+
           const componentName = step.component;
           if (componentName && COMPONENT_MAP[componentName]) {
             this.activeComponent = COMPONENT_MAP[componentName];
@@ -185,18 +245,18 @@ export class DipStepperComponent {
       this.center(this.intContainer);
     }
   }
-  
+
 
   private resetToBlock(b: 'decl' | 'int'): void {
     this.currentBlock = b;
-  
+
     /* ①  Cambiar mat‑tab de forma imperativa */
     const tabIndex = b === 'decl' ? 0 : 1;
     if (this.tabGroup && this.tabGroup.selectedIndex !== tabIndex) {
       this.tabGroup.selectedIndex = tabIndex;
       this.selectedTabIndex = tabIndex;
     }
-  
+
     /* ②  Reposicionar el stepper correspondiente */
     if (b === 'decl') {
       if (this.declSteps && this.declSteps.length > 0) {
@@ -220,40 +280,53 @@ export class DipStepperComponent {
   }
 
   /* ───────── Cambio de pestaña (mat‑tab) ───────── */
-  onTabChange(ev: MatTabChangeEvent): void {
-    this.selectedTabIndex = ev.index;
+  onTabChange(event: any): void {
+    const ev = event as MatTabChangeEvent;
 
-    switch (ev.index) {
-      case 0:  // Antecedentes
-        this.state.setActiveBlock('decl');
-        if (this.declSteps && this.declSteps.length > 0) {
-          this.declStepper.selectedIndex = 0;
-          this.handleDeclChange({ selectedIndex: 0 } as StepperSelectionEvent);
-        }
-        break;
 
-      case 1:  // Intereses
-        this.state.setActiveBlock('int');
-        this.intIndex = -1;
-        setTimeout(() => {
-          if (this.intSteps && this.intSteps.length > 0) {
-            const firstEnabledStep = this.intSteps.findIndex(step => step.enabled);
-            if (firstEnabledStep >= 0) {
-              this.intStepper.selectedIndex = firstEnabledStep;
-              this.intIndex = firstEnabledStep;
-              const step = this.intSteps[firstEnabledStep];
-              const componentName = step.component;
-              if (componentName && COMPONENT_MAP[componentName]) {
-                this.activeComponent = COMPONENT_MAP[componentName];
-              }
+    // Bloquear cambio de tab si está creando y no están completos los antecedentes
+    if (this.isCreating && event > 0) {
+      if (!this.areAntecedentesComplete()) {
+        // Revertir al tab anterior
+        this.tabGroup.selectedIndex = this.selectedTabIndex;
+        return;
+      }
+    }
+
+    this.selectedTabIndex = event;
+    if (event === 0) {
+      this.currentBlock = 'decl';
+      this.state.setActiveBlock('decl');
+      setTimeout(() => this.loadDeclStep(this.declIndex));
+    } else if (event === 1) {
+      this.currentBlock = 'int';
+      this.state.setActiveBlock('int');
+
+      // Verificar si hay un declarante activo
+      this.state.activeId$.pipe(take(1)).subscribe(activeId => {
+        if (!activeId) {
+          this._auth.currentUser$.pipe(take(1)).subscribe(user => {
+            console.log(user)
+
+          })
+          // Si no hay declarante activo, buscar el declarante principal
+          this.state.declaraciones$.pipe(take(1)).subscribe(declaraciones => {
+            const mainDeclarante = declaraciones.find(d => d.esDeclarante);
+            if (mainDeclarante) {
+              // Establecer el declarante principal como activo
+              this.state.setActiveDeclaracion(mainDeclarante.id);
+              this.state.setActiveDeclarante(mainDeclarante.id);
             }
-          }
-        });
-        break;
+          });
+        }
+      });
 
-      default: // Confirmación
-        this.activeComponent = null;
-        this.declIndex = this.intIndex = -1;
+      setTimeout(() => {
+        if (this.intIndex === -1) {
+          this.intIndex = 0;
+        }
+        this.loadIntStep(this.intIndex);
+      });
     }
   }
 
@@ -268,7 +341,7 @@ export class DipStepperComponent {
     this.dialog.open(this.declaracionModal, { width: '850px' });
   }
 
-  openDeclarantesModal(): void { 
+  openDeclarantesModal(): void {
     this.dialog.open(this.declaracionModal, {
       width: '850px',
       disableClose: true
@@ -280,16 +353,16 @@ export class DipStepperComponent {
     // Actualizar tanto la declaración como el declarante activo
     this.state.setActiveDeclaracion(id);
     this.state.setActiveDeclarante(id);
-    
+
     // Cerrar el modal
     this.dialog.closeAll();
-    
+
     // Solo actualizamos el stepper de intereses
     this.state.setActiveBlock('int');
-    
+
     // Resetear el índice para forzar la carga del primer paso
     this.intIndex = -1;
-    
+
     // Esperar a que los pasos estén disponibles
     setTimeout(() => {
       if (this.intSteps && this.intSteps.length > 0) {
@@ -324,6 +397,10 @@ export class DipStepperComponent {
     const key = this.declSteps[this.declIndex].key;
     this.activeComponent = COMPONENT_MAP[this.declSteps[this.declIndex].component!];
     this.state.setCurrentStep(key);
+    
+    // Actualizar el estado de los pasos
+    this.validateAntecedentesProgress();
+    
     this.intStepper.selectedIndex = -1;
     this.intIndex = -1;
   }
@@ -338,12 +415,12 @@ export class DipStepperComponent {
     // Obtener el paso actual y el paso objetivo
     const currentStep = this.intSteps[this.intIndex];
     const targetStep = this.intSteps[ev.selectedIndex];
-    
+
     // Verificar si el paso existe y está habilitado
     if (targetStep && targetStep.enabled) {
       // Actualizar el índice
       this.intIndex = ev.selectedIndex;
-      
+
       // Actualizar el componente activo
       const componentName = targetStep.component;
       if (componentName && COMPONENT_MAP[componentName]) {
@@ -385,9 +462,9 @@ export class DipStepperComponent {
       .forEach((hdr, idx) => {
         hdr.style.cursor = 'pointer';
         hdr.addEventListener('click', () => {
-          if (this.declIndex === idx) { 
-            this.loadDeclStep(idx); 
-          } else { 
+          if (this.declIndex === idx) {
+            this.loadDeclStep(idx);
+          } else {
             this.declStepper.selectedIndex = idx;
             this.handleDeclChange({ selectedIndex: idx } as StepperSelectionEvent);
           }
@@ -402,9 +479,9 @@ export class DipStepperComponent {
         hdr.addEventListener('click', () => {
           const step = this.intSteps[idx];
           if (step && step.enabled) {
-            if (this.intIndex === idx) { 
-              this.loadIntStep(idx); 
-            } else { 
+            if (this.intIndex === idx) {
+              this.loadIntStep(idx);
+            } else {
               this.intStepper.selectedIndex = idx;
               this.handleIntChange({ selectedIndex: idx } as StepperSelectionEvent);
             }
@@ -425,5 +502,52 @@ export class DipStepperComponent {
 
     host.querySelector<HTMLElement>('.mat-step-header.mat-active')
       ?.scrollIntoView({ inline: 'center', behavior: 'smooth' });
+  }
+
+  areAntecedentesComplete(): boolean {
+    return this.state.isComplete('paso1') &&
+      this.state.isComplete('paso2') &&
+      this.state.isComplete('paso3') &&
+      this.state.isComplete('paso4');
+  }
+
+  private validateAntecedentesProgress(): void {
+    // Solo actualizamos isCreating si estamos en modo creación
+    // if (this.state.declaracionId === 0) {
+      // Verificamos cada paso individualmente
+      const paso1Completo = this.state.isComplete('paso1');
+      const paso2Completo = this.state.isComplete('paso2');
+      const paso3Completo = this.state.isComplete('paso3');
+      const paso4Completo = this.state.isComplete('paso4');
+
+      // Actualizamos el estado de cada paso en el stepper
+      this.declSteps.forEach(step => {
+        switch(step.key) {
+          case 'paso1':
+            step.status = paso1Completo ? 'completed' : 'incomplete';
+            break;
+          case 'paso2':
+            step.status = paso2Completo ? 'completed' : 'incomplete';
+            break;
+          case 'paso3':
+            step.status = paso3Completo ? 'completed' : 'incomplete';
+            break;
+          case 'paso4':
+            step.status = paso4Completo ? 'completed' : 'incomplete';
+            break;
+          default:
+            step.status = 'pending';
+        }
+      });
+
+      // Solo marcamos como no-creando si todos los pasos están completos
+      if (paso1Completo && paso2Completo && paso3Completo && paso4Completo) {
+        this.state.setIsCreating(false);
+        this.isCreating = false;
+      } else {
+        this.state.setIsCreating(true);
+        this.isCreating = true;
+      }
+    // }
   }
 }

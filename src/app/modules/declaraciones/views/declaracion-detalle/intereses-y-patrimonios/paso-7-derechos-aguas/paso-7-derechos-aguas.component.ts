@@ -126,8 +126,12 @@ export class Paso7DerechosAguasComponent implements OnInit, AfterViewInit {
 
   loadRegistro() {
     this._declaracionHelper.declaracionesFlag$.subscribe(data => {
-      this.tieneDerechosAguas = data.aguas ? 'si' : 'no';
-      this.tieneConcesiones = data.concesiones ? 'si' : 'no';
+      if(data.aguas != undefined) {
+        this.tieneDerechosAguas = data.aguas ? 'si' : 'no';
+      }
+      if(data.concesiones != undefined) {
+        this.tieneConcesiones = data.concesiones ? 'si' : 'no';
+      }
     });
   }
 
