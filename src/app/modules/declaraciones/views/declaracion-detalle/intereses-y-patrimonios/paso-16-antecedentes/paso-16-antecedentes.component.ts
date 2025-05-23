@@ -40,6 +40,7 @@ export class Paso16AntecedentesComponent implements OnInit {
   displayedColumns = ['antecedente','estado', 'acciones'];
 
   tieneAntecedentes = '';
+  tieneAntecedentes = '';
   antecedentes: Antecedente[] = [];
   antecedentesForm!: FormGroup;
   editMode = false;
@@ -64,6 +65,7 @@ export class Paso16AntecedentesComponent implements OnInit {
   ngOnInit(): void {
     this.buildForm();
     this._declaracionHelper.activeId$.subscribe(id => this.activeDeclId = id);
+    // this._declaracionHelper.markStepIncomplete(['declaraciones', this.activeDeclId, this.key]);
     // this._declaracionHelper.markStepIncomplete(['declaraciones', this.activeDeclId, this.key]);
 
     this.loadOtrosAntecedentes();

@@ -362,6 +362,7 @@ private getTemplate(tipo:number):TemplateRef<any>{
       },
       error: (err: any) => {
         console.error('Error al guardar registro:', err);
+        this.toastr.error('Error al guardar registro');
       }
     });
   }
@@ -386,6 +387,7 @@ private getTemplate(tipo:number):TemplateRef<any>{
       },
       error: (err: any) => {
         console.error('Error al guardar registro:', err);
+        this.toastr.error('Error al guardar registro');
       }
     });
   }
@@ -410,6 +412,7 @@ private getTemplate(tipo:number):TemplateRef<any>{
       },
       error: (err: any) => {
         console.error('Error al guardar registro:', err);
+        this.toastr.error('Error al guardar registro');
       }
     });
   }
@@ -434,6 +437,7 @@ private getTemplate(tipo:number):TemplateRef<any>{
       },
       error: (err: any) => {
         console.error('Error al guardar registro:', err);
+        this.toastr.error('Error al guardar registro');
       }
     });
   }

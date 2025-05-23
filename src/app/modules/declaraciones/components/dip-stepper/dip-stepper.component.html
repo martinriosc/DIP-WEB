@@ -15,9 +15,30 @@
     </mat-progress-bar>
   </div>
 
+  <!-- Loader -->
+  <div *ngIf="isLoading$ | async" class="loading-spinner-container">
+    <div class="spinner-content">
+      <mat-spinner diameter="50"></mat-spinner>
+      <p class="loading-text">Cargando progreso...</p>
+    </div>
+  </div>
+
+  <!-- Progress bar global -->
+  <div class="progress-container" [class.hidden]="isLoading$ | async">
+    <mat-progress-bar 
+      mode="determinate" 
+      [value]="(globalProgress$ | async)! * 100">
+    </mat-progress-bar>
+  </div>
+
   <div class="row">
     <div class="col">
       <div class="dual-container">
+        <mat-tab-group 
+          [selectedIndex]="selectedTabIndex$ | async" 
+          (selectedIndexChange)="onTabChange($event)"
+          [disableRipple]="true">
+          
         <mat-tab-group 
           [selectedIndex]="selectedTabIndex$ | async" 
           (selectedIndexChange)="onTabChange($event)"
@@ -29,6 +50,7 @@
               <div class="step-info row g-2 p-3 pb-4 align-items-center bg-white"
                 style="border: 1px solid #004084a1; border-radius: 2px 2px 0px 0px">
                 <span class="progress-bar-dip col-12 col-md-2">
+                  Paso {{ (declIndex$ | async)! + 1 }} de {{ (declSteps$ | async)?.length || 0 }}
                   Paso {{ (declIndex$ | async)! + 1 }} de {{ (declSteps$ | async)?.length || 0 }}
                   ({{ ((declProgress$ | async) ?? 0) * 100 | number:'1.0-0' }}%)
                 </span>
@@ -43,11 +65,13 @@
               <div cdkScrollable #declContainer class="stepper-wrapper stepper-decl">
                 <mat-horizontal-stepper #declStepper class="custom-stepper header-only" [disableRipple]="true"
                   [selectedIndex]="declIndex$ | async" (selectionChange)="handleDeclChange($event)"
+                  [selectedIndex]="declIndex$ | async" (selectionChange)="handleDeclChange($event)"
                   (animationDone)="center(declContainer)">
 
                   <ng-template matStepperIcon="edit">
                     <mat-icon class="step-icon done">check_circle</mat-icon>
                   </ng-template>
+                  
                   
                   <ng-template matStepperIcon="error">
                     <mat-icon class="step-icon warning">warning</mat-icon>
@@ -58,9 +82,11 @@
                   </ng-template>
 
                   <ng-container *ngFor="let s of declSteps$ | async; let i = index">
+                  <ng-container *ngFor="let s of declSteps$ | async; let i = index">
                     <mat-step [completed]="s.status === 'completed'" [hasError]="s.status === 'incomplete'"
                       style="padding:0">
                       <ng-template matStepLabel>
+                        <span [ngClass]="{ 'active-step' : i === (declIndex$ | async) }">
                         <span [ngClass]="{ 'active-step' : i === (declIndex$ | async) }">
                           {{ s.label }}
                         </span>
@@ -95,6 +121,7 @@
                     style="border-top: 1px solid #ff5d17d3;">
                     <!-- Texto "Paso …" -->
                     <span class="progress-bar-dip m-0 col-12 col-md-2">
+                      Paso {{ (intIndex$ | async)! + 1 }} de {{ (intSteps$ | async)?.length || 0 }}
                       Paso {{ (intIndex$ | async)! + 1 }} de {{ (intSteps$ | async)?.length || 0 }}
                       ({{ ((intProgress$ | async) ?? 0) * 100 | number:'1.0-0' }}%)
                     </span>
@@ -209,6 +236,9 @@
           <mat-tab 
             label="Confirmación de Datos"
             [disabled]="(isCreating$ | async) && !areAntecedentesComplete()">
+          <mat-tab 
+            label="Confirmación de Datos"
+            [disabled]="(isCreating$ | async) && !areAntecedentesComplete()">
             <app-confirmacion-datos></app-confirmacion-datos>
           </mat-tab>
         </mat-tab-group>
@@ -219,6 +249,7 @@
   <div class="row" *ngIf="(selectedTabIndex$ | async) !== 3">
     <div class="col">
       <div class="step-content">
+        <ng-container *ngIf="activeComponent$ | async as cmp">
         <ng-container *ngIf="activeComponent$ | async as cmp">
           <ng-container *ngComponentOutlet="cmp"></ng-container>
         </ng-container>

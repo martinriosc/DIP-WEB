@@ -363,14 +363,27 @@ export class Paso6BienesInmueblesComponent implements OnInit, AfterViewInit {
       this.tieneChile = 'si';
       return;
     }
+    if (value === 'no' && this.bienesChile.length > 0) {
+      Swal.fire({
+        title: 'No se puede cambiar',
+        text: 'Debe eliminar todos los registros antes de cambiar a "No Tiene"',
+        icon: 'warning',
+        confirmButtonText: 'Aceptar'
+      });
+      this.tieneChile = 'si';
+      return;
+    }
     this.tieneChile = value;
+    const path = ['declaraciones', this.activeDeclId, 'paso6'];
     const path = ['declaraciones', this.activeDeclId, 'paso6'];
     this._declaracion.guardarRegistro(this.declaranteId, 'bienesInmuebles', value === 'si').subscribe({
       next: (res: any) => {
         console.log('Registro guardado exitosamente');
+        console.log('Registro guardado exitosamente');
       },
       error: (err: any) => {
         console.error('Error al guardar registro:', err);
+        this.toastr.error('Error al guardar registro');
         this.toastr.error('Error al guardar registro');
       }
     });
@@ -481,14 +494,27 @@ export class Paso6BienesInmueblesComponent implements OnInit, AfterViewInit {
       this.tieneExtranjero = 'si';
       return;
     }
+    if (value === 'no' && this.bienesExtranjero.length > 0) {
+      Swal.fire({
+        title: 'No se puede cambiar',
+        text: 'Debe eliminar todos los registros antes de cambiar a "No Tiene"',
+        icon: 'warning',
+        confirmButtonText: 'Aceptar'
+      });
+      this.tieneExtranjero = 'si';
+      return;
+    }
     this.tieneExtranjero = value;
+    const path = ['declaraciones', this.activeDeclId, 'paso6'];
     const path = ['declaraciones', this.activeDeclId, 'paso6'];
     this._declaracion.guardarRegistro(this.declaranteId, 'bienesInmueblesExtranjero', value === 'si').subscribe({
       next: (res: any) => {
         console.log('Registro guardado exitosamente');
+        console.log('Registro guardado exitosamente');
       },
       error: (err: any) => {
         console.error('Error al guardar registro:', err);
+        this.toastr.error('Error al guardar registro');
         this.toastr.error('Error al guardar registro');
       }
     });
