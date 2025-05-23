@@ -39,7 +39,7 @@ export class Paso16AntecedentesComponent implements OnInit {
 
   displayedColumns = ['antecedente','estado', 'acciones'];
 
-  tieneAntecedentes = 'no';
+  tieneAntecedentes = '';
   antecedentes: Antecedente[] = [];
   antecedentesForm!: FormGroup;
   editMode = false;
@@ -64,7 +64,7 @@ export class Paso16AntecedentesComponent implements OnInit {
   ngOnInit(): void {
     this.buildForm();
     this._declaracionHelper.activeId$.subscribe(id => this.activeDeclId = id);
-    this._declaracionHelper.markStepIncomplete(['declaraciones', this.activeDeclId, this.key]);
+    // this._declaracionHelper.markStepIncomplete(['declaraciones', this.activeDeclId, this.key]);
 
     this.loadOtrosAntecedentes();
     this.loadRegistro();
@@ -72,7 +72,10 @@ export class Paso16AntecedentesComponent implements OnInit {
 
   loadRegistro() {
     this._declaracionHelper.declaracionesFlag$.subscribe(data => {
-      this.tieneAntecedentes = data.otrosAntecedentes ? 'si' : 'no';
+      console.log("data", data.otrosAntecedentes)
+      if(data.otrosAntecedentes != undefined) {
+        this.tieneAntecedentes = data.otrosAntecedentes ? 'si' : 'no';
+      }
     });
   }
 
@@ -88,11 +91,21 @@ export class Paso16AntecedentesComponent implements OnInit {
     });
   }
 
-  onTieneAntecedentesChange(value: string): void {
-    this.tieneAntecedentes = value;
-    const path = ['declaraciones', this.activeDeclId, this.key];
-
-    this._declaracion.guardarRegistro(this.declaranteId, 'otrosAntecedentes', value === 'si').subscribe({
+  onTieneAntecedentesChange(value: boolean): void {
+    console.log("value", value)
+    if (!value && this.antecedentes.length > 0) {
+      Swal.fire({
+        title: 'No se puede cambiar',
+        text: 'Debe eliminar todos los registros antes de cambiar a "No Tiene"',
+        icon: 'warning',
+        confirmButtonText: 'Aceptar'
+      });
+      this.tieneAntecedentes = 'si';
+      return;
+    }
+    this.tieneAntecedentes = value ? 'si' : 'no';
+    const path = ['declaraciones', this.activeDeclId, 'paso16'];
+    this._declaracion.guardarRegistro(this.declaranteId, 'antecedentes', value).subscribe({
       next: (res: any) => {
         console.log('Registro guardado exitosamente');
       },
@@ -101,16 +114,6 @@ export class Paso16AntecedentesComponent implements OnInit {
         this.toastr.error('Error al guardar registro');
       }
     });
-
-    if (value === 'no') {
-      this._declaracionHelper.markStepCompleted(path);
-    } else {
-      if (this.antecedentes.length > 0) {
-        this._declaracionHelper.markStepCompleted(path);
-      } else {
-        this._declaracionHelper.markStepIncomplete(path);
-      }
-    }
   }
 
   openAddModal(): void {

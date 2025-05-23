@@ -109,7 +109,7 @@ $custom-theme: mat-light-theme(
 }
 .cdk-table,            /* alias interno de mat-table              */
 .mat-table {
-  display: block; /* permite el overflow en Y        */
+  // display: block; /* permite el overflow en Y        */
   max-height: var(--tabla-altura-px);
   overflow-y: auto;
 }

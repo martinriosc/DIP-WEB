@@ -49,8 +49,8 @@ export class Paso13PasivosComponent implements OnInit {
   displayedColumnsPensiones = ['monto', 'registroNacional', 'estado', 'acciones'];
   displayedColumnsPasivos = ['tipoObligacion', 'monto', 'razonSocial', 'estado', 'acciones'];
 
-  tienePasivos = 'no';
-  tieneDeudaPension = 'no';
+  tienePasivos = '';
+  tieneDeudaPension = '';
   
   pasivoForm!: FormGroup;
   pensionForm!: FormGroup;
@@ -119,8 +119,12 @@ export class Paso13PasivosComponent implements OnInit {
   
   loadRegistro() {
     this._declaracionHelper.declaracionesFlag$.subscribe(data => {
-      this.tienePasivos = data.pasivos ? 'si' : 'no';
-      this.tieneDeudaPension = data.pensiones ? 'si' : 'no';
+      if(data.pasivos != undefined) {
+        this.tienePasivos = data.pasivos ? 'si' : 'no';
+      }
+      if(data.pensiones != undefined) {
+        this.tieneDeudaPension = data.pensiones ? 'si' : 'no';
+      }
     });
   }
 
@@ -165,6 +169,7 @@ export class Paso13PasivosComponent implements OnInit {
     this._declaracion.guardarRegistro(this.declaranteId, 'pensiones', value === 'si').subscribe({
       next: (res: any) => {
         this.toastr.success('Registro actualizado exitosamente');
+        this._declaracionHelper.validateFlagsForInteresesSteps();
       },
       error: (err: any) => {
         console.error('Error al guardar registro:', err);
@@ -174,14 +179,26 @@ export class Paso13PasivosComponent implements OnInit {
   }
 
   onTienePasivosChange(value: string): void {
+    if (value === 'no' && this.pasivoForm?.valid) {
+      Swal.fire({
+        title: 'No se puede cambiar',
+        text: 'Debe eliminar todos los registros antes de cambiar a "No Tiene"',
+        icon: 'warning',
+        confirmButtonText: 'Aceptar'
+      });
+      this.tienePasivos = 'si';
+      return;
+    }
     this.tienePasivos = value;
+    const path = ['declaraciones', this.activeDeclId, 'paso13'];
     this._declaracion.guardarRegistro(this.declaranteId, 'pasivos', value === 'si').subscribe({
       next: (res: any) => {
-        this.toastr.success('Registro actualizado exitosamente');
+        console.log('Registro guardado exitosamente');
+        this._declaracionHelper.validateFlagsForInteresesSteps();
       },
       error: (err: any) => {
         console.error('Error al guardar registro:', err);
-        this.toastr.error('Error al actualizar el registro');
+        this.toastr.error('Error al guardar registro');
       }
     });
   }
@@ -233,35 +250,39 @@ export class Paso13PasivosComponent implements OnInit {
   }
 
   savePasivo(): void {
-    if (this.pasivoForm.invalid) {
-      this.toastr.error('Por favor complete todos los campos requeridos');
+    if (!this.pasivoForm.valid) {
+      this.toastr.error('Por favor complete todos los campos obligatorios.');
       return;
     }
 
     const data = this.pasivoForm.value;
     const obj = {
       id: this.editPasivoMode ? data.id : '',
+      tipoId: data.tipoId,
+      monto: data.monto,
       razonSocial: data.razonSocial,
-      rut: data.rut,
-      fechaCelebracion: data.fechaCelebracion,
-      notaria: data.notaria,
-      valor: data.valor,
       borrador: !this.isFormValid(this.pasivoForm)
-    }
+    };
+
     this._pasivos.guardarPasivo(this.declaranteId, obj).subscribe({
       next: (res: any) => {
         this.toastr.success('Pasivo guardado exitosamente');
         this.closeDialog();
-        this.loadDeudasMayor100UTM();
+        this.loadDeudas();
+        this._declaracionHelper.validateFlagsForInteresesSteps();
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('Error al guardar pasivo:', err);
-        this.toastr.error('Error al guardar el pasivo');
+        this.toastr.error('Error al guardar pasivo');
       }
     });
   }
 
   savePension(): void {
+    if (!this.pensionForm.valid) {
+      this.toastr.error('Por favor complete todos los campos obligatorios.');
+      return;
+    }
 
     const data = this.pensionForm.value;
     const obj = {
@@ -269,40 +290,41 @@ export class Paso13PasivosComponent implements OnInit {
       monto: data.monto,
       registroNacional: data.registroNacional,
       borrador: !this.isFormValid(this.pensionForm)
-    }
+    };
+
     this._pensiones.guardar(obj, this.declaranteId).subscribe({
       next: (res: any) => {
         this.toastr.success('Pensión guardada exitosamente');
         this.closeDialog();
-        this.loadDeudas();
+        this.loadDeudasMayor100UTM();
+        this._declaracionHelper.validateFlagsForInteresesSteps();
       },
-      error: (err) => {
+      error: (err: any) => {
         console.error('Error al guardar pensión:', err);
-        this.toastr.error('Error al guardar la pensión');
+        this.toastr.error('Error al guardar pensión');
       }
     });
   }
 
   eliminarPasivo(item: PasivoItem): void {
     if (!item.id) return;
-
+    
     Swal.fire({
-      title: '¿Estás seguro?',
-      text: 'Esta acción eliminará el pasivo seleccionado.',
+      title: '¿Está seguro?',
+      text: 'Esta acción no se puede deshacer',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
       confirmButtonText: 'Sí, eliminar',
       cancelButtonText: 'Cancelar'
-    }).then((result) => {
+    }).then(result => {
       if (result.isConfirmed) {
         this._pasivos.eliminar(Number(item.id)).subscribe({
           next: (res: any) => {
             this.toastr.success('Pasivo eliminado exitosamente');
-            this.loadDeudasMayor100UTM();
+            this.loadDeudas();
+            this._declaracionHelper.validateFlagsForInteresesSteps();
           },
-          error: (err) => {
+          error: (err: any) => {
             console.error('Error al eliminar pasivo:', err);
             this.toastr.error('Error al eliminar el pasivo');
           }
@@ -313,24 +335,23 @@ export class Paso13PasivosComponent implements OnInit {
 
   eliminarPension(item: PensionItem): void {
     if (!item.id) return;
-
+    
     Swal.fire({
-      title: '¿Estás seguro?',
-      text: 'Esta acción eliminará la pensión seleccionada.',
+      title: '¿Está seguro?',
+      text: 'Esta acción no se puede deshacer',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
       confirmButtonText: 'Sí, eliminar',
       cancelButtonText: 'Cancelar'
-    }).then((result) => {
+    }).then(result => {
       if (result.isConfirmed) {
         this._pensiones.eliminar(Number(item.id)).subscribe({
           next: (res: any) => {
             this.toastr.success('Pensión eliminada exitosamente');
-            this.loadDeudas();
+            this.loadDeudasMayor100UTM();
+            this._declaracionHelper.validateFlagsForInteresesSteps();
           },
-          error: (err) => {
+          error: (err: any) => {
             console.error('Error al eliminar pensión:', err);
             this.toastr.error('Error al eliminar la pensión');
           }
@@ -343,10 +364,11 @@ export class Paso13PasivosComponent implements OnInit {
     this._declaracion.guardarRegistroPasivo(this.declaranteId, 'pasivosGlobal', value).subscribe({
       next: (res: any) => {
         this.toastr.success('Monto global guardado exitosamente');
+        this._declaracionHelper.validateFlagsForInteresesSteps();
       },
       error: (err: any) => {
         console.error('Error al guardar monto global:', err);
-        this.toastr.error('Error al guardar el monto global');
+        this.toastr.error('Error al guardar monto global');
       }
     });
   }

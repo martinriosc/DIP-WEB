@@ -216,7 +216,7 @@
       </div>
 
       <mat-card-actions class="acciones justify-content-end mt-3">
-        <button mat-raised-button color="primary" type="submit" (click)="onSubmit()">
+        <button mat-raised-button color="primary" type="submit" (click)="onSubmit()" [disabled]="!datosPersonalesForm.valid">
           Guardar/Siguiente
         </button>
       </mat-card-actions>

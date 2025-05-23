@@ -47,7 +47,7 @@ export class DeclaracionListComponent implements AfterViewInit, OnInit {
 
   dataSource = new MatTableDataSource<Declaracion>([]);
   totalItems: number = 0;
-  pageSize: number = 1;
+  pageSize: number = 10;
   currentPage: number = 0;
 
   displayedColumns: string[] = [
@@ -80,7 +80,9 @@ export class DeclaracionListComponent implements AfterViewInit, OnInit {
     private _auth: AuthService,
     private _declaracionHelper: DeclaracionHelperService,
     private _toastr: ToastrService
-  ) { }
+  ) {
+    this._declaracionHelper.resetState();
+   }
 
   ngOnInit(): void {
     this.cargarFiltros();
@@ -194,6 +196,7 @@ export class DeclaracionListComponent implements AfterViewInit, OnInit {
     this._declaracion.validarNuevaDeclaracion().subscribe({
       next: (res: any) => {
         if (!res.data) {
+          this._declaracionHelper.setIsCreating(true);
           this._declaracionHelper.setDeclaracionId(0);
           this._declaracionHelper.setDeclaranteId(this._auth.currentUser?.idDeclarante ?? 0);
           this.dialog.closeAll();
@@ -229,6 +232,8 @@ export class DeclaracionListComponent implements AfterViewInit, OnInit {
   }
 
   editar(element: Declaracion) {
+
+    this._declaracionHelper.setIsCreating(false);
     const declaracionId = Number(element.id);
     this._declaracionHelper.setDeclaracionId(declaracionId);
 

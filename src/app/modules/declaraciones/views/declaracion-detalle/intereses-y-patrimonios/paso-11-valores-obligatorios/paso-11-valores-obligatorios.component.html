@@ -33,49 +33,49 @@
         <table mat-table [dataSource]="cuentasLibretas" class="w-100 mat-elevation-z8">
       
           <!-- Tipo Documento -->
-          <ng-container matColumnDef="tipoInstrumento" appResizableColumn>
+          <ng-container matColumnDef="tipoInstrumento" >
             <th mat-header-cell *matHeaderCellDef>Tipo de Instrumento</th>
             <td mat-cell *matCellDef="let vo">{{ vo.tipoInstrumento }}</td>
           </ng-container>
   
           <!-- N° Documento -->
-          <ng-container matColumnDef="razonSocial" appResizableColumn>
+          <ng-container matColumnDef="razonSocial" >
             <th mat-header-cell *matHeaderCellDef>Nombre o Razón Social</th>
             <td mat-cell *matCellDef="let vo">{{ vo.razonSocial }}</td>
           </ng-container>
 
           <!-- Pais -->
-          <ng-container matColumnDef="pais" appResizableColumn>
+          <ng-container matColumnDef="pais" >
             <th mat-header-cell *matHeaderCellDef>País</th>
             <td mat-cell *matCellDef="let vo">{{ vo.pais }}</td>
           </ng-container>
 
           <!-- Fecha Adquisicion -->
-          <ng-container matColumnDef="fecha" appResizableColumn>
+          <ng-container matColumnDef="fecha" >
             <th mat-header-cell *matHeaderCellDef>Fecha de Adquisición</th>
             <td mat-cell *matCellDef="let vo">{{ vo.fecha | date: 'dd/MM/yyyy' }}</td>
           </ng-container>
   
           <!-- Valor -->
-          <ng-container matColumnDef="monto" appResizableColumn>
+          <ng-container matColumnDef="monto" >
             <th mat-header-cell *matHeaderCellDef>Monto</th>
             <td mat-cell *matCellDef="let vo">{{ vo.monto }}</td>
           </ng-container>
   
           <!-- Moneda -->
-          <ng-container matColumnDef="tipoMoneda" appResizableColumn>
+          <ng-container matColumnDef="tipoMoneda" >
             <th mat-header-cell *matHeaderCellDef>Moneda</th>
             <td mat-cell *matCellDef="let vo">{{ vo.moneda }}</td>
           </ng-container>
 
           <!-- Gravamen -->
-          <ng-container matColumnDef="gravamen" appResizableColumn>
+          <ng-container matColumnDef="gravamen" >
             <th mat-header-cell *matHeaderCellDef>Gravámen</th>
             <td mat-cell *matCellDef="let vo">{{ vo.gravamen }}</td>
           </ng-container>
   
           <!-- Estado -->
-          <ng-container matColumnDef="estado" appResizableColumn>
+          <ng-container matColumnDef="estado" >
             <th mat-header-cell *matHeaderCellDef>Estado</th>
             <td mat-cell *matCellDef="let vo">{{ !vo.borrador ? 'COMPLETO' : 'INCOMPLETO' }}</td>
           </ng-container>
@@ -103,7 +103,7 @@
       <div class="row mb-3 align-items-center">
         <div class="col-md-4 fw-bold etiqueta">Ahorro Previsional Voluntario </div>
         <div class="col-md-7 text-end">
-          <mat-radio-group [(ngModel)]="tieneAhorrosPrevisionales" name="ahorroRadio" (change)="onTieneAhorrosChange($event.value)">
+          <mat-radio-group [(ngModel)]="tieneAhorrosPrevisionales" name="ahorroRadio" (change)="onTieneAhorrosPrevisionalesChange($event.value)">
             <mat-radio-button value="si" class="me-4">Tiene</mat-radio-button>
             <mat-radio-button value="no">No Tiene</mat-radio-button>
           </mat-radio-group>
@@ -122,49 +122,49 @@
         <table mat-table [dataSource]="ahorrosPrevisionales" class="w-100 mat-elevation-z8">
       
           <!-- Tipo Documento -->
-          <ng-container matColumnDef="tipoInstrumento" appResizableColumn>
+          <ng-container matColumnDef="tipoInstrumento" >
             <th mat-header-cell *matHeaderCellDef>Tipo de Instrumento</th>
             <td mat-cell *matCellDef="let vo">{{ vo.tipoInstrumento }}</td>
           </ng-container>
   
           <!-- N° Documento -->
-          <ng-container matColumnDef="razonSocial" appResizableColumn>
+          <ng-container matColumnDef="razonSocial" >
             <th mat-header-cell *matHeaderCellDef>Nombre o Razón Social</th>
             <td mat-cell *matCellDef="let vo">{{ vo.razonSocial }}</td>
           </ng-container>
 
           <!-- Pais -->
-          <ng-container matColumnDef="pais" appResizableColumn>
+          <ng-container matColumnDef="pais" >
             <th mat-header-cell *matHeaderCellDef>País</th>
             <td mat-cell *matCellDef="let vo">{{ vo.pais }}</td>
           </ng-container>
 
           <!-- Fecha Adquisicion -->
-          <ng-container matColumnDef="fecha" appResizableColumn>
+          <ng-container matColumnDef="fecha" >
             <th mat-header-cell *matHeaderCellDef>Fecha de Inicio</th>
             <td mat-cell *matCellDef="let vo">{{ vo.fecha | date: 'dd/MM/yyyy' }}</td>
           </ng-container>
   
           <!-- Valor -->
-          <ng-container matColumnDef="monto" appResizableColumn>
+          <ng-container matColumnDef="monto" >
             <th mat-header-cell *matHeaderCellDef>Monto</th>
             <td mat-cell *matCellDef="let vo">{{ vo.monto }}</td>
           </ng-container>
   
           <!-- Moneda -->
-          <ng-container matColumnDef="tipoMoneda" appResizableColumn>
+          <ng-container matColumnDef="tipoMoneda" >
             <th mat-header-cell *matHeaderCellDef>Moneda</th>
             <td mat-cell *matCellDef="let vo">{{ vo.moneda }}</td>
           </ng-container>
 
           <!-- Gravamen -->
-          <ng-container matColumnDef="gravamen" appResizableColumn>
+          <ng-container matColumnDef="gravamen" >
             <th mat-header-cell *matHeaderCellDef>Gravámen</th>
             <td mat-cell *matCellDef="let vo">{{ vo.gravamen }}</td>
           </ng-container>
   
           <!-- Estado -->
-          <ng-container matColumnDef="estado" appResizableColumn>
+          <ng-container matColumnDef="estado" >
             <th mat-header-cell *matHeaderCellDef>Estado</th>
             <td mat-cell *matCellDef="let vo">{{ !vo.borrador ? 'COMPLETO' : 'INCOMPLETO' }}</td>
           </ng-container>
@@ -211,49 +211,49 @@
         <table mat-table [dataSource]="depositosPlazo" class="w-100 mat-elevation-z8">
       
           <!-- Tipo Documento -->
-          <ng-container matColumnDef="tipoInstrumento" appResizableColumn>
+          <ng-container matColumnDef="tipoInstrumento" >
             <th mat-header-cell *matHeaderCellDef>Tipo de Instrumento</th>
             <td mat-cell *matCellDef="let vo">{{ vo.tipoInstrumento }}</td>
           </ng-container>
   
           <!-- N° Documento -->
-          <ng-container matColumnDef="razonSocial" appResizableColumn>
+          <ng-container matColumnDef="razonSocial" >
             <th mat-header-cell *matHeaderCellDef>Nombre o Razón Social</th>
             <td mat-cell *matCellDef="let vo">{{ vo.razonSocial }}</td>
           </ng-container>
 
           <!-- Pais -->
-          <ng-container matColumnDef="pais" appResizableColumn>
+          <ng-container matColumnDef="pais" >
             <th mat-header-cell *matHeaderCellDef>País</th>
             <td mat-cell *matCellDef="let vo">{{ vo.pais }}</td>
           </ng-container>
 
           <!-- Fecha Adquisicion -->
-          <ng-container matColumnDef="fecha" appResizableColumn>
+          <ng-container matColumnDef="fecha" >
             <th mat-header-cell *matHeaderCellDef>Fecha de Contratación</th>
             <td mat-cell *matCellDef="let vo">{{ vo.fecha | date: 'dd/MM/yyyy' }}</td>
           </ng-container>
   
           <!-- Valor -->
-          <ng-container matColumnDef="monto" appResizableColumn>
+          <ng-container matColumnDef="monto" >
             <th mat-header-cell *matHeaderCellDef>Monto</th>
             <td mat-cell *matCellDef="let vo">{{ vo.monto }}</td>
           </ng-container>
   
           <!-- Moneda -->
-          <ng-container matColumnDef="tipoMoneda" appResizableColumn>
+          <ng-container matColumnDef="tipoMoneda" >
             <th mat-header-cell *matHeaderCellDef>Moneda</th>
             <td mat-cell *matCellDef="let vo">{{ vo.moneda }}</td>
           </ng-container>
 
           <!-- Gravamen -->
-          <ng-container matColumnDef="gravamen" appResizableColumn>
+          <ng-container matColumnDef="gravamen" >
             <th mat-header-cell *matHeaderCellDef>Gravámen</th>
             <td mat-cell *matCellDef="let vo">{{ vo.gravamen }}</td>
           </ng-container>
   
           <!-- Estado -->
-          <ng-container matColumnDef="estado" appResizableColumn>
+          <ng-container matColumnDef="estado" >
             <th mat-header-cell *matHeaderCellDef>Estado</th>
             <td mat-cell *matCellDef="let vo">{{ !vo.borrador ? 'COMPLETO' : 'INCOMPLETO' }}</td>
           </ng-container>
@@ -281,7 +281,7 @@
       <div class="row mb-3 align-items-center">
         <div class="col-md-4 fw-bold etiqueta">Seguros </div>
         <div class="col-md-7 text-end">
-          <mat-radio-group [(ngModel)]="tieneSeguros" name="seguroRadio" (change)="onTieneSeguroChange($event.value)">
+          <mat-radio-group [(ngModel)]="tieneSeguros" name="seguroRadio" (change)="onTieneSegurosChange($event.value)">
             <mat-radio-button value="si" class="me-4">Tiene</mat-radio-button>
             <mat-radio-button value="no">No Tiene</mat-radio-button>
           </mat-radio-group>
@@ -300,55 +300,55 @@
         <table mat-table [dataSource]="seguros" class="w-100 mat-elevation-z8">
       
           <!-- Tipo Documento -->
-          <ng-container matColumnDef="tipoInstrumento" appResizableColumn>
+          <ng-container matColumnDef="tipoInstrumento" >
             <th mat-header-cell *matHeaderCellDef>Tipo de Instrumento</th>
             <td mat-cell *matCellDef="let vo">{{ vo.tipoDocumento }}</td>
           </ng-container>
 
           <!-- Tipo Seguro -->
-          <ng-container matColumnDef="tipoSeguro" appResizableColumn>
+          <ng-container matColumnDef="tipoSeguro" >
             <th mat-header-cell *matHeaderCellDef>Tipo de Seguro</th>
             <td mat-cell *matCellDef="let vo">{{ vo.tipoSeguro }}</td>
           </ng-container>
 
           <!-- N° Documento -->
-          <ng-container matColumnDef="razonSocial" appResizableColumn>
+          <ng-container matColumnDef="razonSocial" >
             <th mat-header-cell *matHeaderCellDef>Nombre o Razón Social</th>
             <td mat-cell *matCellDef="let vo">{{ vo.razonSocial }}</td>
           </ng-container>
 
           <!-- Pais -->
-          <ng-container matColumnDef="pais" appResizableColumn>
+          <ng-container matColumnDef="pais" >
             <th mat-header-cell *matHeaderCellDef>País</th>
             <td mat-cell *matCellDef="let vo">{{ vo.pais }}</td>
           </ng-container>
 
           <!-- Fecha Adquisicion -->
-          <ng-container matColumnDef="fecha" appResizableColumn>
+          <ng-container matColumnDef="fecha" >
             <th mat-header-cell *matHeaderCellDef>Fecha de Contratación</th>
             <td mat-cell *matCellDef="let vo">{{ vo.fecha | date: 'dd/MM/yyyy' }}</td>
           </ng-container>
   
           <!-- Valor -->
-          <ng-container matColumnDef="monto" appResizableColumn>
+          <ng-container matColumnDef="monto" >
             <th mat-header-cell *matHeaderCellDef>Valor</th>
             <td mat-cell *matCellDef="let vo">{{ vo.monto }}</td>
           </ng-container>
   
           <!-- Moneda -->
-          <ng-container matColumnDef="tipoMoneda" appResizableColumn>
+          <ng-container matColumnDef="tipoMoneda" >
             <th mat-header-cell *matHeaderCellDef>Moneda</th>
             <td mat-cell *matCellDef="let vo">{{ vo.moneda }}</td>
           </ng-container>
 
           <!-- Gravamen -->
-          <ng-container matColumnDef="gravamen" appResizableColumn>
+          <ng-container matColumnDef="gravamen" >
             <th mat-header-cell *matHeaderCellDef>Gravámen</th>
             <td mat-cell *matCellDef="let vo">{{ vo.gravamen }}</td>
           </ng-container>
   
           <!-- Estado -->
-          <ng-container matColumnDef="estado" appResizableColumn>
+          <ng-container matColumnDef="estado" >
             <th mat-header-cell *matHeaderCellDef>Estado</th>
             <td mat-cell *matCellDef="let vo">{{ !vo.borrador ? 'COMPLETO' : 'INCOMPLETO' }}</td>
           </ng-container>

@@ -74,8 +74,9 @@ interface BienExtranjero {
   styleUrls: ['./paso-6-bienes-inmuebles.component.scss']
 })
 export class Paso6BienesInmueblesComponent implements OnInit, AfterViewInit {
-  tieneChile = 'no';
-  tieneExtranjero = 'no';
+  tieneChile = '';
+  tieneExtranjero = '';
+  private activeDeclId!: string;
 
   bienesChile: any[] = [];
   displayedColumnsChile = [
@@ -143,8 +144,15 @@ export class Paso6BienesInmueblesComponent implements OnInit, AfterViewInit {
 
   loadRegistro() {
     this._declaracionHelper.declaracionesFlag$.subscribe(data => {
-      this.tieneExtranjero = data.bienesInmueblesExtranjero ? 'si' : 'no';
-      this.tieneChile = data.bienesInmuebles ? 'si' : 'no';
+      console.log("data", data)
+      console.log("data.bienesInmueblesExtranjero", data.bienesInmueblesExtranjero)
+      console.log("data.bienesInmuebles", data.bienesInmuebles)
+      if(data.bienesInmueblesExtranjero != undefined) {
+        this.tieneExtranjero = data.bienesInmueblesExtranjero ? 'si' : 'no';
+      }
+      if(data.bienesInmuebles != undefined) {
+        this.tieneChile = data.bienesInmuebles ? 'si' : 'no';
+      }
     })
   }
 
@@ -345,14 +353,25 @@ export class Paso6BienesInmueblesComponent implements OnInit, AfterViewInit {
   }
 
   onChileChange(value: string): void {
+    if (value === 'no' && this.bienesChile.length > 0) {
+      Swal.fire({
+        title: 'No se puede cambiar',
+        text: 'Debe eliminar todos los registros antes de cambiar a "No Tiene"',
+        icon: 'warning',
+        confirmButtonText: 'Aceptar'
+      });
+      this.tieneChile = 'si';
+      return;
+    }
     this.tieneChile = value;
+    const path = ['declaraciones', this.activeDeclId, 'paso6'];
     this._declaracion.guardarRegistro(this.declaranteId, 'bienesInmuebles', value === 'si').subscribe({
       next: (res: any) => {
-        this.toastr.success('Registro actualizado correctamente');
+        console.log('Registro guardado exitosamente');
       },
       error: (err: any) => {
         console.error('Error al guardar registro:', err);
-        this.toastr.error('Error al actualizar registro');
+        this.toastr.error('Error al guardar registro');
       }
     });
   }
@@ -452,14 +471,25 @@ export class Paso6BienesInmueblesComponent implements OnInit, AfterViewInit {
   }
 
   onExtranjeroChange(value: string): void {
+    if (value === 'no' && this.bienesExtranjero.length > 0) {
+      Swal.fire({
+        title: 'No se puede cambiar',
+        text: 'Debe eliminar todos los registros antes de cambiar a "No Tiene"',
+        icon: 'warning',
+        confirmButtonText: 'Aceptar'
+      });
+      this.tieneExtranjero = 'si';
+      return;
+    }
     this.tieneExtranjero = value;
+    const path = ['declaraciones', this.activeDeclId, 'paso6'];
     this._declaracion.guardarRegistro(this.declaranteId, 'bienesInmueblesExtranjero', value === 'si').subscribe({
       next: (res: any) => {
-        this.toastr.success('Registro actualizado correctamente');
+        console.log('Registro guardado exitosamente');
       },
       error: (err: any) => {
         console.error('Error al guardar registro:', err);
-        this.toastr.error('Error al actualizar registro');
+        this.toastr.error('Error al guardar registro');
       }
     });
   }

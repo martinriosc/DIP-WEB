@@ -44,55 +44,55 @@
       <table mat-table [dataSource]="vehiculosData" class="w-100 mat-elevation-z8">
 
         <!-- Tipo -->
-        <ng-container matColumnDef="tipo" appResizableColumn>
+        <ng-container matColumnDef="tipo" >
           <th mat-header-cell *matHeaderCellDef>Tipo</th>
           <td mat-cell *matCellDef="let v"> {{ v.tipoMotorizado }} </td>
         </ng-container>
 
         <!-- Marca -->
-        <ng-container matColumnDef="marca" appResizableColumn>
+        <ng-container matColumnDef="marca" >
           <th mat-header-cell *matHeaderCellDef>Marca</th>
           <td mat-cell *matCellDef="let v"> {{ v.marca }} </td>
         </ng-container>
 
         <!-- Modelo -->
-        <ng-container matColumnDef="modelo" appResizableColumn>
+        <ng-container matColumnDef="modelo" >
           <th mat-header-cell *matHeaderCellDef>Modelo</th>
           <td mat-cell *matCellDef="let v"> {{ v.modelo }} </td>
         </ng-container>
 
         <!-- Año -->
-        <ng-container matColumnDef="anio" appResizableColumn>
+        <ng-container matColumnDef="anio" >
           <th mat-header-cell *matHeaderCellDef>Año</th>
           <td mat-cell *matCellDef="let v"> {{ v.anio }} </td>
         </ng-container>
 
         <!-- Patente -->
-        <ng-container matColumnDef="patente" appResizableColumn>
+        <ng-container matColumnDef="patente" >
           <th mat-header-cell *matHeaderCellDef>Patente</th>
           <td mat-cell *matCellDef="let v"> {{ v.patente }} </td>
         </ng-container>
 
         <!-- Nro Inscripción -->
-        <ng-container matColumnDef="nroInscripcion" appResizableColumn>
+        <ng-container matColumnDef="nroInscripcion" >
           <th mat-header-cell *matHeaderCellDef>Nro Inscripción</th>
           <td mat-cell *matCellDef="let v"> {{ v.numeroInscripcion }} </td>
         </ng-container>
 
         <!-- Ano Inscripción -->
-        <ng-container matColumnDef="anoInscripcion" appResizableColumn>
+        <ng-container matColumnDef="anoInscripcion" >
           <th mat-header-cell *matHeaderCellDef>Año Inscripción</th>
           <td mat-cell *matCellDef="let v"> {{ v.anioInscripcion }} </td>
         </ng-container>
 
         <!-- Avaluo Fiscal -->
-        <ng-container matColumnDef="avaluoFiscal" appResizableColumn>
+        <ng-container matColumnDef="avaluoFiscal" >
           <th mat-header-cell *matHeaderCellDef>Avaluo Fiscal</th>
           <td mat-cell *matCellDef="let v"> {{ v.avaluoFiscal }} </td>
         </ng-container>
 
         <!-- Estado -->
-        <ng-container matColumnDef="estado" appResizableColumn>
+        <ng-container matColumnDef="estado" >
           <th mat-header-cell *matHeaderCellDef>Estado</th>
           <td mat-cell *matCellDef="let v"> {{ !v.borrador ? 'COMPLETO' : 'INCOMPLETO' }} </td>
         </ng-container>
@@ -141,61 +141,61 @@
 
       <table mat-table [dataSource]="aeronavesData" class="w-100 mat-elevation-z8">
         <!-- Tipo (avión, helicóptero, etc.) -->
-        <ng-container matColumnDef="tipo" appResizableColumn>
+        <ng-container matColumnDef="tipo" >
           <th mat-header-cell *matHeaderCellDef>Tipo</th>
           <td mat-cell *matCellDef="let a"> {{ a.tipoMotorizado }} </td>
         </ng-container>
 
         <!-- Nombre -->
-        <ng-container matColumnDef="nombre" appResizableColumn>
+        <ng-container matColumnDef="nombre" >
           <th mat-header-cell *matHeaderCellDef>Nombre</th>
           <td mat-cell *matCellDef="let a"> {{ a.nombre }} </td>
         </ng-container>
 
         <!-- Matricula -->
-        <ng-container matColumnDef="matricula" appResizableColumn>
+        <ng-container matColumnDef="matricula" >
           <th mat-header-cell *matHeaderCellDef>Matricula</th>
           <td mat-cell *matCellDef="let a"> {{ a.matricula }} </td>
         </ng-container>
 
         <!-- Marca -->
-        <ng-container matColumnDef="marca" appResizableColumn>
+        <ng-container matColumnDef="marca" >
           <th mat-header-cell *matHeaderCellDef>Marca</th>
           <td mat-cell *matCellDef="let a"> {{ a.marca }} </td>
         </ng-container>
 
         <!-- Modelo -->
-        <ng-container matColumnDef="modelo" appResizableColumn>
+        <ng-container matColumnDef="modelo" >
           <th mat-header-cell *matHeaderCellDef>Modelo</th>
           <td mat-cell *matCellDef="let a"> {{ a.modelo }} </td>
         </ng-container>
 
         <!-- Año de Fabricacion -->
-        <ng-container matColumnDef="anoFabricacion" appResizableColumn>
+        <ng-container matColumnDef="anoFabricacion" >
           <th mat-header-cell *matHeaderCellDef>Año de Fabricacion</th>
           <td mat-cell *matCellDef="let a"> {{ a.anioFabricacion }} </td>
         </ng-container>
 
         <!-- Nro Inscripcion -->        
-        <ng-container matColumnDef="nroInscripcion" appResizableColumn>
+        <ng-container matColumnDef="nroInscripcion" >
           <th mat-header-cell *matHeaderCellDef>Nro Inscripción</th>
           <td mat-cell *matCellDef="let a"> {{ a.numeroInscripcion }} </td>
         </ng-container>
 
         <!-- Tasacion -->        
-        <ng-container matColumnDef="tasacion" appResizableColumn>
+        <ng-container matColumnDef="tasacion" >
           <th mat-header-cell *matHeaderCellDef>Tasación</th>
           <td mat-cell *matCellDef="let a"> {{ a.tasacion }} </td>
         </ng-container>
 
         <!-- Gravamenes -->        
-        <ng-container matColumnDef="gravamenes" appResizableColumn>
+        <ng-container matColumnDef="gravamenes" >
           <th mat-header-cell *matHeaderCellDef>Gravamenes</th>
           <td mat-cell *matCellDef="let a"> {{ a.gravamenes }} </td>
         </ng-container>
 
         <!-- Estado -->        
-        <ng-container matColumnDef="estado" appResizableColumn>
+        <ng-container matColumnDef="estado" >
           <th mat-header-cell *matHeaderCellDef>Estado</th>
           <td mat-cell *matCellDef="let a"> {{ !a.borrador ? 'COMPLETO' : 'INCOMPLETO' }} </td>
         </ng-container>
@@ -245,49 +245,49 @@
       <table mat-table [dataSource]="navesData" class="w-100 mat-elevation-z8">
 
         <!-- Tipo -->
-        <ng-container matColumnDef="tipo" appResizableColumn>
+        <ng-container matColumnDef="tipo" >
           <th mat-header-cell *matHeaderCellDef>Tipo</th>
           <td mat-cell *matCellDef="let n"> {{ n.tipoMotorizado }} </td>
         </ng-container>
 
         <!-- Nombre -->
-        <ng-container matColumnDef="nombre" appResizableColumn>
+        <ng-container matColumnDef="nombre" >
           <th mat-header-cell *matHeaderCellDef>Nombre</th>
           <td mat-cell *matCellDef="let n"> {{ n.nombre }} </td>
         </ng-container>
 
         <!-- Matricula -->
-        <ng-container matColumnDef="matricula" appResizableColumn>
+        <ng-container matColumnDef="matricula" >
           <th mat-header-cell *matHeaderCellDef>Matricula</th>
           <td mat-cell *matCellDef="let n"> {{ n.matricula }} </td>
         </ng-container>
 
         <!-- Ano Fabricacion -->        
-        <ng-container matColumnDef="anoFabricacion" appResizableColumn>
+        <ng-container matColumnDef="anoFabricacion" >
           <th mat-header-cell *matHeaderCellDef>Ano Fabricacion</th>
           <td mat-cell *matCellDef="let n"> {{ n.anioFabricacion }} </td>
         </ng-container>
 
         <!-- Nro Inscripcion -->        
-        <ng-container matColumnDef="nroInscripcion" appResizableColumn>
+        <ng-container matColumnDef="nroInscripcion" >
           <th mat-header-cell *matHeaderCellDef>Nro Inscripción</th>          
           <td mat-cell *matCellDef="let n"> {{ n.numeroInscripcion }} </td>
         </ng-container>
 
         <!-- Tasación -->        
-        <ng-container matColumnDef="tasacion" appResizableColumn>
+        <ng-container matColumnDef="tasacion" >
           <th mat-header-cell *matHeaderCellDef>Tasación</th>
           <td mat-cell *matCellDef="let n"> {{ n.tasacion }} </td>
         </ng-container>
 
         <!-- Gravamenes -->        
-        <ng-container matColumnDef="gravamenes" appResizableColumn>
+        <ng-container matColumnDef="gravamenes" >
           <th mat-header-cell *matHeaderCellDef>Gravamenes</th>
           <td mat-cell *matCellDef="let n"> {{ n.gravamenes }} </td>
         </ng-container>
 
         <!-- Estado -->        
-        <ng-container matColumnDef="estado" appResizableColumn>
+        <ng-container matColumnDef="estado" >
           <th mat-header-cell *matHeaderCellDef>Estado</th>
           <td mat-cell *matCellDef="let n"> {{ !n.borrador ? 'COMPLETO' : 'INCOMPLETO' }} </td>
         </ng-container>
@@ -337,37 +337,37 @@
       <table mat-table [dataSource]="otrosBienesData" class="w-100 mat-elevation-z8">
 
         <!-- Descripción -->
-        <ng-container matColumnDef="descripcion" appResizableColumn>
+        <ng-container matColumnDef="descripcion" >
           <th mat-header-cell *matHeaderCellDef>Descripción</th>
           <td mat-cell *matCellDef="let o"> {{ o.descripcion }} </td>
         </ng-container>
 
         <!-- Nro Inscripcion -->        
-        <ng-container matColumnDef="nroInscripcion" appResizableColumn>
+        <ng-container matColumnDef="nroInscripcion" >
           <th mat-header-cell *matHeaderCellDef>Nro Inscripción</th>          
           <td mat-cell *matCellDef="let o"> {{ o.numeroInscripcion }} </td>
         </ng-container>
 
         <!-- Ano Inscripcion -->        
-        <ng-container matColumnDef="anoInscripcion" appResizableColumn>
+        <ng-container matColumnDef="anoInscripcion" >
           <th mat-header-cell *matHeaderCellDef>Ano Inscripción</th>          
           <td mat-cell *matCellDef="let o"> {{ o.anioInscripcion }} </td>
         </ng-container>
 
         <!-- Valor Comercial -->        
-        <ng-container matColumnDef="valorComercial" appResizableColumn>
+        <ng-container matColumnDef="valorComercial" >
           <th mat-header-cell *matHeaderCellDef>Valor Comercial</th>          
           <td mat-cell *matCellDef="let o"> {{ o.valorComercial }} </td>
         </ng-container>
 
         <!-- Tipo Registro -->        
-        <ng-container matColumnDef="tipoRegistro" appResizableColumn>
+        <ng-container matColumnDef="tipoRegistro" >
           <th mat-header-cell *matHeaderCellDef>Tipo Registro</th>          
           <td mat-cell *matCellDef="let o"> {{ o.tipoRegistro }} </td>
         </ng-container>
 
         <!-- Estado -->        
-        <ng-container matColumnDef="estado" appResizableColumn>
+        <ng-container matColumnDef="estado" >
           <th mat-header-cell *matHeaderCellDef>Estado</th>          
           <td mat-cell *matCellDef="let o"> {{ !o.borrador ? 'COMPLETO' : 'INCOMPLETO' }} </td>
         </ng-container>
