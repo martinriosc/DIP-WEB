@@ -1,15 +1,35 @@
 <div class="container-fluid">
+  <!-- Loader -->
+  <div *ngIf="isLoading$ | async" class="loading-spinner-container">
+    <div class="spinner-content">
+      <mat-spinner diameter="50"></mat-spinner>
+      <p class="loading-text">Cargando progreso...</p>
+    </div>
+  </div>
+
+  <!-- Progress bar global -->
+  <div class="progress-container" [class.hidden]="isLoading$ | async">
+    <mat-progress-bar 
+      mode="determinate" 
+      [value]="(globalProgress$ | async)! * 100">
+    </mat-progress-bar>
+  </div>
+
   <div class="row">
     <div class="col">
       <div class="dual-container">
-        <mat-tab-group (selectedTabChange)="onTabChange($event)" [(selectedIndex)]="selectedTabIndex">
+        <mat-tab-group 
+          [selectedIndex]="selectedTabIndex$ | async" 
+          (selectedIndexChange)="onTabChange($event)"
+          [disableRipple]="true">
+          
           <mat-tab label="Antecedentes del Declarante">
             <div class="stepper-section">
 
               <div class="step-info row g-2 p-3 pb-4 align-items-center bg-white"
                 style="border: 1px solid #004084a1; border-radius: 2px 2px 0px 0px">
                 <span class="progress-bar-dip col-12 col-md-2">
-                  Paso {{ declIndex + 1 }} de {{ declSteps.length }}
+                  Paso {{ (declIndex$ | async)! + 1 }} de {{ (declSteps$ | async)?.length || 0 }}
                   ({{ ((declProgress$ | async) ?? 0) * 100 | number:'1.0-0' }}%)
                 </span>
 
@@ -20,18 +40,15 @@
                 </div>
               </div>
 
-
-
               <div cdkScrollable #declContainer class="stepper-wrapper stepper-decl">
                 <mat-horizontal-stepper #declStepper class="custom-stepper header-only" [disableRipple]="true"
-                  [selectedIndex]="declIndex" (selectionChange)="handleDeclChange($event)"
+                  [selectedIndex]="declIndex$ | async" (selectionChange)="handleDeclChange($event)"
                   (animationDone)="center(declContainer)">
 
                   <ng-template matStepperIcon="edit">
                     <mat-icon class="step-icon done">check_circle</mat-icon>
                   </ng-template>
                   
-
                   <ng-template matStepperIcon="error">
                     <mat-icon class="step-icon warning">warning</mat-icon>
                   </ng-template>
@@ -40,15 +57,14 @@
                     <span class="step-number">{{ index + 1 }}</span>
                   </ng-template>
 
-                  <ng-container *ngFor="let s of declSteps; let i = index">
+                  <ng-container *ngFor="let s of declSteps$ | async; let i = index">
                     <mat-step [completed]="s.status === 'completed'" [hasError]="s.status === 'incomplete'"
                       style="padding:0">
                       <ng-template matStepLabel>
-                        <span [ngClass]="{ 'active-step' : i === declIndex }">
+                        <span [ngClass]="{ 'active-step' : i === (declIndex$ | async) }">
                           {{ s.label }}
                         </span>
                       </ng-template>
-
                     </mat-step>
                   </ng-container>
                 </mat-horizontal-stepper>
@@ -56,10 +72,10 @@
             </div>
           </mat-tab>
 
-
-          <mat-tab label="Intereses y Patrimonios">
+          <mat-tab
+            label="Intereses y Patrimonios" 
+            [disabled]="(isCreating$ | async) && !areAntecedentesComplete()">
             <div class="stepper-section">
-
 
               <div class="container-fluid stepper-declarante">
                 <div class="row">
@@ -79,7 +95,7 @@
                     style="border-top: 1px solid #ff5d17d3;">
                     <!-- Texto "Paso …" -->
                     <span class="progress-bar-dip m-0 col-12 col-md-2">
-                      Paso {{ intIndex + 1 }} de {{ intSteps.length }}
+                      Paso {{ (intIndex$ | async)! + 1 }} de {{ (intSteps$ | async)?.length || 0 }}
                       ({{ ((intProgress$ | async) ?? 0) * 100 | number:'1.0-0' }}%)
                     </span>
 
@@ -91,22 +107,17 @@
                     </div>
                   </div>
                 </div>
-
               </div>
 
-
-
-
               <div cdkScrollable #intContainer class="stepper-wrapper stepper-int">
-                <mat-horizontal-stepper #intStepper class="custom-stepper header-only" [disableRipple]="true"
-                  [selectedIndex]="intIndex" (selectionChange)="handleIntChange($event)"
+                <mat-horizontal-stepper #intStepper class="custom-stepper header-only multi-row" [disableRipple]="true"
+                  [selectedIndex]="intIndex$ | async" (selectionChange)="handleIntChange($event)"
                   (animationDone)="center(intContainer)">
 
                   <ng-template matStepperIcon="edit">
                     <mat-icon class="step-icon done">check_circle</mat-icon>
                   </ng-template>
                   
-
                   <ng-template matStepperIcon="error">
                     <mat-icon class="step-icon warning">warning</mat-icon>
                   </ng-template>
@@ -115,11 +126,10 @@
                     <span class="step-number">{{ index + 1 }}</span>
                   </ng-template>
 
-                  <ng-container *ngFor="let s of intSteps; let i = index">
-                    <mat-step [completed]="s.status === 'completed'" [hasError]="s.status === 'incomplete'">
-
+                  <ng-container *ngFor="let s of intSteps$ | async; let i = index">
+                    <mat-step [completed]="s.status === 'completed'" [hasError]="s.status === 'incomplete'" *ngIf="s.step != null && s.step < 14">
                       <ng-template matStepLabel>
-                        <span [ngClass]="{ 'active-step' : i === intIndex }">
+                        <span [ngClass]="{ 'active-step' : i === (intIndex$ | async) }">
                           {{ s.label }}
                         </span>
                       </ng-template>
@@ -130,28 +140,92 @@
             </div>
           </mat-tab>
 
-          <mat-tab label="Confirmación de Datos">
+          <mat-tab
+            label="Declaraciones Voluntarias"
+            [disabled]="(isCreating$ | async) && !areAntecedentesComplete()">
+            <div class="stepper-section">
+
+              <div class="container-fluid stepper-declarante">
+                <div class="row">
+                  <div class="col p-3">
+                    <h4 class="float-start">
+                      Declarante: {{ activeDeclName$ | async }}
+                    </h4>
+                
+                    <button class="btn btn-primary float-end"
+                            (click)="openDeclarantesModal()">
+                      Cambiar persona a declarar
+                    </button>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="step-info row p-3 pb-4 g-2 align-items-center bg-white"
+                    style="border-top: 1px solid #ff5d17d3;">
+                    <span class="progress-bar-dip m-0 col-12 col-md-2">
+                      Paso {{ (volIndex$ | async)! + 1 }} de {{ (volSteps$ | async)?.length || 0 }}
+                      ({{ ((volProgress$ | async) ?? 0) * 100 | number:'1.0-0' }}%)
+                    </span>
+
+                    <div class="progress int-progress-bar col-12 col-md-10">
+                      <div class="progress-bar bg-primary progress-bar-striped progress-bar-animated" role="progressbar"
+                        [style.width.%]="((volProgress$ | async) ?? 0) * 100" aria-valuemin="0" aria-valuemax="100">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div cdkScrollable #volContainer class="stepper-wrapper stepper-int">
+                <mat-horizontal-stepper #volStepper class="custom-stepper header-only multi-row" [disableRipple]="true"
+                  [selectedIndex]="volIndex$ | async" (selectionChange)="handleVolChange($event)"
+                  (animationDone)="center(volContainer)">
+
+                  <ng-template matStepperIcon="edit">
+                    <mat-icon class="step-icon done">check_circle</mat-icon>
+                  </ng-template>
+                  
+                  <ng-template matStepperIcon="error">
+                    <mat-icon class="step-icon warning">warning</mat-icon>
+                  </ng-template>
+
+                  <ng-template matStepperIcon="number" let-index="index">
+                    <span class="step-number">{{ index + 1 }}</span>
+                  </ng-template>
+
+                  <ng-container *ngFor="let s of volSteps$ | async; let i = index">
+                    <mat-step [completed]="s.status === 'completed'" [hasError]="s.status === 'incomplete'">
+                      <ng-template matStepLabel>
+                        <span [ngClass]="{ 'active-step' : i === (volIndex$ | async) }">
+                          {{ s.label }}
+                        </span>
+                      </ng-template>
+                    </mat-step>
+                  </ng-container>
+                </mat-horizontal-stepper>
+              </div>
+            </div>
+          </mat-tab>
+
+          <mat-tab 
+            label="Confirmación de Datos"
+            [disabled]="(isCreating$ | async) && !areAntecedentesComplete()">
             <app-confirmacion-datos></app-confirmacion-datos>
           </mat-tab>
         </mat-tab-group>
-
       </div>
     </div>
   </div>
 
-  <div class="row" *ngIf="selectedTabIndex !== 2">
+  <div class="row" *ngIf="(selectedTabIndex$ | async) !== 3">
     <div class="col">
       <div class="step-content">
-        <ng-container *ngIf="activeComponent as cmp">
+        <ng-container *ngIf="activeComponent$ | async as cmp">
           <ng-container *ngComponentOutlet="cmp"></ng-container>
         </ng-container>
       </div>
     </div>
   </div>
-
-
 </div>
-
 
 <ng-template #declaracionModal>
   <div class="modal-content">

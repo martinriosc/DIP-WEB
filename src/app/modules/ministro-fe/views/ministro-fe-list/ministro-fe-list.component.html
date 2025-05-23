@@ -147,55 +147,55 @@
     </ng-container>
 
     <!-- Id -->
-    <ng-container matColumnDef="idDeclaracion" appResizableColumn>
+    <ng-container matColumnDef="idDeclaracion" >
       <th mat-header-cell *matHeaderCellDef>Id Declaración</th>
       <td mat-cell *matCellDef="let e">{{ e.id }}</td>
     </ng-container>
 
     <!-- Fecha -->
-    <ng-container matColumnDef="fechaDeclaracion" appResizableColumn>
+    <ng-container matColumnDef="fechaDeclaracion" >
       <th mat-header-cell *matHeaderCellDef>Fecha Declaración</th>
       <td mat-cell *matCellDef="let e">{{ e.fechaFirmaDeclarante }}</td>
     </ng-container>
 
     <!-- Tipo -->
-    <ng-container matColumnDef="tipoDeclaracion" appResizableColumn>
+    <ng-container matColumnDef="tipoDeclaracion" >
       <th mat-header-cell *matHeaderCellDef>Tipo Declaración</th>
       <td mat-cell *matCellDef="let e">{{ e.declaTipo }}</td>
     </ng-container>
 
     <!-- Numeral -->
-    <ng-container matColumnDef="numeral" appResizableColumn>
+    <ng-container matColumnDef="numeral" >
       <th mat-header-cell *matHeaderCellDef>Numeral</th>
       <td mat-cell *matCellDef="let e">{{ e.sujetoObligado }}</td>
     </ng-container>
 
     <!-- RUT -->
-    <ng-container matColumnDef="rut" appResizableColumn>
+    <ng-container matColumnDef="rut" >
       <th mat-header-cell *matHeaderCellDef>RUT</th>
       <td mat-cell *matCellDef="let e">{{ e.rut }}</td>
     </ng-container>
 
     <!-- Declarante -->
-    <ng-container matColumnDef="declarante" appResizableColumn>
+    <ng-container matColumnDef="declarante" >
       <th mat-header-cell *matHeaderCellDef>Declarante</th>
       <td mat-cell *matCellDef="let e">{{ e.declarante }}</td>
     </ng-container>
 
     <!-- Servicio -->
-    <ng-container matColumnDef="servicio" appResizableColumn>
+    <ng-container matColumnDef="servicio" >
       <th mat-header-cell *matHeaderCellDef>Servicio</th>
       <td mat-cell *matCellDef="let e">{{ e.servicio }}</td>
     </ng-container>
 
     <!-- Cargo -->
-    <ng-container matColumnDef="cargo" appResizableColumn>
+    <ng-container matColumnDef="cargo" >
       <th mat-header-cell *matHeaderCellDef>Cargo</th>
       <td mat-cell *matCellDef="let e">{{ e.cargo }}</td>
     </ng-container>
 
     <!-- Estado -->
-    <ng-container matColumnDef="estado" appResizableColumn>
+    <ng-container matColumnDef="estado" >
       <th mat-header-cell *matHeaderCellDef>Estado</th>
       <td mat-cell *matCellDef="let e">
         <span [ngClass]="pillClass(e.declaEstado)" class="estado-pill">{{ e.declaEstado }}</span>

@@ -1,5 +1,7 @@
-import { Component, HostListener, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
+import { AuthService } from './modules/auth/services/auth.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-root',
@@ -7,7 +9,9 @@ import { Router } from '@angular/router';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, OnDestroy {
+  private userSubscription: Subscription | undefined;
+
   // Datos dummy de usuario
   currentUser = {
     name: 'CHRISTIAN ALEJANDRO CONTARDO SALINAS',
@@ -31,10 +35,24 @@ export class AppComponent implements OnInit {
     // ...
   ];
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private authService: AuthService) {}
 
   ngOnInit(): void {
     this.checkScreenSize();
+    this.userSubscription = this.authService.currentUser$.subscribe(user => {
+      if (user) {
+        console.log(user);
+        this.currentUser.name = `${user.nombre} ${user.apellidoPaterno} ${user.apellidoMaterno}`.trim();
+      } else {
+        this.currentUser.name = '';
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    if (this.userSubscription) {
+      this.userSubscription.unsubscribe();
+    }
   }
 
   @HostListener('window:resize')
@@ -71,6 +89,7 @@ export class AppComponent implements OnInit {
 
   logout() {
     console.log('Cerrar sesión...');
+    this.authService.logout();
     // Lógica real de logout
   }
 }

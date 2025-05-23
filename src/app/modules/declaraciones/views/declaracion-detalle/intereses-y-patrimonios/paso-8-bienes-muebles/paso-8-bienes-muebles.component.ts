@@ -91,10 +91,10 @@ interface OtroBienMueble {
   styleUrls: ['./paso-8-bienes-muebles.component.scss']
 })
 export class Paso8BienesMueblesComponent implements OnInit, AfterViewInit {
-  tieneVehiculos = 'no';
-  tieneAeronaves = 'no';
-  tieneNaves = 'no';
-  tieneOtrosBienes = 'no';
+  tieneVehiculos = '';
+  tieneAeronaves = '';
+  tieneNaves = '';
+  tieneOtrosBienes = '';
 
   vehiculosData: any[] = [];
   aeronavesData: any[] = [];
@@ -162,10 +162,18 @@ export class Paso8BienesMueblesComponent implements OnInit, AfterViewInit {
 
   loadRegistro() {
     this._declaracionHelper.declaracionesFlag$.subscribe(data => {
-      this.tieneVehiculos = data.vehiculos ? 'si' : 'no';
-      this.tieneAeronaves = data.aeronaves ? 'si' : 'no';
-      this.tieneNaves = data.naves ? 'si' : 'no';
-      this.tieneOtrosBienes = data.otrosBienes ? 'si' : 'no';
+      if(data.vehiculos != undefined) {
+        this.tieneVehiculos = data.vehiculos ? 'si' : 'no';
+      }
+      if(data.aeronaves != undefined) {
+        this.tieneAeronaves = data.aeronaves ? 'si' : 'no';
+      }
+      if(data.naves != undefined) {
+        this.tieneNaves = data.naves ? 'si' : 'no';
+      }
+      if(data.otrosBienes != undefined) {
+        this.tieneOtrosBienes = data.otrosBienes ? 'si' : 'no';
+      }
     })
   }
 

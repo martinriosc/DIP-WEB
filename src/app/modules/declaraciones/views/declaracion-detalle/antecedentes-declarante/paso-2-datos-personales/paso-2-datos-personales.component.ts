@@ -49,20 +49,20 @@ export class Paso2DatosPersonalesComponent implements OnInit, AfterViewInit {
       apellidoMaterno: ['', Validators.required],
       profesion: ['', Validators.required],
       lugarReside: ['chile', Validators.required],
-      region: ['', Validators.required],
-      comuna: ['', Validators.required],
+      region: [''],
+      comuna: [''],
       pais: [''],
       ciudad: [''],
       domicilioCalle: ['', Validators.required],
       domicilioNumero: ['', Validators.required],
       domicilioDepto: [''],
       estadoCivil: ['', Validators.required],
-      regimenPatrimonial: ['', Validators.required],
-      rutConyuge: ['', Validators.required],
-      nombresConyuge: ['', Validators.required],
-      apellidoPaternoConyuge: ['', Validators.required],
-      apellidoMaternoConyuge: ['', Validators.required],
-      declaraConyuge: ['no', Validators.required],
+      regimenPatrimonial: [''],
+      rutConyuge: [''],
+      nombresConyuge: [''],
+      apellidoPaternoConyuge: [''],
+      apellidoMaternoConyuge: [''],
+      declaraConyuge: [''],
     });
   }
 
@@ -76,27 +76,24 @@ export class Paso2DatosPersonalesComponent implements OnInit, AfterViewInit {
     this.loadPaises();
     this.loadRegimenes();
     this.loadEstadosCiviles();
-
-
     this.loadDatosPersonales();
-
   }
 
   ngAfterViewInit(): void {
     // Escucha validez y marca complete/incomplete
-    this.datosPersonalesForm.statusChanges.subscribe(status => {
-      if (status === 'VALID') {
-        this._declaracionHelper.markStepCompleted(['declarante', 'paso2']);
-      } else {
-        this._declaracionHelper.markStepIncomplete(['declarante', 'paso2']);
-      }
-    });
+    // this.datosPersonalesForm.statusChanges.subscribe(status => {
+    //   if (status === 'VALID') {
+    //     this._declaracionHelper.markStepCompleted(['declarante', 'paso2']);
+    //   } else {
+    //     this._declaracionHelper.markStepIncomplete(['declarante', 'paso2']);
+    //   }
+    // });
   }
 
   loadDatosPersonales() {
 
     this._declarante.getDatosDeclarante(this._declaracionHelper.declaracionId).subscribe(res => {
-      this.onChangeEstadoCivil(res.estadoCivil);
+      // this.onChangeEstadoCivil(res.estadoCivil);
       this.datosPersonalesForm.patchValue({
         rut: res.rut,
         nombres: res.nombre,
@@ -116,8 +113,15 @@ export class Paso2DatosPersonalesComponent implements OnInit, AfterViewInit {
         apellidoMaternoConyuge: res.cygApellidoMaterno,
         declaraConyuge: res.cygForm ? 'si' : 'no',
       })
+      if (res.cygForm) {
+        this.conyugeFlag = true;
+      }
+
+      if (res.estadoCivil != null) {
+        this.onChangeEstadoCivil(res.estadoCivil);
+
+      }
       this.onChangeRegion();
-      this.onChangeEstadoCivil(res.estadoCivil);
       this.datosPersonalesForm.patchValue({
         comuna: res.comunaId
       })
@@ -241,13 +245,21 @@ export class Paso2DatosPersonalesComponent implements OnInit, AfterViewInit {
     })
   }
 
+  formatearRut(rut: any) {
+    rut = rut.replace(/\./g, ''); // Eliminar puntos
+    rut = rut.replace(/-/g, ''); // Eliminar guiones existentes
+    const num = rut.substring(0, rut.length - 1); // Obtener el número principal
+    const digitoVerificador = rut.substring(rut.length - 1); // Obtener el dígito verificador
 
+    return num + "-" + digitoVerificador;
+  }
 
   onSubmit(): void {
     this._spinner.show();
+    console.log(this.datosPersonalesForm.value.domicilioDepto)
     if (this.datosPersonalesForm.valid) {
-      const obj = {
-        rut: this.datosPersonalesForm.value.rut,
+      const obj:any = {
+        rut: this.formatearRut(this.datosPersonalesForm.value.rut),
         nombre: this.datosPersonalesForm.value.nombres,
         apellidoPaterno: this.datosPersonalesForm.value.apellidoPaterno,
         apellidoMaterno: this.datosPersonalesForm.value.apellidoMaterno,
@@ -257,15 +269,18 @@ export class Paso2DatosPersonalesComponent implements OnInit, AfterViewInit {
         comunaId: this.datosPersonalesForm.value.comuna,
         calle: this.datosPersonalesForm.value.domicilioCalle,
         numero: this.datosPersonalesForm.value.domicilioNumero,
-        departamento: this.datosPersonalesForm.value.domicilioDepto,
+        departamento: this.datosPersonalesForm.value.domicilioDepto == null ? "" : this.datosPersonalesForm.value.domicilioDepto,
         estadoCivil: this.datosPersonalesForm.value.estadoCivil,
         regimenPatrimonialId: this.datosPersonalesForm.value.regimenPatrimonial,
-        cygDeclaranteId: '',
-        cygRut: this.datosPersonalesForm.value.rutConyuge,
-        cygNombre: this.datosPersonalesForm.value.nombresConyuge,
-        cygApellidoPaterno: this.datosPersonalesForm.value.apellidoPaternoConyuge,
-        cygApellidoMaterno: this.datosPersonalesForm.value.apellidoMaternoConyuge,
-        cygForm: this.datosPersonalesForm.value.declaraConyuge == 'si' ? true : false
+
+      }
+
+      if(this.conyugeFlag){
+        obj['cygRut'] = this.formatearRut(this.datosPersonalesForm.value.rutConyuge);
+        obj['cygNombre'] = this.datosPersonalesForm.value.nombresConyuge;
+        obj['cygApellidoPaterno'] = this.datosPersonalesForm.value.apellidoPaternoConyuge;
+        obj['cygApellidoMaterno'] = this.datosPersonalesForm.value.apellidoMaternoConyuge;
+        obj['cygForm'] = this.datosPersonalesForm.value.declaraConyuge == 'si' ? true : false;
       }
 
       this._declarante.guardarDeclarante(obj, this.declaracionId).subscribe({

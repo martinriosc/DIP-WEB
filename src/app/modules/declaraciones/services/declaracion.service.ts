@@ -58,7 +58,7 @@ export class DeclaracionService {
     params = params.set('filtro', JSON.stringify(filtroObj));
 
     if (sort) {
-      params = params.set('sort', JSON.stringify([{ property: 'id', direction: 'DESC' }]));
+      params = params.set('sort', JSON.stringify([{ property: sort, direction: 'DESC' }]));
     }
 
     return this.http.get<ApiResponse<T>>(`${this.apiUrl}/pr/service/declaracion/declaraciones/listar`, {

@@ -34,25 +34,25 @@
 
         <table mat-table [dataSource]="otrosBienes" class="w-100 mat-elevation-z8">
           <!-- Tipo Bien -->
-          <ng-container matColumnDef="tipoBien" appResizableColumn>
+          <ng-container matColumnDef="tipoBien" >
             <th mat-header-cell *matHeaderCellDef>Tipo de Bien</th>
             <td mat-cell *matCellDef="let o">{{ o.tipoBienId }}</td>
           </ng-container>
 
           <!-- Monto -->
-          <ng-container matColumnDef="monto" appResizableColumn>
+          <ng-container matColumnDef="monto" >
             <th mat-header-cell *matHeaderCellDef>Monto o Valor</th>
             <td mat-cell *matCellDef="let o">{{ o.monto }}</td>
           </ng-container>
 
           <!-- Descripción -->
-          <ng-container matColumnDef="descripcion" appResizableColumn>
+          <ng-container matColumnDef="descripcion" >
             <th mat-header-cell *matHeaderCellDef>Datos del Bien</th>
             <td mat-cell *matCellDef="let o">{{ o.descripcion }}</td>
           </ng-container>
 
           <!-- Estado -->
-          <ng-container matColumnDef="estado" appResizableColumn>
+          <ng-container matColumnDef="estado" >
             <th mat-header-cell *matHeaderCellDef>Estado</th>
             <td mat-cell *matCellDef="let o">{{ !o.borrador ? 'COMPLETO' : 'INCOMPLETO' }}</td>
           </ng-container>

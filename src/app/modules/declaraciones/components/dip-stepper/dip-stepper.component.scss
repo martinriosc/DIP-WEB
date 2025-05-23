@@ -152,3 +152,113 @@ mat-tab-group {
   background: #e0f0ff;
   border-radius: 4px;
 }
+
+.loading-spinner-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.8);
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.spinner-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.loading-text {
+  margin: 0;
+  color: #004084;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.progress-container {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+  transition: opacity 0.3s ease-in-out;
+
+  &.hidden {
+    opacity: 0;
+  }
+}
+/* ===== MULTI-ROW BONITO (máx. 5 por fila) ===== */
+
+/* Contenedor de cabeceras */
+::ng-deep .multi-row .mat-horizontal-stepper-header-container {
+  display: flex !important;
+  flex-wrap: wrap;      /* salto de línea automático              */
+
+}
+
+/* Cada cabecera ocupa 1/5 del ancho con flex-basis y crece igual */
+::ng-deep .multi-row .mat-step-header {
+  flex: 1 1 calc((100% - 4 * 16px) / 5); /* 5 columnas = 4 gaps */
+  max-width: calc((100% - 4 * 16px) / 5);
+  min-width: 0;            /* permite elipsis si es muy largo */
+  justify-content: flex-start;
+  // padding: 4px 8px;        /* acolchado interior             */
+  border-radius: 4px;
+  transition: background .2s;
+}
+
+/* Cabecera activa o hover para feedback visual */
+::ng-deep .multi-row .mat-step-header:hover,
+::ng-deep .multi-row .mat-step-header.mat-active {
+  background: #e8f1ff;
+}
+
+/* Ocultar la línea de conexión (no sirve en varias filas) */
+::ng-deep .multi-row .mat-horizontal-stepper-line {
+  display: none;
+}
+
+/* ===== Breakpoints responsivos ===== */
+@media (max-width: 1024px) {  /* tablets: 3 por fila */
+  ::ng-deep .multi-row .mat-step-header {
+    flex: 1 1 calc((100% - 2 * 16px) / 3);
+    max-width: calc((100% - 2 * 16px) / 3);
+  }
+}
+
+@media (max-width: 600px) {   /* móviles: 1 por fila */
+  ::ng-deep .multi-row .mat-step-header {
+    flex: 1 1 100%;
+    max-width: 100%;
+  }
+}
+
+/* Contenedor que rodea el stepper: permitir salto de línea,
+   pero mantener overflow-x para pantallas angostas */
+.stepper-int {
+  white-space: normal;   /* ADIÓS nowrap */
+  overflow-x: auto;      /* si el diseño se hace muy ancho en desktop */
+  padding: 0 8px;        /* evita que los íconos queden pegados al borde */
+}
+
+/* Opcional: mantener scroll suave al centrar */
+.stepper-int {
+  scroll-behavior: smooth;
+}
+
+/* ── 1️⃣  El stepper multi-row debe medir 100 % ────────────────────── */
+::ng-deep .custom-stepper.multi-row {
+  min-width: 100% !important;   /* anula 'max-content' */
+  width: 100%;
+}
+
+/* ── 2️⃣  Cada cabecera: ancho fijo (no crece) ─────────────────────── */
+::ng-deep .multi-row .mat-step-header {
+  flex: 0 0 calc((100% - 4 * 16px) / 5);   /* 0 grow | 0 shrink | 20 %–gaps */
+  max-width: calc((100% - 4 * 16px) / 5);  /* evita que pase de 20 %        */
+}

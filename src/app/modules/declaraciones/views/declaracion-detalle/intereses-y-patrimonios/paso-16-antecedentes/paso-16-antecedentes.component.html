@@ -17,13 +17,13 @@
       <div class="col-md-7 text-end">
         <mat-radio-group [(ngModel)]="tieneAntecedentes" (change)="onTieneAntecedentesChange($event.value)"
           name="antecedentesRadio">
-          <mat-radio-button value="si" class="me-4">Sí</mat-radio-button>
-          <mat-radio-button value="no">No</mat-radio-button>
+          <mat-radio-button [value]="'si'" class="me-4">Sí</mat-radio-button>
+          <mat-radio-button [value]="'no'">No</mat-radio-button>
         </mat-radio-group>
       </div>
     </div>
 
-    <div *ngIf="tieneAntecedentes === 'si'">
+    <div *ngIf="tieneAntecedentes">
       <div class="row mb-3">
         <div class="col-md-12 text-end">
           <button mat-raised-button color="primary" (click)="openAddModal()">
@@ -34,13 +34,13 @@
 
       <table mat-table [dataSource]="antecedentes" class="w-100 mat-elevation-z8">
         <!-- Descripción -->
-        <ng-container matColumnDef="antecedente" appResizableColumn>
+        <ng-container matColumnDef="antecedente">
           <th mat-header-cell *matHeaderCellDef>Antecedente</th>
           <td mat-cell *matCellDef="let a">{{ a.descripcion }}</td>
         </ng-container>
 
         <!-- Estado -->
-        <ng-container matColumnDef="estado" appResizableColumn>
+        <ng-container matColumnDef="estado">
           <th mat-header-cell *matHeaderCellDef>Estado</th>
           <td mat-cell *matCellDef="let a">{{ !a.borrador ? 'COMPLETO' : 'INCOMPLETO' }}</td>
         </ng-container>

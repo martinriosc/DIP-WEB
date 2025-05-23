@@ -41,7 +41,7 @@ export class Paso12MandatoEspecialComponent implements OnInit {
 
   displayedColumns = ['razonSocial', 'rut', 'fechaCelebracion', 'notaria', 'valor', 'estado', 'acciones'];
 
-  tieneMandato = 'no';
+  tieneMandato = '';
   contratoForm!: FormGroup;
   editMode = false;
   currentItem: Contrato | null = null;
@@ -73,7 +73,9 @@ export class Paso12MandatoEspecialComponent implements OnInit {
 
   loadRegistro() {
     this._declaracionHelper.declaracionesFlag$.subscribe(data => {
-      this.tieneMandato = data.contratos ? 'si' : 'no';
+      if(data.contratos != undefined) {
+        this.tieneMandato = data.contratos ? 'si' : 'no';
+      }
     });
   }
 
@@ -188,14 +190,25 @@ export class Paso12MandatoEspecialComponent implements OnInit {
   }
 
   onTieneMandatoChange(value: string): void {
+    if (value === 'no' && this.contratoForm?.valid) {
+      Swal.fire({
+        title: 'No se puede cambiar',
+        text: 'Debe eliminar todos los registros antes de cambiar a "No Tiene"',
+        icon: 'warning',
+        confirmButtonText: 'Aceptar'
+      });
+      this.tieneMandato = 'si';
+      return;
+    }
     this.tieneMandato = value;
+    const path = ['declaraciones', this.activeDeclId, 'paso12'];
     this._declaracion.guardarRegistro(this.declaranteId, 'contratos', value === 'si').subscribe({
       next: (res: any) => {
         console.log('Registro guardado exitosamente');
       },
       error: (err: any) => {
         console.error('Error al guardar registro:', err);
-        this.toastr.error('Error al guardar el registro');
+        this.toastr.error('Error al guardar registro');
       }
     });
   }

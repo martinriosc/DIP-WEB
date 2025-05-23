@@ -52,7 +52,7 @@ export class Paso11ValoresObligatoriosComponent implements OnInit {
   displayedColumnsDepositos = ['tipoInstrumento', 'razonSocial', 'pais', 'fecha', 'monto', 'tipoMoneda', 'gravamen','estado', 'acciones'];
   displayedColumnsSeguros = ['tipoInstrumento','tipoSeguro', 'razonSocial', 'pais', 'fecha', 'monto', 'tipoMoneda', 'gravamen','estado', 'acciones'];
 
-  tieneValoresObligatorios = 'no';
+  tieneValoresObligatorios = '';
   valoresObligatoriosData: ValorObligatorio[] = [];
   valorForm!: FormGroup;
   editMode = false;
@@ -61,10 +61,10 @@ export class Paso11ValoresObligatoriosComponent implements OnInit {
 
   private activeDeclId!: string;
 
-  tieneCuentasLibretas = 'no';
-  tieneAhorrosPrevisionales = 'no';
-  tieneDepositosPlazo = 'no';
-  tieneSeguros = 'no';
+  tieneCuentasLibretas = '';
+  tieneAhorrosPrevisionales = '';
+  tieneDepositosPlazo = '';
+  tieneSeguros = '';
 
   cuentasLibretas: any[] = [];
   ahorrosPrevisionales: any[] = [];
@@ -117,11 +117,20 @@ export class Paso11ValoresObligatoriosComponent implements OnInit {
   
   loadRegistro(){
     this._declaracionHelper.declaracionesFlag$.subscribe(data => {
+      if(data.cuentas != undefined) {
+        this.tieneCuentasLibretas = data.cuentas ? 'si' : 'no';
+      }
+      if(data.ahorros != undefined) {
+        this.tieneAhorrosPrevisionales = data.ahorros ? 'si' : 'no';
+      }
+      if(data.depositos != undefined) {
+        this.tieneDepositosPlazo = data.depositos ? 'si' : 'no';
+      }
+      if(data.seguros != undefined) {
+        this.tieneSeguros = data.seguros ? 'si' : 'no';
+      }
       
-      this.tieneCuentasLibretas = data.cuentas ? 'si' : 'no';
-      this.tieneAhorrosPrevisionales = data.ahorros ? 'si' : 'no';
-      this.tieneDepositosPlazo = data.depositos ? 'si' : 'no';
-      this.tieneSeguros = data.seguros ? 'si' : 'no';
+      
     })
   }
 
@@ -256,41 +265,44 @@ export class Paso11ValoresObligatoriosComponent implements OnInit {
 
   /** Guarda o actualiza un registro desde la modal */
   saveValorOblig(): void {
-
-const payload = {
-   ...this.valorForm.value,              // ya incluye tipoValorId, borrador, etc.
-   borrador: !this.isFormValid(this.valorForm),
-};
-
-this._valoresObligatorios
-    .guardar(payload, this.declaranteId)
-    .subscribe({
-        next: _ => { this.loadValores(); this.closeDialog(); },
-        error: _ => this.toastr.error('No se pudo guardar')
-    });
+    const obj = this.valorForm.value;
+    
+    this._valoresObligatorios.guardar(obj, this.declaranteId).subscribe({
+      next: (res: any) => {
+        this.toastr.success('Valor obligatorio guardado exitosamente');
+        this.closeDialog();
+        this.loadValores();
+        // Llamar a validateFlagsForInteresesSteps después de guardar
+        this._declaracionHelper.validateFlagsForInteresesSteps();
+      },
+      error: (err) => {
+        console.log(err);
+        this.toastr.error('Error al guardar el valor obligatorio');
+      }
+    })
   }
 
   /** Elimina un registro */
   eliminarValorOblig(id: string): void {
     Swal.fire({
-      title: '¿Estás seguro?',
-      text: 'Esta acción eliminará el registro seleccionado.',
+      title: '¿Está seguro?',
+      text: 'Esta acción no se puede deshacer',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
       confirmButtonText: 'Sí, eliminar',
       cancelButtonText: 'Cancelar'
-    }).then((result) => {
+    }).then(result => {
       if (result.isConfirmed) {
         this._valoresObligatorios.eliminar(Number(id)).subscribe({
           next: (res: any) => {
+            this.toastr.success('Valor obligatorio eliminado exitosamente');
             this.loadValores();
-            this.toastr.success('Registro eliminado exitosamente');
+            // Llamar a validateFlagsForInteresesSteps después de eliminar
+            this._declaracionHelper.validateFlagsForInteresesSteps();
           },
           error: (err) => {
-            console.error('Error al eliminar:', err);
-            this.toastr.error('Error al eliminar el registro');
+            console.log(err);
+            this.toastr.error('Error al eliminar el valor obligatorio');
           }
         });
       }
@@ -311,7 +323,7 @@ this._valoresObligatorios
   /** Abre modal para agregar nuevo registro */
   openAddModal(tipo: number): void {
    this.editMode = false;
-  this.isSeguro = (tipo===4);            // para mostrar campo extra “tipoSeguro”
+  this.isSeguro = (tipo===4);            // para mostrar campo extra "tipoSeguro"
   this.buildForm();                      // ← limpio
   this.valorForm.patchValue({ tipoValorId: tipo });   // ****
   this.loadTiposInstrumentos(tipo);      // combos
@@ -330,11 +342,23 @@ private getTemplate(tipo:number):TemplateRef<any>{
   }
 }
 
-  onTieneCuentasLibretaChange(value: string): void {  
+  onTieneCuentasLibretaChange(value: string): void {
+    if (value === 'no' && this.cuentasLibretas.length > 0) {
+      Swal.fire({
+        title: 'No se puede cambiar',
+        text: 'Debe eliminar todos los registros antes de cambiar a "No Tiene"',
+        icon: 'warning',
+        confirmButtonText: 'Aceptar'
+      });
+      this.tieneCuentasLibretas = 'si';
+      return;
+    }
     this.tieneCuentasLibretas = value;
-    this._declaracion.guardarRegistro(this.declaranteId, 'rgCuentas', value === 'si').subscribe({
+    const path = ['declaraciones', this.activeDeclId, 'paso11'];
+    this._declaracion.guardarRegistro(this.declaranteId, 'cuentas', value === 'si').subscribe({
       next: (res: any) => {
         console.log('Registro guardado exitosamente');
+        this._declaracionHelper.validateFlagsForInteresesSteps();
       },
       error: (err: any) => {
         console.error('Error al guardar registro:', err);
@@ -342,11 +366,23 @@ private getTemplate(tipo:number):TemplateRef<any>{
     });
   }
 
-  onTieneAhorrosChange(value: string): void {
+  onTieneAhorrosPrevisionalesChange(value: string): void {
+    if (value === 'no' && this.ahorrosPrevisionales.length > 0) {
+      Swal.fire({
+        title: 'No se puede cambiar',
+        text: 'Debe eliminar todos los registros antes de cambiar a "No Tiene"',
+        icon: 'warning',
+        confirmButtonText: 'Aceptar'
+      });
+      this.tieneAhorrosPrevisionales = 'si';
+      return;
+    }
     this.tieneAhorrosPrevisionales = value;
-    this._declaracion.guardarRegistro(this.declaranteId, 'rgAhorro', value === 'si').subscribe({
+    const path = ['declaraciones', this.activeDeclId, 'paso11'];
+    this._declaracion.guardarRegistro(this.declaranteId, 'ahorros', value === 'si').subscribe({
       next: (res: any) => {
         console.log('Registro guardado exitosamente');
+        this._declaracionHelper.validateFlagsForInteresesSteps();
       },
       error: (err: any) => {
         console.error('Error al guardar registro:', err);
@@ -355,10 +391,22 @@ private getTemplate(tipo:number):TemplateRef<any>{
   }
 
   onTieneDepositoAPlazoChange(value: string): void {
+    if (value === 'no' && this.depositosPlazo.length > 0) {
+      Swal.fire({
+        title: 'No se puede cambiar',
+        text: 'Debe eliminar todos los registros antes de cambiar a "No Tiene"',
+        icon: 'warning',
+        confirmButtonText: 'Aceptar'
+      });
+      this.tieneDepositosPlazo = 'si';
+      return;
+    }
     this.tieneDepositosPlazo = value;
-    this._declaracion.guardarRegistro(this.declaranteId, 'rgDeposito', value === 'si').subscribe({
+    const path = ['declaraciones', this.activeDeclId, 'paso11'];
+    this._declaracion.guardarRegistro(this.declaranteId, 'depositos', value === 'si').subscribe({
       next: (res: any) => {
         console.log('Registro guardado exitosamente');
+        this._declaracionHelper.validateFlagsForInteresesSteps();
       },
       error: (err: any) => {
         console.error('Error al guardar registro:', err);
@@ -366,11 +414,23 @@ private getTemplate(tipo:number):TemplateRef<any>{
     });
   }
 
-  onTieneSeguroChange(value: string): void {
+  onTieneSegurosChange(value: string): void {
+    if (value === 'no' && this.seguros.length > 0) {
+      Swal.fire({
+        title: 'No se puede cambiar',
+        text: 'Debe eliminar todos los registros antes de cambiar a "No Tiene"',
+        icon: 'warning',
+        confirmButtonText: 'Aceptar'
+      });
+      this.tieneSeguros = 'si';
+      return;
+    }
     this.tieneSeguros = value;
-    this._declaracion.guardarRegistro(this.declaranteId, 'rgSeguro', value === 'si').subscribe({
+    const path = ['declaraciones', this.activeDeclId, 'paso11'];
+    this._declaracion.guardarRegistro(this.declaranteId, 'seguros', value === 'si').subscribe({
       next: (res: any) => {
         console.log('Registro guardado exitosamente');
+        this._declaracionHelper.validateFlagsForInteresesSteps();
       },
       error: (err: any) => {
         console.error('Error al guardar registro:', err);

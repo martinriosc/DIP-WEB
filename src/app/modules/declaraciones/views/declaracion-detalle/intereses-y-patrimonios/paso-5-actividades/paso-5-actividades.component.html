@@ -38,38 +38,38 @@
             <table mat-table [dataSource]="actividades12Meses" class="w-100 mat-elevation-z8">
 
               <!-- Tipo Actividad -->
-              <ng-container matColumnDef="tipoActividad" appResizableColumn>
+              <ng-container matColumnDef="tipoActividad" >
                 <th mat-header-cell *matHeaderCellDef> Tipo de Actividad </th>
                 <td mat-cell *matCellDef="let act">{{ act.tipoActividad }}</td>
               </ng-container>
 
               <!-- Rubro/Área -->
-              <ng-container matColumnDef="rubroArea" appResizableColumn>
+              <ng-container matColumnDef="rubroArea" >
                 <th mat-header-cell *matHeaderCellDef>Rubro, Área o Tipo de Actividad</th>
                 <td mat-cell *matCellDef="let act">{{ act.rubro }}</td>
               </ng-container>
 
               <!-- Naturaleza del vínculo -->
-              <ng-container matColumnDef="vinculo" appResizableColumn>
+              <ng-container matColumnDef="vinculo" >
                 <th mat-header-cell *matHeaderCellDef>Naturaleza del vínculo</th>
                 <td mat-cell *matCellDef="let act">{{ act.vinculo }}</td>
               </ng-container>
 
               <!-- Objeto Entidad -->
-              <ng-container matColumnDef="objetoEntidad" appResizableColumn>
+              <ng-container matColumnDef="objetoEntidad" >
                 <th mat-header-cell *matHeaderCellDef>Objeto Entidad</th>
                 <td mat-cell *matCellDef="let act">{{ act.objetoEntidad }}</td>
               </ng-container>
 
               <!-- Data Sensible -->
-              <ng-container matColumnDef="dataSensible" appResizableColumn>
+              <ng-container matColumnDef="dataSensible" >
                 <th mat-header-cell *matHeaderCellDef>Data Sensible</th>
                 <td mat-cell *matCellDef="let act">{{act.rbDatoSensible ? 'SI' : 'NO' }}
                 </td>
               </ng-container>
 
               <!-- Estado -->
-              <ng-container matColumnDef="estado" appResizableColumn>
+              <ng-container matColumnDef="estado" >
                 <th mat-header-cell *matHeaderCellDef>Estado</th>
                 <td mat-cell *matCellDef="let act">{{ !act.borrador ? 'COMPLETO' : 'INCOMPLETO' }}
                 </td>
@@ -121,50 +121,50 @@
             <table mat-table [dataSource]="actividadesRealiza" class="w-100 mat-elevation-z8">
 
               <!-- Tipo Actividad -->
-              <ng-container matColumnDef="tipoActividad" appResizableColumn>
+              <ng-container matColumnDef="tipoActividad" >
                 <th mat-header-cell *matHeaderCellDef> Tipo de Actividad </th>
                 <td mat-cell *matCellDef="let act">{{ act.tipoActividad }}</td>
               </ng-container>
 
               <!-- Rubro/Área -->
-              <ng-container matColumnDef="rubroArea" appResizableColumn>
+              <ng-container matColumnDef="rubroArea" >
                 <th mat-header-cell *matHeaderCellDef>Rubro, Área o Tipo de Actividad</th>
                 <td mat-cell *matCellDef="let act">{{ act.rubroArea }}</td>
               </ng-container>
 
               <!-- Naturaleza del vínculo -->
-              <ng-container matColumnDef="vinculo" appResizableColumn>
+              <ng-container matColumnDef="vinculo" >
                 <th mat-header-cell *matHeaderCellDef>Naturaleza del vínculo</th>
                 <td mat-cell *matCellDef="let act">{{ act.vinculo }}</td>
               </ng-container>
 
               <!-- Objeto Entidad -->
-              <ng-container matColumnDef="objetoVinculo" appResizableColumn>
+              <ng-container matColumnDef="objetoVinculo" >
                 <th mat-header-cell *matHeaderCellDef>Objeto Vinculo</th>
                 <td mat-cell *matCellDef="let act">{{ act.objetoVinculo }}</td>
               </ng-container>
 
               <!-- Fecha Inicio -->
-              <ng-container matColumnDef="fechaInicio" appResizableColumn>
+              <ng-container matColumnDef="fechaInicio" >
                 <th mat-header-cell *matHeaderCellDef>Fecha Inicio</th>
                 <td mat-cell *matCellDef="let act">{{ act.fechaInicio }}</td>
               </ng-container>
 
               <!-- Beneficiario -->
-              <ng-container matColumnDef="beneficiario" appResizableColumn>
+              <ng-container matColumnDef="beneficiario" >
                 <th mat-header-cell *matHeaderCellDef>Beneficiario</th>
                 <td mat-cell *matCellDef="let act">{{ act.beneficiario }}</td>
               </ng-container>
 
               <!-- Data Sensible -->
-              <ng-container matColumnDef="dataSensible" appResizableColumn>
+              <ng-container matColumnDef="dataSensible" >
                 <th mat-header-cell *matHeaderCellDef>Data Sensible</th>
                 <td mat-cell *matCellDef="let act">{{act.rbDatoSensible ? 'SI' : 'NO' }}
                 </td>
               </ng-container>
 
               <!-- Estado -->
-              <ng-container matColumnDef="estado" appResizableColumn>
+              <ng-container matColumnDef="estado" >
                 <th mat-header-cell *matHeaderCellDef>Estado</th>
                 <td mat-cell *matCellDef="let act">{{ !act.borrador ? 'COMPLETO' : 'INCOMPLETO' }}
                 </td>
@@ -218,52 +218,52 @@
             <table mat-table [dataSource]="actividadesConyugeData" class="w-100 mat-elevation-z8">
 
               <!-- Tipo Actividad -->
-              <ng-container matColumnDef="tipoActividad" appResizableColumn>
+              <ng-container matColumnDef="tipoActividad" >
                 <th mat-header-cell *matHeaderCellDef> Tipo de Actividad </th>
                 <td mat-cell *matCellDef="let act">{{ act.tipoActividad }}</td>
               </ng-container>
 
               <!-- Rubro/Área -->
-              <ng-container matColumnDef="rubroArea" appResizableColumn>
+              <ng-container matColumnDef="rubroArea" >
                 <th mat-header-cell *matHeaderCellDef>Rubro, Área o Tipo de Actividad</th>
                 <td mat-cell *matCellDef="let act">{{ act.rubroArea }}</td>
               </ng-container>
 
               <!-- Fecha Inicio -->
-              <ng-container matColumnDef="fechaInicio" appResizableColumn>
+              <ng-container matColumnDef="fechaInicio" >
                 <th mat-header-cell *matHeaderCellDef>Fecha Inicio</th>
                 <td mat-cell *matCellDef="let act">{{ act.fechaInicio }}</td>
               </ng-container>
 
 
               <!-- Clasificación -->
-              <ng-container matColumnDef="clasificacion" appResizableColumn>
+              <ng-container matColumnDef="clasificacion" >
                 <th mat-header-cell *matHeaderCellDef>Clasificación</th>
                 <td mat-cell *matCellDef="let act">{{ act.clasificacion }}</td>
               </ng-container>
 
               <!-- Beneficiario -->
-              <ng-container matColumnDef="beneficiario" appResizableColumn>
+              <ng-container matColumnDef="beneficiario" >
                 <th mat-header-cell *matHeaderCellDef>Beneficiario</th>
                 <td mat-cell *matCellDef="let act">{{ act.beneficiario }}</td>
               </ng-container>
 
               <!-- Rut Beneficiario -->
-              <ng-container matColumnDef="rutBeneficiario" appResizableColumn>
+              <ng-container matColumnDef="rutBeneficiario" >
                 <th mat-header-cell *matHeaderCellDef>Rut Beneficiario</th>
                 <td mat-cell *matCellDef="let act">{{ act.rutBeneficiario }}</td>
               </ng-container>
 
 
               <!-- Data Sensible -->
-              <ng-container matColumnDef="dataSensible" appResizableColumn>
+              <ng-container matColumnDef="dataSensible" >
                 <th mat-header-cell *matHeaderCellDef>Data Sensible</th>
                 <td mat-cell *matCellDef="let act">{{act.rbDatoSensible ? 'SI' : 'NO' }}
                 </td>
               </ng-container>
 
               <!-- Estado -->
-              <ng-container matColumnDef="estado" appResizableColumn>
+              <ng-container matColumnDef="estado" >
                 <th mat-header-cell *matHeaderCellDef>Estado</th>
                 <td mat-cell *matCellDef="let act">{{ !act.borrador ? 'COMPLETO' : 'INCOMPLETO' }}
                 </td>

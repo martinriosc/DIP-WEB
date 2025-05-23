@@ -5,14 +5,8 @@
     overflow-x: auto;
     white-space: nowrap;
   }
-
-  ::ng-deep .mat-step-header {
-    min-width: 150px;
-    max-width: 300px;
-  }
 }
 
-/* Íconos circulares con color */
 .icon-circle {
   display: inline-flex;
   align-items: center;

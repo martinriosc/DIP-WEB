@@ -36,7 +36,7 @@
 
         <table mat-table [dataSource]="deduasPensionAlimento" class="w-100 mat-elevation-z8">
           <!-- Monto Total -->
-          <ng-container matColumnDef="monto" appResizableColumn>
+          <ng-container matColumnDef="monto" >
             <th mat-header-cell *matHeaderCellDef>Monto total adeudado por cada pensión a que está obligado (en pesos chilenos)</th>
             <td mat-cell *matCellDef="let p">
               {{ p.monto | currency }}
@@ -44,7 +44,7 @@
           </ng-container>
 
           <!-- Tipo Obligación -->
-          <ng-container matColumnDef="tipoObligacion" appResizableColumn>
+          <ng-container matColumnDef="tipoObligacion" >
             <th mat-header-cell *matHeaderCellDef>Tipo de Obligación o Deuda</th>
             <td mat-cell *matCellDef="let p">
               {{ p.tipoId }}
@@ -52,7 +52,7 @@
           </ng-container>
 
           <!-- Registra Inscripción -->
-          <ng-container matColumnDef="registroNacional" appResizableColumn>
+          <ng-container matColumnDef="registroNacional" >
             <th mat-header-cell *matHeaderCellDef>¿Esta deuda Registra Inscripción vigente en el Registro Nacional de Deudores de Pensiones de ALimentos?</th>
             <td mat-cell *matCellDef="let p">
               {{ p.registroNacional ? 'Sí' : 'No' }}
@@ -60,7 +60,7 @@
           </ng-container>
 
           <!-- Estado -->
-          <ng-container matColumnDef="estado" appResizableColumn>
+          <ng-container matColumnDef="estado" >
             <th mat-header-cell *matHeaderCellDef>Estado</th>
             <td mat-cell *matCellDef="let p">{{ !p.borrador ? 'completo' : 'incompleto' }}</td>
           </ng-container>
@@ -121,7 +121,7 @@
         <table mat-table [dataSource]="deudasMayor100UTM" class="w-100 mat-elevation-z8">
        
           <!-- Tipo Obligación -->
-          <ng-container matColumnDef="tipoObligacion" appResizableColumn>
+          <ng-container matColumnDef="tipoObligacion" >
             <th mat-header-cell *matHeaderCellDef>Tipo de Obligación o Deuda</th>
             <td mat-cell *matCellDef="let p">
               {{ p.tipoId }}
@@ -129,7 +129,7 @@
           </ng-container>
 
           <!-- Monto en Pesos -->
-          <ng-container matColumnDef="monto" appResizableColumn>
+          <ng-container matColumnDef="monto" >
             <th mat-header-cell *matHeaderCellDef>Monto Adeudado en Pesos</th>
             <td mat-cell *matCellDef="let p">
               {{ p.monto | currency }}
@@ -137,7 +137,7 @@
           </ng-container>
 
           <!-- Razon Social -->
-          <ng-container matColumnDef="razonSocial" appResizableColumn> 
+          <ng-container matColumnDef="razonSocial" > 
             <th mat-header-cell *matHeaderCellDef>Nombre o Razón Social del Acreedor</th>
             <td mat-cell *matCellDef="let p">
               {{ p.razonSocial }}
@@ -145,7 +145,7 @@
           </ng-container>
 
           <!-- Estado -->
-          <ng-container matColumnDef="estado" appResizableColumn>
+          <ng-container matColumnDef="estado" >
             <th mat-header-cell *matHeaderCellDef>Estado</th>
             <td mat-cell *matCellDef="let p">{{ !p.borrador ? 'completo' : 'incompleto' }}</td>
           </ng-container>

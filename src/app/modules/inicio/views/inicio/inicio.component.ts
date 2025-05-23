@@ -1,4 +1,4 @@
-import { Component, TemplateRef, ViewChild } from '@angular/core';
+import { Component, TemplateRef, ViewChild, OnDestroy } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTableDataSource } from '@angular/material/table';
 import { Router } from '@angular/router';
@@ -7,21 +7,23 @@ import { ToastrService } from 'ngx-toastr';
 import { AuthService } from 'src/app/modules/auth/services/auth.service';
 import { DeclaracionHelperService } from 'src/app/modules/declaraciones/services/declaracion-helper.service';
 import { DeclaracionService } from 'src/app/modules/declaraciones/services/declaracion.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-inicio',
   templateUrl: './inicio.component.html',
   styleUrls: ['./inicio.component.scss']
 })
-export class InicioComponent {
+export class InicioComponent implements OnDestroy {
   @ViewChild('nuevaDeclaracionModal') nuevaDeclaracionModal!: TemplateRef<any>;
   @ViewChild('rectificarDeclaracionModal') rectificarDeclaracionModal!: TemplateRef<any>;
   @ViewChild('ultimosDatosModal') ultimosDatosModal!: TemplateRef<any>;
   @ViewChild('listadoDeclaracionesModal') listadoDeclaracionesModal!: TemplateRef<any>;
 
   isLoading: boolean = false;
+  private userSubscription: Subscription | undefined;
 
-  nombreUsuario = 'CHRISTIAN ALEJANDRO CONTARDO SALINAS';
+  nombreUsuario = '';
   declaraciones = {
     totales: 22,
     borradores: 3,
@@ -42,7 +44,21 @@ export class InicioComponent {
   ) { }
 
   ngOnInit(): void {
-    this._declaracionHelper.setDeclaranteId(this._auth.currentUser?.idDeclarante ?? 0);
+    this.userSubscription = this._auth.currentUser$.subscribe(user => {
+      if (user) {
+        this.nombreUsuario = `${user.nombre} ${user.apellidoPaterno} ${user.apellidoMaterno}`.trim();
+        this._declaracionHelper.setDeclaranteId(user.idDeclarante ?? 0);
+      } else {
+        this.nombreUsuario = '';
+        this._declaracionHelper.setDeclaranteId(0);
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    if (this.userSubscription) {
+      this.userSubscription.unsubscribe();
+    }
   }
 
   openModalNuevaDeclaracion() {

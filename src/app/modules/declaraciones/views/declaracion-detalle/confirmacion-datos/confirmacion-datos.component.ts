@@ -29,6 +29,7 @@ interface DatosDeclarante {
   lugarDesempeno: string;
   regionDesempeno: string;
   comunaDesempeno: string;
+  items: any[];
   valida: boolean;
   datosDeclarante: boolean;
   datosEntidad: boolean;
@@ -59,14 +60,7 @@ export class ConfirmacionDatosComponent implements OnInit {
 
     this._declaracionHelper.state$.subscribe(state => {
       this.declaraciones = state.declaraciones;
-
-      /* Advertencias: solo pasos habilitados pero NO completos */
-      this.advertencias = this.declaraciones.flatMap(d =>
-        d.intereses
-          .filter(s => s.enabled && !s.completed)
-          .map(s => `Falta completar «${s.label}» para ${d.declara}`)
-      );
-    })
+    });
   }
 
   loadConfirmacionDatos(): void {
@@ -75,9 +69,30 @@ export class ConfirmacionDatosComponent implements OnInit {
         next: (response) => {
           this.datosDeclarante = response;
           console.log('Datos del declarante cargados:', response);
+          if (this.datosDeclarante && this.datosDeclarante.items) {
+            this.advertencias = this.datosDeclarante.items
+              .filter(item => item.incompleto)
+              .map(item => `Falta completar «${item.item}» para ${item.nombreDeclarante}`);
+          } else {
+            this.advertencias = [];
+          }
         }, 
         error: console.error 
       });
+  }
+
+  getFilteredItemsByDeclaranteName(declaranteName: string): any[] {
+    if (!this.datosDeclarante || !this.datosDeclarante.items) {
+      return [];
+    }
+    const cleanDeclaranteName = declaranteName.replace('Declarante:  ', '');
+    return this.datosDeclarante.items.filter(item => item.nombreDeclarante === cleanDeclaranteName);
+  }
+
+  areAllItemsCompleteForDeclarante(declaranteName: string): boolean {
+    const items = this.getFilteredItemsByDeclaranteName(declaranteName);
+    if (!items.length) return true;
+    return items.every(item => !item.incompleto);
   }
 
   get tienePersonasRelacionadas(): string {

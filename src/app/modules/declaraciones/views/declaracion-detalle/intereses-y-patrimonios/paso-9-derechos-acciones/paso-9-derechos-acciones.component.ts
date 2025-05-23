@@ -59,8 +59,8 @@ export class Paso9DerechosAccionesComponent implements OnInit {
 
   private activeDeclId!: string;
 
-  tieneDerechosChile = 'no';
-  tieneDerechosExtranjero = 'no';
+  tieneDerechosChile = '';
+  tieneDerechosExtranjero = '';
 
   derechosAccionesChile: any[] = [];
   derechosAccionesExtranjero: any[] = [];
@@ -86,8 +86,8 @@ export class Paso9DerechosAccionesComponent implements OnInit {
     this.initFormChile();
     this.initFormExtranjero();
     this._declaracionHelper.activeId$.subscribe(id => this.activeDeclId = id);
-    const path = ['declaraciones', this.activeDeclId, 'paso9'];
-    this._declaracionHelper.markStepIncomplete(path);
+    // const path = ['declaraciones', this.activeDeclId, 'paso9'];
+    // this._declaracionHelper.markStepIncomplete(path);
 
     this.loadDerechosOAcciones();
     this.loadTitulos();
@@ -103,8 +103,12 @@ export class Paso9DerechosAccionesComponent implements OnInit {
 
   loadRegistro() {
     this._declaracionHelper.declaracionesFlag$.subscribe(data => {
-      this.tieneDerechosChile = data.sociedades ? 'si' : 'no';
-      this.tieneDerechosExtranjero = data.sociedadesExtranjero ? 'si' : 'no';
+      if(data.sociedades != undefined) {
+        this.tieneDerechosChile = data.sociedades ? 'si' : 'no';
+      }
+      if(data.sociedadesExtranjero != undefined) {
+        this.tieneDerechosExtranjero = data.sociedadesExtranjero ? 'si' : 'no';
+      }
     })
   }
 

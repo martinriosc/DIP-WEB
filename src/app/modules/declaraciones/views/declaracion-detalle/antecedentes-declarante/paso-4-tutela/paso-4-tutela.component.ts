@@ -67,6 +67,7 @@ export class Paso4TutelaComponent {
   obtenerAplica() {
     this._declaracion.obtenerAplica(this.declaracionId).subscribe({
       next: (response) => {
+        console.log(response)
 
         this.tieneHijosTutela = response.data
       },
@@ -114,8 +115,6 @@ export class Paso4TutelaComponent {
   }
 
   onSubmit(): void {
-
-
 
     const ok = this.tieneHijosTutela ? this.data.length > 0 : true;
     if (ok) {
@@ -213,7 +212,17 @@ export class Paso4TutelaComponent {
 
   onTieneHijosChange(v: boolean): void {
     this.tieneHijosTutela = v;
+
+    this._personaRelacionada.changePersonaRelacionada(this.declaracionId, v).subscribe({
+      next: (response) => {
+        console.log(response)
+      },
+      error: (error) => {
+        console.error('Error al cambiar persona relacionada:', error);
+      }
+    })
     if (!v) {
+      
       this._declaracionHelper.markStepCompleted(['declarante', 'paso4']);
     }
   }
