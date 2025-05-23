@@ -72,7 +72,10 @@ export class Paso16AntecedentesComponent implements OnInit {
 
   loadRegistro() {
     this._declaracionHelper.declaracionesFlag$.subscribe(data => {
+<<<<<<< HEAD
       console.log("data", data.otrosAntecedentes)
+=======
+>>>>>>> 02caafeb59e9745fc1c6f120b7d5909560c4bdc2
       if(data.otrosAntecedentes != undefined) {
         this.tieneAntecedentes = data.otrosAntecedentes ? 'si' : 'no';
       }
@@ -91,9 +94,14 @@ export class Paso16AntecedentesComponent implements OnInit {
     });
   }
 
+<<<<<<< HEAD
   onTieneAntecedentesChange(value: boolean): void {
     console.log("value", value)
     if (!value && this.antecedentes.length > 0) {
+=======
+  onTieneAntecedentesChange(value: string): void {
+    if (value === 'no' && this.antecedentes.length > 0) {
+>>>>>>> 02caafeb59e9745fc1c6f120b7d5909560c4bdc2
       Swal.fire({
         title: 'No se puede cambiar',
         text: 'Debe eliminar todos los registros antes de cambiar a "No Tiene"',
@@ -103,9 +111,15 @@ export class Paso16AntecedentesComponent implements OnInit {
       this.tieneAntecedentes = 'si';
       return;
     }
+<<<<<<< HEAD
     this.tieneAntecedentes = value ? 'si' : 'no';
     const path = ['declaraciones', this.activeDeclId, 'paso16'];
     this._declaracion.guardarRegistro(this.declaranteId, 'antecedentes', value).subscribe({
+=======
+    this.tieneAntecedentes = value;
+    const path = ['declaraciones', this.activeDeclId, 'paso16'];
+    this._declaracion.guardarRegistro(this.declaranteId, 'antecedentes', value === 'si').subscribe({
+>>>>>>> 02caafeb59e9745fc1c6f120b7d5909560c4bdc2
       next: (res: any) => {
         console.log('Registro guardado exitosamente');
       },

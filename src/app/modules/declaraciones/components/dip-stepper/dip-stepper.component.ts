@@ -27,6 +27,7 @@ import { Paso16AntecedentesComponent } from '../../views/declaracion-detalle/int
 import { DeclaracionHelperService } from '../../services/declaracion-helper.service';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { AuthService } from 'src/app/modules/auth/services/auth.service';
+import { AuthService } from 'src/app/modules/auth/services/auth.service';
 
 /* Mapa para instanciar dinámicamente el componente de cada paso */
 const COMPONENT_MAP: Record<string, Type<unknown>> = {
@@ -133,6 +134,7 @@ export class DipStepperComponent {
     private readonly state: DeclaracionHelperService,
     private readonly dialog: MatDialog,
     private readonly cd: ChangeDetectorRef,
+    private _auth: AuthService,
     private _auth: AuthService,
     private _spinner: NgxSpinnerService
   ) { }
@@ -300,6 +302,7 @@ export class DipStepperComponent {
           this.intStepper.selectedIndex = idx;
           this.intIndex = idx;
 
+
           const componentName = step.component;
           if (componentName && COMPONENT_MAP[componentName]) {
             console.log('Actualizando componente activo:', componentName);
@@ -351,6 +354,7 @@ export class DipStepperComponent {
     console.log('resetToBlock:', b, 'Bloque actual:', this.currentBlock);
     this.currentBlock = b;
 
+
     /* ①  Cambiar mat‑tab de forma imperativa */
     const tabIndex = b === 'decl' ? 0 : 1;
     console.log('Cambiando a tabIndex:', tabIndex);
@@ -358,6 +362,7 @@ export class DipStepperComponent {
       this.tabGroup.selectedIndex = tabIndex;
       this.selectedTabIndexSubject.next(tabIndex);
     }
+
 
     /* ②  Reposicionar el stepper correspondiente */
     if (b === 'decl') {
@@ -454,6 +459,7 @@ export class DipStepperComponent {
   }
 
   openDeclarantesModal(): void {
+  openDeclarantesModal(): void {
     this.dialog.open(this.declaracionModal, {
       width: '850px',
       disableClose: true
@@ -466,14 +472,18 @@ export class DipStepperComponent {
     this.state.setActiveDeclaracion(id);
     this.state.setActiveDeclarante(id);
 
+
     // Cerrar el modal
     this.dialog.closeAll();
+
 
     // Solo actualizamos el stepper de intereses
     this.state.setActiveBlock('int');
 
+
     // Resetear el índice para forzar la carga del primer paso
     this.intIndex = -1;
+
 
     // Esperar a que los pasos estén disponibles
     setTimeout(() => {
@@ -558,6 +568,7 @@ export class DipStepperComponent {
       // Actualizar el índice
       this.intIndex = ev.selectedIndex;
 
+
       // Actualizar el componente activo
       const componentName = targetStep.component;
       if (componentName && COMPONENT_MAP[componentName]) {
@@ -608,6 +619,9 @@ export class DipStepperComponent {
           if (this.declIndex === idx) {
             this.loadDeclStep(idx);
           } else {
+          if (this.declIndex === idx) {
+            this.loadDeclStep(idx);
+          } else {
             this.declStepper.selectedIndex = idx;
             this.handleDeclChange({ selectedIndex: idx } as StepperSelectionEvent);
           }
@@ -622,6 +636,9 @@ export class DipStepperComponent {
         hdr.addEventListener('click', () => {
           const step = this._intSteps[idx];
           if (step && step.enabled) {
+            if (this.intIndex === idx) {
+              this.loadIntStep(idx);
+            } else {
             if (this.intIndex === idx) {
               this.loadIntStep(idx);
             } else {

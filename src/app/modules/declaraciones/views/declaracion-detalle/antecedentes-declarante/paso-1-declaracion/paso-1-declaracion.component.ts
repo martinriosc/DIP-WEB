@@ -70,9 +70,12 @@ export class Paso1DeclaracionComponent implements OnInit {
 
   loadDeclaracion() {
 
+<<<<<<< HEAD
     console.log('declaracionId', this.declaracionId)
     console.log('declaranteId', this.declaranteId)
 
+=======
+>>>>>>> 02caafeb59e9745fc1c6f120b7d5909560c4bdc2
     if (this.declaracionId == 0 && this.declaranteId != 0) {
       this._declaracionHelper.setIsCreating(true);
     } else if (this.declaracionId == 0 && this.declaranteId == 0) {

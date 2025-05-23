@@ -74,8 +74,13 @@ interface BienExtranjero {
   styleUrls: ['./paso-6-bienes-inmuebles.component.scss']
 })
 export class Paso6BienesInmueblesComponent implements OnInit, AfterViewInit {
+<<<<<<< HEAD
   tieneChile = '';
   tieneExtranjero = '';
+=======
+  tieneChile = 'no';
+  tieneExtranjero = 'no';
+>>>>>>> 02caafeb59e9745fc1c6f120b7d5909560c4bdc2
   private activeDeclId!: string;
 
   bienesChile: any[] = [];
@@ -144,9 +149,12 @@ export class Paso6BienesInmueblesComponent implements OnInit, AfterViewInit {
 
   loadRegistro() {
     this._declaracionHelper.declaracionesFlag$.subscribe(data => {
+<<<<<<< HEAD
       console.log("data", data)
       console.log("data.bienesInmueblesExtranjero", data.bienesInmueblesExtranjero)
       console.log("data.bienesInmuebles", data.bienesInmuebles)
+=======
+>>>>>>> 02caafeb59e9745fc1c6f120b7d5909560c4bdc2
       if(data.bienesInmueblesExtranjero != undefined) {
         this.tieneExtranjero = data.bienesInmueblesExtranjero ? 'si' : 'no';
       }

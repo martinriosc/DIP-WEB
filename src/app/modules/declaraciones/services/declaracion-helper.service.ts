@@ -173,6 +173,7 @@ function buildFormState(api: any, flags: any): FormState {
         const subSteps: Step[] = [];
         const subStepMap = SUB_STEP[stepKey];
 
+
         if (subStepMap) {
           Object.entries(subStepMap).forEach(([label, subKey]) => {
             const item = itemsStep.find(it => it.item.trim() === label);
@@ -184,10 +185,20 @@ function buildFormState(api: any, flags: any): FormState {
 
               const isCompleted = todosNoAplica || (tieneRegistros && registrosCompletos);
 
+              // Nueva lógica de validación para subpasos
+              const tieneRegistros = item.tiene !== 'No Tiene';
+              const todosNoAplica = item.tiene === 'No Tiene';
+              const registrosCompletos = !item.incompleto;
+
+              const isCompleted = todosNoAplica || (tieneRegistros && registrosCompletos);
+
               subSteps.push({
                 label,
                 key: subKey,
                 order: item.orden,
+                completed: isCompleted,
+                enabled: tieneRegistros,
+                status: isCompleted ? 'completed' : 'incomplete',
                 completed: isCompleted,
                 enabled: tieneRegistros,
                 status: isCompleted ? 'completed' : 'incomplete',
@@ -206,10 +217,19 @@ function buildFormState(api: any, flags: any): FormState {
 
           const isCompleted = todosNoAplica || (tieneRegistros && registrosCompletos);
 
+          const tieneRegistros = mainItem.tiene !== 'No Tiene';
+          const todosNoAplica = mainItem.tiene === 'No Tiene';
+          const registrosCompletos = !mainItem.incompleto;
+
+          const isCompleted = todosNoAplica || (tieneRegistros && registrosCompletos);
+
           subSteps.push({
             label: 'Contratos de Mandato Especial',
             key: 'paso12-1',
             order: mainItem.orden,
+            completed: isCompleted,
+            enabled: tieneRegistros,
+            status: isCompleted ? 'completed' : 'incomplete',
             completed: isCompleted,
             enabled: tieneRegistros,
             status: isCompleted ? 'completed' : 'incomplete',
@@ -221,12 +241,17 @@ function buildFormState(api: any, flags: any): FormState {
         // Validar si todos los subpasos están completos
         const allSubStepsCompleted = subSteps.every(subStep => subStep.completed);
 
+        // Validar si todos los subpasos están completos
+        const allSubStepsCompleted = subSteps.every(subStep => subStep.completed);
+
         intereses.push({
           label: mainItem.item.split(' - ')[0],
           key: stepKey,
           order: mainItem.orden,
           completed: allSubStepsCompleted,
+          completed: allSubStepsCompleted,
           enabled: true,
+          status: allSubStepsCompleted ? 'completed' : 'incomplete',
           status: allSubStepsCompleted ? 'completed' : 'incomplete',
           component: `Paso${stepKey.replace('paso', '')}Component`,
           subSteps
@@ -316,6 +341,9 @@ export class DeclaracionHelperService {
     0
   );
   readonly activeDeclarante$ = this.activeDeclaranteSubject.asObservable();
+
+  private readonly isCreatingFlag = new BehaviorSubject<any>(null);
+  readonly isCreating$ = this.isCreatingFlag.asObservable();
 
   private readonly isCreatingFlag = new BehaviorSubject<any>(null);
   readonly isCreating$ = this.isCreatingFlag.asObservable();
@@ -437,6 +465,41 @@ export class DeclaracionHelperService {
     this._state$.next(initialState);
 
     // Iniciar la carga de datos
+  setIsCreating(isCreating: boolean): void {
+    if (this.isCreatingFlag.value !== isCreating) {
+      this.isCreatingFlag.next(isCreating);
+    }
+  }
+
+  get isCreating(): boolean {
+    return this.isCreatingFlag.value;
+  }
+
+  private loadInitialData(declaracionId: number, declaranteId: number, preserveActiveDeclarante: boolean = false): void {
+    // Si es una nueva declaración, inicializar el estado sin hacer llamadas al servidor
+    if (declaracionId === 0) {
+      const nuevoState = {
+        declarante: this._state$.value.declarante,
+        declaraciones: [],
+        activeDeclaracionId: ''
+      };
+      this._state$.next(nuevoState);
+      this.declaracionesFlagSubject.next(null);
+      this.isCreatingFlag.next(true);
+      return;
+    }
+
+    // Si es una declaración existente, proceder con la carga normal
+    this.isCreatingFlag.next(false);
+
+    // Emitir un estado inicial con progreso undefined para mostrar el loader
+    const initialState = {
+      ...this._state$.value,
+      declaraciones: [] // Limpiar las declaraciones para forzar el estado de carga
+    };
+    this._state$.next(initialState);
+
+    // Iniciar la carga de datos
     forkJoin([
       this._declaracion.confirmarDatos(declaracionId),
       this._declaracion.obtenerRegistro(declaranteId),
@@ -444,6 +507,7 @@ export class DeclaracionHelperService {
       next: ([confirm, registro]) => {
         this.declaracionesFlagSubject.next(registro);
         const nuevoState = buildFormState(confirm, registro);
+
 
         if (!preserveActiveDeclarante) {
           const mainDeclarante = nuevoState.declaraciones.find(d => d.esDeclarante);
@@ -460,9 +524,15 @@ export class DeclaracionHelperService {
 
         // Validar el progreso después de cargar los datos iniciales
         this.validateAndUpdateStepProgress(declaracionId, declaranteId);
+        console.log("nuevoState", nuevoState)
+
+        // Validar el progreso después de cargar los datos iniciales
+        this.validateAndUpdateStepProgress(declaracionId, declaranteId);
       },
       error: (err) => {
         console.error('Error al cargar datos iniciales:', err);
+        // En caso de error, mantener el estado actual
+        this._state$.next(this._state$.value);
         // En caso de error, mantener el estado actual
         this._state$.next(this._state$.value);
       },
@@ -547,6 +617,24 @@ export class DeclaracionHelperService {
     });
   }
 
+          this.markStepIncomplete(['declarante', 'paso4']);
+        }
+
+        // Actualizar el estado de creación basado en el progreso
+        const allStepsComplete = this.isComplete('paso1') &&
+          this.isComplete('paso2') &&
+          this.isComplete('paso3') &&
+          this.isComplete('paso4');
+
+        // Solo actualizamos isCreating si es una nueva declaración
+        if (declaracionId === 0) {
+          this.setIsCreating(!allStepsComplete);
+        }
+      },
+      error: (err) => console.error('Error validando progreso:', err)
+    });
+  }
+
 
 
   ngOnInit(): void {
@@ -556,6 +644,8 @@ export class DeclaracionHelperService {
 
   getConfirmacionDatos() {
     this._declaracion.confirmarDatos(this.declaranteId).subscribe({
+      next: (res: any) => { },
+      error: (err) => { }
       next: (res: any) => { },
       error: (err) => { }
     })
@@ -701,6 +791,7 @@ export class DeclaracionHelperService {
     if (declaracion) {
       // Actualizar el ID del declarante activo
       this.activeDeclaranteSubject.next(declaracion.idDeclarante);
+
 
       // Actualizar el estado manteniendo el declarante activo
       this._state$.next({

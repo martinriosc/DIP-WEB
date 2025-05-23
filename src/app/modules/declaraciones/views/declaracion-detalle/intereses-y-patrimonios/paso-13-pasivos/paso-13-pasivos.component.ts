@@ -194,7 +194,10 @@ export class Paso13PasivosComponent implements OnInit {
     this._declaracion.guardarRegistro(this.declaranteId, 'pasivos', value === 'si').subscribe({
       next: (res: any) => {
         console.log('Registro guardado exitosamente');
+<<<<<<< HEAD
         this._declaracionHelper.validateFlagsForInteresesSteps();
+=======
+>>>>>>> 02caafeb59e9745fc1c6f120b7d5909560c4bdc2
       },
       error: (err: any) => {
         console.error('Error al guardar registro:', err);

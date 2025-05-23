@@ -527,7 +527,10 @@ export class Paso5ActividadesComponent implements OnInit, AfterViewInit {
     if (!listo) {
       console.log('paso5 incompleto');
       this.helper.markStepIncomplete(['declaraciones', 'paso5']);
+<<<<<<< HEAD
 
+=======
+>>>>>>> 02caafeb59e9745fc1c6f120b7d5909560c4bdc2
       this.helper.nextStep();
       return;
     }
