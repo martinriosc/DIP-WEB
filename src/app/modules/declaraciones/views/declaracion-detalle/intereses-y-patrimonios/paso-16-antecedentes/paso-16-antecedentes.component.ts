@@ -40,7 +40,6 @@ export class Paso16AntecedentesComponent implements OnInit {
   displayedColumns = ['antecedente','estado', 'acciones'];
 
   tieneAntecedentes = '';
-  tieneAntecedentes = '';
   antecedentes: Antecedente[] = [];
   antecedentesForm!: FormGroup;
   editMode = false;

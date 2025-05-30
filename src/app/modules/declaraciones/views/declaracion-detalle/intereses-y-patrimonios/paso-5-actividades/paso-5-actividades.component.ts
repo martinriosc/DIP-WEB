@@ -105,23 +105,23 @@ export class Paso5ActividadesComponent implements OnInit, AfterViewInit {
   ngAfterViewInit(): void {
     this.helper.declaracionesFlag$.subscribe(flag => {
       console.log(flag.actividadesIndividuales)
-      if(flag.actividadesIndividuales != undefined) {
+      if (flag.actividadesIndividuales != undefined) {
         this.actividadesUltimos12Meses = flag.actividadesIndividuales ? 'si' : 'no';
       }
-      if(flag.actividadesDependientes != undefined) {
+      if (flag.actividadesDependientes != undefined) {
         this.actividadesQueRealiza = flag.actividadesDependientes ? 'si' : 'no';
       }
-      if(flag.actividadesGremiales != undefined) {
+      if (flag.actividadesGremiales != undefined) {
         this.actividadesConyuge = flag.actividadesGremiales ? 'si' : 'no';
       }
       console.log(flag.actividadesIndividuales)
-      if(flag.actividadesIndividuales != undefined) {
+      if (flag.actividadesIndividuales != undefined) {
         this.actividadesUltimos12Meses = flag.actividadesIndividuales ? 'si' : 'no';
       }
-      if(flag.actividadesDependientes != undefined) {
+      if (flag.actividadesDependientes != undefined) {
         this.actividadesQueRealiza = flag.actividadesDependientes ? 'si' : 'no';
       }
-      if(flag.actividadesGremiales != undefined) {
+      if (flag.actividadesGremiales != undefined) {
         this.actividadesConyuge = flag.actividadesGremiales ? 'si' : 'no';
       }
     });
@@ -270,22 +270,22 @@ export class Paso5ActividadesComponent implements OnInit, AfterViewInit {
         };
     }
   }
-  
+
   private isFormValid(ctrl: any): boolean {
-  if (ctrl instanceof FormControl) {
-    const v = ctrl.value;
-    return v !== null && v !== undefined && String(v).trim() !== '';
-  }
+    if (ctrl instanceof FormControl) {
+      const v = ctrl.value;
+      return v !== null && v !== undefined && String(v).trim() !== '';
+    }
 
-  if (ctrl instanceof FormGroup) {
-    return Object.values(ctrl.controls).every(child => this.isFormValid(child));
-  }
+    if (ctrl instanceof FormGroup) {
+      return Object.values(ctrl.controls).every(child => this.isFormValid(child));
+    }
 
-  if (ctrl instanceof FormArray) {
-    return ctrl.controls.every(child => this.isFormValid(child));
+    if (ctrl instanceof FormArray) {
+      return ctrl.controls.every(child => this.isFormValid(child));
+    }
+    return true;
   }
-  return true;
-}
 
 
   /* ---------- alta / edición ---------- */
@@ -455,29 +455,29 @@ export class Paso5ActividadesComponent implements OnInit, AfterViewInit {
   /* ===================================================================
      RADIO – Tiene/No tiene
   =================================================================== */
-  onTieneActividad12MesesChange(value: string): void {
-    if (value === 'no' && this.actividades12Meses.length > 0) {
-      Swal.fire({
-        title: 'No se puede cambiar',
-        text: 'Debe eliminar todos los registros antes de cambiar a "No Tiene"',
-        icon: 'warning',
-        confirmButtonText: 'Aceptar'
-      });
-      this.actividadesUltimos12Meses = 'si';
-      return;
-    }
-    this.actividadesUltimos12Meses = value;
-    const path = ['declaraciones', this.activeDeclId, 'paso5'];
-    this.declaracionSrv.guardarRegistro(this.declaranteId, 'actividadesIndividuales', value === 'si').subscribe({
-      next: (res: any) => {
-        console.log('Registro guardado exitosamente');
-      },
-      error: (err: any) => {
-        console.error('Error al guardar registro:', err);
-        this.toastr.error('Error al guardar registro');
-      }
-    });
-  }
+  // onTieneActividad12MesesChange(value: string): void {
+  //   if (value === 'no' && this.actividades12Meses.length > 0) {
+  //     Swal.fire({
+  //       title: 'No se puede cambiar',
+  //       text: 'Debe eliminar todos los registros antes de cambiar a "No Tiene"',
+  //       icon: 'warning',
+  //       confirmButtonText: 'Aceptar'
+  //     });
+  //     this.actividadesUltimos12Meses = 'si';
+  //     return;
+  //   }
+  //   this.actividadesUltimos12Meses = value;
+  //   const path = ['declaraciones', this.activeDeclId, 'paso5'];
+  //   this.declaracionSrv.guardarRegistro(this.declaranteId, 'actividadesIndividuales', value === 'si').subscribe({
+  //     next: (res: any) => {
+  //       console.log('Registro guardado exitosamente');
+  //     },
+  //     error: (err: any) => {
+  //       console.error('Error al guardar registro:', err);
+  //       this.toastr.error('Error al guardar registro');
+  //     }
+  //   });
+  // }
   onTieneActividad12MesesChange(value: string): void {
     if (value === 'no' && this.actividades12Meses.length > 0) {
       Swal.fire({
@@ -502,29 +502,29 @@ export class Paso5ActividadesComponent implements OnInit, AfterViewInit {
     });
   }
 
-  onTieneActividadRealizaChange(value: string): void {
-    if (value === 'no' && this.actividadesRealiza.length > 0) {
-      Swal.fire({
-        title: 'No se puede cambiar',
-        text: 'Debe eliminar todos los registros antes de cambiar a "No Tiene"',
-        icon: 'warning',
-        confirmButtonText: 'Aceptar'
-      });
-      this.actividadesQueRealiza = 'si';
-      return;
-    }
-    this.actividadesQueRealiza = value;
-    const path = ['declaraciones', this.activeDeclId, 'paso5'];
-    this.declaracionSrv.guardarRegistro(this.declaranteId, 'actividadesDependientes', value === 'si').subscribe({
-      next: (res: any) => {
-        console.log('Registro guardado exitosamente');
-      },
-      error: (err: any) => {
-        console.error('Error al guardar registro:', err);
-        this.toastr.error('Error al guardar registro');
-      }
-    });
-  }
+  // onTieneActividadRealizaChange(value: string): void {
+  //   if (value === 'no' && this.actividadesRealiza.length > 0) {
+  //     Swal.fire({
+  //       title: 'No se puede cambiar',
+  //       text: 'Debe eliminar todos los registros antes de cambiar a "No Tiene"',
+  //       icon: 'warning',
+  //       confirmButtonText: 'Aceptar'
+  //     });
+  //     this.actividadesQueRealiza = 'si';
+  //     return;
+  //   }
+  //   this.actividadesQueRealiza = value;
+  //   const path = ['declaraciones', this.activeDeclId, 'paso5'];
+  //   this.declaracionSrv.guardarRegistro(this.declaranteId, 'actividadesDependientes', value === 'si').subscribe({
+  //     next: (res: any) => {
+  //       console.log('Registro guardado exitosamente');
+  //     },
+  //     error: (err: any) => {
+  //       console.error('Error al guardar registro:', err);
+  //       this.toastr.error('Error al guardar registro');
+  //     }
+  //   });
+  // }
   onTieneActividadRealizaChange(value: string): void {
     if (value === 'no' && this.actividadesRealiza.length > 0) {
       Swal.fire({
@@ -549,28 +549,30 @@ export class Paso5ActividadesComponent implements OnInit, AfterViewInit {
     });
   }
 
-  onTieneActividadConyugeChange(value: string): void {
-    if (value === 'no' && this.actividadesConyugeData.length > 0) {
-      Swal.fire({
-        title: 'No se puede cambiar',
-        text: 'Debe eliminar todos los registros antes de cambiar a "No Tiene"',
-        icon: 'warning',
-        confirmButtonText: 'Aceptar'
-      });
-      this.actividadesConyuge = 'si';
-      return;
-    }
-    this.actividadesConyuge = value;
-    const path = ['declaraciones', this.activeDeclId, 'paso5'];
-    this.declaracionSrv.guardarRegistro(this.declaranteId, 'actividadesGremiales', value === 'si').subscribe({
-      next: (res: any) => {
-        console.log('Registro guardado exitosamente');
-      },
-      error: (err: any) => {
-        console.error('Error al guardar registro:', err);
-        this.toastr.error('Error al guardar registro');
-      }
-    });
+  // onTieneActividadConyugeChange(value: string): void {
+  //   if (value === 'no' && this.actividadesConyugeData.length > 0) {
+  //     Swal.fire({
+  //       title: 'No se puede cambiar',
+  //       text: 'Debe eliminar todos los registros antes de cambiar a "No Tiene"',
+  //       icon: 'warning',
+  //       confirmButtonText: 'Aceptar'
+  //     });
+  //     this.actividadesConyuge = 'si';
+  //     return;
+  //   }
+  //   this.actividadesConyuge = value;
+  //   const path = ['declaraciones', this.activeDeclId, 'paso5'];
+  //   this.declaracionSrv.guardarRegistro(this.declaranteId, 'actividadesGremiales', value === 'si').subscribe({
+  //     next: (res: any) => {
+  //       console.log('Registro guardado exitosamente');
+  //     },
+  //     error: (err: any) => {
+  //       console.error('Error al guardar registro:', err);
+  //       this.toastr.error('Error al guardar registro');
+  //     }
+  //   });
+  // }
+
   onTieneActividadConyugeChange(value: string): void {
     if (value === 'no' && this.actividadesConyugeData.length > 0) {
       Swal.fire({
@@ -603,7 +605,7 @@ export class Paso5ActividadesComponent implements OnInit, AfterViewInit {
       ((this.actividadesUltimos12Meses === 'no' || this.actividadesUltimos12Meses == undefined) || this.actividades12Meses.length) &&
       ((this.actividadesQueRealiza === 'no' || this.actividadesQueRealiza == undefined) || this.actividadesRealiza.length) &&
       ((this.actividadesConyuge === 'no' || this.actividadesConyuge == undefined) || this.actividadesConyugeData.length);
-      ((this.actividadesUltimos12Meses === 'no' || this.actividadesUltimos12Meses == undefined) || this.actividades12Meses.length) &&
+    ((this.actividadesUltimos12Meses === 'no' || this.actividadesUltimos12Meses == undefined) || this.actividades12Meses.length) &&
       ((this.actividadesQueRealiza === 'no' || this.actividadesQueRealiza == undefined) || this.actividadesRealiza.length) &&
       ((this.actividadesConyuge === 'no' || this.actividadesConyuge == undefined) || this.actividadesConyugeData.length);
 

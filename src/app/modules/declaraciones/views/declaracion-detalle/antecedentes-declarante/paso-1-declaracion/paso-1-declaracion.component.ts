@@ -18,8 +18,8 @@ export class Paso1DeclaracionComponent implements OnInit {
 
   isNueva: boolean = false;
   formDeclaracion!: FormGroup;
-  
-  
+
+
   tipos: any = [];
   periodos: any = [2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025];
   regiones: any = [];
@@ -42,7 +42,6 @@ export class Paso1DeclaracionComponent implements OnInit {
     this.formDeclaracion = this.fb.group({
       tipo: ['', Validators.required],
       periodo: ['', Validators.required],
-      lugar: ['', Validators.required],
       lugar: ['', Validators.required],
       region: [''],
       comuna: [''],
@@ -83,10 +82,7 @@ export class Paso1DeclaracionComponent implements OnInit {
     console.log('declaracionId', this.declaracionId)
     console.log('declaranteId', this.declaranteId)
 
-=======
->>>>>>> 02caafeb59e9745fc1c6f120b7d5909560c4bdc2
     if (this.declaracionId == 0 && this.declaranteId != 0) {
-      this._declaracionHelper.setIsCreating(true);
       this._declaracionHelper.setIsCreating(true);
     } else if (this.declaracionId == 0 && this.declaranteId == 0) {
       this._router.navigate(['declaraciones']);
@@ -191,7 +187,6 @@ export class Paso1DeclaracionComponent implements OnInit {
         tipoDeclaracion: this.formDeclaracion.value.tipo
       }
       if (this._declaracionHelper.isCreating) {
-      if (this._declaracionHelper.isCreating) {
         obj = {
           declaracionId: this.declaracionId,
           ...obj,
@@ -199,14 +194,11 @@ export class Paso1DeclaracionComponent implements OnInit {
         }
       }
 
-
-
       this._declaracion.guardarDeclaracion(obj).subscribe({
         next: (response) => {
           console.log(response)
           if (response.success) {
             this._toastr.success('Datos de la Declaración guardados correctamente');
-            this._declaracionHelper.setDeclaracionId(response.data.declaracionId);
             this._declaracionHelper.setDeclaracionId(response.data.declaracionId);
             this._declaracionHelper.markStepCompleted(['declarante', 'paso1']);
             this._declaracionHelper.nextStep();

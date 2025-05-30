@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, filter, combineLatest, forkJoin, map, Subject, distinctUntilChanged, mergeMap, of, Observable, shareReplay, exhaustMap, catchError, finalize } from 'rxjs';
-import { BehaviorSubject, filter, combineLatest, forkJoin, map, Subject, distinctUntilChanged, mergeMap, of, Observable, shareReplay, exhaustMap, catchError, finalize } from 'rxjs';
 import { DeclaracionService } from './declaracion.service';
 import { DatosLaboralesService } from './datos-laborales.service';
 import { DeclaranteService } from './declarante.service';
@@ -284,9 +283,7 @@ function applyFlags(intereses: Step[], flags: any): void {
 const updateState = <T extends object>(obj: T, updates: Partial<T>): T => {
   return { ...obj, ...updates };
 };
-const updateState = <T extends object>(obj: T, updates: Partial<T>): T => {
-  return { ...obj, ...updates };
-};
+
 
 function flatten(steps: Step[]): Step[] {
   return steps.flatMap(s => [s, ...(s.subSteps ? flatten(s.subSteps) : [])]);
@@ -369,19 +366,6 @@ export class DeclaracionHelperService {
     exhaustMap(() => this.processNextStep())
   );
 
-  // Centralizar el estado base y compartirlo entre suscriptores
-  private readonly baseState$ = this._state$.asObservable().pipe(
-    shareReplay(1)
-  );
-
-  // Mantener Subject original para compatibilidad
-  private readonly nextStepSubject = new Subject<void>();
-  readonly nextStep$ = this.nextStepSubject.asObservable();
-
-  private readonly nextStepTrigger = new Subject<void>();
-  private readonly processedNextStep$ = this.nextStepTrigger.pipe(
-    exhaustMap(() => this.processNextStep())
-  );
 
   constructor(
     private _declaracion: DeclaracionService,
@@ -588,7 +572,6 @@ export class DeclaracionHelperService {
     })
   }
   getDeclaracionesFlag(declaranteId: number): void {
-  getDeclaracionesFlag(declaranteId: number): void {
     this._declaracion.obtenerRegistro(declaranteId).subscribe({
       next: (res: any) => {
         console.log('Flags obtenidos:', res);
@@ -596,12 +579,7 @@ export class DeclaracionHelperService {
         // Validar los pasos de intereses basados en los nuevos flags
         this.validateFlagsForInteresesSteps();
         this.getConfirmacionDatos();
-      next: (res: any) => {
-        console.log('Flags obtenidos:', res);
-        this.declaracionesFlagSubject.next(res);
-        // Validar los pasos de intereses basados en los nuevos flags
-        this.validateFlagsForInteresesSteps();
-        this.getConfirmacionDatos();
+
       },
       error: (err: any) => {
         console.error('Error al obtener flags:', err);
@@ -697,7 +675,6 @@ export class DeclaracionHelperService {
   /** Marca un paso/subpaso completo + burbujea al padre */
   markStepCompleted(path: string[]): void {
     const copy = updateState(this._state$.value, {});
-    const copy = updateState(this._state$.value, {});
     const step = this.locateStep(copy, path);
     if (!step) { return; }
     step.completed = true;
@@ -713,7 +690,6 @@ export class DeclaracionHelperService {
   /** Marca como incompleto */
   markStepIncomplete(path: string[]): void {
     const copy = updateState(this._state$.value, {});
-    const copy = updateState(this._state$.value, {});
     const step = this.locateStep(copy, path);
     if (!step) { return; }
     step.completed = false;
@@ -728,7 +704,6 @@ export class DeclaracionHelperService {
 
   /** Habilita / deshabilita un Paso (útil para lógica condicional) */
   toggleEnabled(path: string[], flag: boolean): void {
-    const copy = updateState(this._state$.value, {});
     const copy = updateState(this._state$.value, {});
     const step = this.locateStep(copy, path);
     if (step) { step.enabled = flag; this._state$.next(copy); }
@@ -749,11 +724,6 @@ export class DeclaracionHelperService {
         this.getDeclaracionesFlag(declaracion.idDeclarante);
       }
 
-      // Cargar los flags para el nuevo declarante activo
-      const declaracion = state.declaraciones.find(d => d.id === id);
-      if (declaracion) {
-        this.getDeclaracionesFlag(declaracion.idDeclarante);
-      }
     }
   }
 
@@ -832,8 +802,7 @@ export class DeclaracionHelperService {
   /** Busca por key en todo el árbol (más cómodo para componentes pequeños) */
   setCompletedByKey(key: string, val = true): void {
     const copy = updateState(this._state$.value, {});
-    const copy = updateState(this._state$.value, {});
-    const step =
+      const step =
       findStep(copy.declarante, key) ??
       copy.declaraciones.flatMap(d => d.intereses)
         .map(int => findStep([int], key)).find(Boolean);
