@@ -19,6 +19,7 @@ import { TextosComponent } from './views/textos/textos.component';
 import { DeclaracionesComponent } from './views/declaraciones/declaraciones.component';
 import { ReportesComponent } from './views/reportes/reportes.component';
 import { AdministracionRoutingModule } from './administracion-routing.module';
+import { TransparenciaActivaComponent } from './views/transparencia-activa/transparencia-activa.component';
 import { TransparenciaActivaPendientesComponent } from './views/transparencia-activa/transparencia-activa-pendientes/transparencia-activa-pendientes.component';
 import { TransparenciaActivaProcesadasComponent } from './views/transparencia-activa/transparencia-activa-procesadas/transparencia-activa-procesadas.component';
 import { TransparenciaActivaPublicadasComponent } from './views/transparencia-activa/transparencia-activa-publicadas/transparencia-activa-publicadas.component';
@@ -41,6 +42,7 @@ import { ParametroConfiguracionComponent } from './views/parametros/parametro-co
     TextosComponent,
     DeclaracionesComponent,
     ReportesComponent,
+    TransparenciaActivaComponent,
     TransparenciaActivaPendientesComponent,
     TransparenciaActivaProcesadasComponent,
     TransparenciaActivaPublicadasComponent,

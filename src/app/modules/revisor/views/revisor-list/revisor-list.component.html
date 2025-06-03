@@ -1,259 +1,600 @@
 <div class="container-fluid">
-  <!-- ▸ Spinner global -->
-  <div *ngIf="isLoading" class="loading-spinner-container">
-    <div class="spinner-content">
+  <!-- Spinner global -->
+  <div *ngIf="isLoading" class="loading-overlay">
+    <div class="loading-content">
       <mat-spinner diameter="50"></mat-spinner>
       <p class="loading-text">Cargando Revisores...</p>
     </div>
   </div>
 
-  <!-- ▸ Breadcrumb -->
-  <nav aria-label="breadcrumb" class="mb-2">
+  <!-- Breadcrumb -->
+  <nav aria-label="breadcrumb" class="mb-3">
     <ol class="breadcrumb">
       <li class="breadcrumb-item"><a routerLink="/">Inicio</a></li>
       <li class="breadcrumb-item active" aria-current="page">Revisores</li>
     </ol>
   </nav>
 
-  <!-- ▸ Título -->
-  <h2 class="component-title mb-3">Lista de Revisores</h2>
-
-  <!-- ▸ Pestañas (bootstrap-like nav-tabs) -->
-  <ul class="nav nav-tabs mb-2">
-    <li class="nav-item" *ngFor="let tab of tabs">
-      <a class="nav-link"
-         [class.active]="currentTab === tab.id"
-         (click)="setTab(tab.id)">
-        {{ tab.label }}&nbsp;({{ tab.count() }})
-      </a>
-    </li>
-  </ul>
-
-  <!-- ▸ Cabecera filtros -->
-  <div class="filtros-header d-flex align-items-center mb-1 mt-3">
-    <span class="me-2 fw-bold">Filtros avanzados</span>
-    <button class="btn btn-link btn-collapse" (click)="toggleFiltros()">
-      <mat-icon *ngIf="!showFilters">keyboard_arrow_down</mat-icon>
-      <mat-icon *ngIf="showFilters">keyboard_arrow_up</mat-icon>
-    </button>
+  <!-- Título -->
+  <div class="page-header">
+    <h2 class="page-title">Lista de Revisores</h2>
   </div>
 
-  <!-- ▸ Caja de filtros -->
-  <div class="filtros-caja" [class.collapsed]="!showFilters">
-    <div class="row g-2 mb-1">
-      <!-- Enviado Por -->
-      <div class="col-md-3">
-        <mat-form-field appearance="outline" class="small-form-field w-100">
-          <mat-label>Enviado por</mat-label>
-          <input matInput [formControl]="enviadoPor">
-        </mat-form-field>
-      </div>
-
-      <!-- Fecha Declaración -->
-      <div class="col-md-3">
-        <mat-form-field appearance="outline" class="small-form-field w-100">
-          <mat-label>Fecha Declaración</mat-label>
-          <input matInput [matDatepicker]="pickerDec" [formControl]="fechaDeclaracion">
-          <mat-datepicker-toggle matSuffix [for]="pickerDec"></mat-datepicker-toggle>
-          <mat-datepicker #pickerDec></mat-datepicker>
-        </mat-form-field>
-      </div>
-
-      <!-- Tipo -->
-      <div class="col-md-3">
-        <mat-form-field appearance="outline" class="small-form-field w-100">
-          <mat-label>Tipo</mat-label>
-          <mat-select [formControl]="tipo">
-            <mat-option *ngFor="let t of tiposDeclaracion" [value]="t.id">{{ t.nombre }}</mat-option>
-          </mat-select>
-        </mat-form-field>
-      </div>
-
-      <!-- RUN -->
-      <div class="col-md-3">
-        <mat-form-field appearance="outline" class="small-form-field w-100">
-          <mat-label>RUN</mat-label>
-          <input matInput [formControl]="run">
-        </mat-form-field>
-      </div>
-
-      <!-- Declarante -->
-      <div class="col-md-3">
-        <mat-form-field appearance="outline" class="small-form-field w-100">
-          <mat-label>Declarante</mat-label>
-          <input matInput [formControl]="declarante">
-        </mat-form-field>
-      </div>
-
-      <!-- Servicio -->
-      <div class="col-md-3">
-        <mat-form-field appearance="outline" class="small-form-field w-100">
-          <mat-label>Servicio</mat-label>
-          <mat-select [formControl]="servicio">
-            <mat-option *ngFor="let s of servicios" [value]="s.id">{{ s.nombre }}</mat-option>
-          </mat-select>
-        </mat-form-field>
-      </div>
-
-      <!-- Cargo -->
-      <div class="col-md-3">
-        <mat-form-field appearance="outline" class="small-form-field w-100">
-          <mat-label>Cargo</mat-label>
-          <input matInput [formControl]="cargo">
-        </mat-form-field>
-      </div>
-
-      <!-- Estado -->
-      <div class="col-md-3">
-        <mat-form-field appearance="outline" class="small-form-field w-100">
-          <mat-label>Estado</mat-label>
-          <mat-select [formControl]="estado">
-            <mat-option *ngFor="let e of estadosDeclaracion" [value]="e.id">{{ e.nombre }}</mat-option>
-          </mat-select>
-        </mat-form-field>
-      </div>
-    </div>
-
-    <!-- Botones filtros -->
-    <div class="row mb-1">
-      <div class="col-12 d-flex justify-content-end">
-        <button mat-raised-button color="primary" class="me-2" (click)="buscar()">
-          <img src="assets/icons/icon-btn-tabla_filtrar.svg" style="width: 20px; filter: invert(1);" alt> Buscar
-        </button>
-        <button mat-raised-button color="warn" class="me-2" (click)="limpiar()">
-          <img src="assets/icons/icon-btn-tabla_eliminar.svg"  style="width: 20px; filter: invert(1);" alt> Limpiar
-        </button>
-        <button mat-raised-button color="accent" (click)="export()">
-          <img src="assets/icons/icon-btn-tabla_descargar.svg" style="width: 20px; filter: invert(1);" alt> Exportar
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <hr>
-
-  <!-- ▸ Barra de acciones -->
-  <div class="row g-2 mb-3 float-end">
-    <div class="col-auto">
-      <button mat-raised-button color="primary" (click)="descargarSeleccionados()"
-              [disabled]="selection.selected.length === 0">
-        <img src="assets/icons/icon-btn-tabla_descargar.svg"
-             style="width:20px; height:20px; filter:invert(1);" alt> Descargar Seleccionados
+  <!-- Pestañas modernos -->
+  <div class="tabs-section">
+    <div class="modern-tabs">
+      <button 
+        class="tab-button" 
+        *ngFor="let tab of tabs"
+        [class.active]="currentTab === tab.id"
+        (click)="setTab(tab.id)">
+        <span class="tab-label">{{ tab.label }}</span>
+        <span class="tab-count">({{ tab.count() }})</span>
       </button>
     </div>
   </div>
 
-  <!-- ▸ Tabla -->
-  <table mat-table [dataSource]="dataSource"
-         class="small-table mat-elevation-z8 w-100"
-         [class.loading]="isLoading">
+  <!-- Sección de filtros mejorada -->
+  <div class="filters-section">
+    <div class="filters-header" (click)="toggleFiltros()">
+      <span class="filters-title">
+        <mat-icon class="filters-icon">filter_list</mat-icon>
+        Filtros avanzados
+      </span>
+      <mat-icon class="toggle-icon" [class.rotated]="showFilters">
+        keyboard_arrow_down
+      </mat-icon>
+    </div>
 
-    <!-- Selección -->
-    <ng-container matColumnDef="select">
-      <th mat-header-cell *matHeaderCellDef>
-        <mat-checkbox color="primary"
-                      (change)="masterToggle()"
-                      [checked]="isAllSelected()"
-                      [indeterminate]="isSomeSelected()">
-        </mat-checkbox>
-      </th>
-      <td mat-cell *matCellDef="let element">
-        <mat-checkbox color="primary"
-                      (click)="$event.stopPropagation()"
-                      (change)="toggle(element)"
-                      [checked]="selection.isSelected(element)">
-        </mat-checkbox>
-      </td>
-    </ng-container>
+    <div class="filters-container" [class.expanded]="showFilters">
+      <div class="filters-content">
+        <div class="row g-3">
+          <!-- Enviado Por -->
+          <div class="col-lg-3 col-md-4 col-sm-6">
+            <mat-form-field appearance="outline" class="modern-form-field">
+              <mat-label>Enviado por</mat-label>
+              <input matInput [formControl]="enviadoPor">
+            </mat-form-field>
+          </div>
 
-    <!-- ID -->
-    <ng-container matColumnDef="id" >
-      <th mat-header-cell *matHeaderCellDef>ID</th>
-      <td mat-cell *matCellDef="let e">{{ e.id }}</td>
-    </ng-container>
+          <!-- Fecha Declaración -->
+          <div class="col-lg-3 col-md-4 col-sm-6">
+            <mat-form-field appearance="outline" class="modern-form-field">
+              <mat-label>Fecha Declaración</mat-label>
+              <input matInput [matDatepicker]="pickerDec" [formControl]="fechaDeclaracion">
+              <mat-datepicker-toggle matSuffix [for]="pickerDec"></mat-datepicker-toggle>
+              <mat-datepicker #pickerDec></mat-datepicker>
+            </mat-form-field>
+          </div>
 
-    <!-- Fecha -->
-    <ng-container matColumnDef="fechaDeclaracion" >
-      <th mat-header-cell *matHeaderCellDef>Fecha Declaración</th>
-      <td mat-cell *matCellDef="let e">{{ e.fecha | date:'dd/MM/yyyy HH:mm' }}</td>
-    </ng-container>
+          <!-- Tipo -->
+          <div class="col-lg-3 col-md-4 col-sm-6">
+            <mat-form-field appearance="outline" class="modern-form-field">
+              <mat-label>Tipo</mat-label>
+              <mat-select [formControl]="tipo">
+                <mat-option *ngFor="let t of tiposDeclaracion" [value]="t.id">{{ t.nombre }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
 
-    <!-- Tipo -->
-    <ng-container matColumnDef="tipoDeclaracion" >
-      <th mat-header-cell *matHeaderCellDef>Tipo</th>
-      <td mat-cell *matCellDef="let e">{{ e.declaTipo }}</td>
-    </ng-container>
+          <!-- RUN -->
+          <div class="col-lg-3 col-md-4 col-sm-6">
+            <mat-form-field appearance="outline" class="modern-form-field">
+              <mat-label>RUN</mat-label>
+              <input matInput [formControl]="run">
+            </mat-form-field>
+          </div>
 
-    <!-- Numeral -->
-    <ng-container matColumnDef="numeral" >
-      <th mat-header-cell *matHeaderCellDef>Numeral</th>
-      <td mat-cell *matCellDef="let e">{{ e.anio }}</td>
-    </ng-container>
+          <!-- Declarante -->
+          <div class="col-lg-3 col-md-4 col-sm-6">
+            <mat-form-field appearance="outline" class="modern-form-field">
+              <mat-label>Declarante</mat-label>
+              <input matInput [formControl]="declarante">
+            </mat-form-field>
+          </div>
 
-    <!-- RUT -->
-    <ng-container matColumnDef="rut" >
-      <th mat-header-cell *matHeaderCellDef>RUT</th>
-      <td mat-cell *matCellDef="let e">{{ e.rut }}</td>
-    </ng-container>
+          <!-- Servicio -->
+          <div class="col-lg-3 col-md-4 col-sm-6">
+            <mat-form-field appearance="outline" class="modern-form-field">
+              <mat-label>Servicio</mat-label>
+              <mat-select [formControl]="servicio">
+                <mat-option *ngFor="let s of servicios" [value]="s.id">{{ s.nombre }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
 
-    <!-- Declarante -->
-    <ng-container matColumnDef="declarante" >
-      <th mat-header-cell *matHeaderCellDef>Declarante</th>
-      <td mat-cell *matCellDef="let e">{{ e.declarante }}</td>
-    </ng-container>
+          <!-- Cargo -->
+          <div class="col-lg-3 col-md-4 col-sm-6">
+            <mat-form-field appearance="outline" class="modern-form-field">
+              <mat-label>Cargo</mat-label>
+              <input matInput [formControl]="cargo">
+            </mat-form-field>
+          </div>
 
-    <!-- Servicio -->
-    <ng-container matColumnDef="servicio" >
-      <th mat-header-cell *matHeaderCellDef>Servicio</th>
-      <td mat-cell *matCellDef="let e">{{ e.servicio }}</td>
-    </ng-container>
+          <!-- Estado -->
+          <div class="col-lg-3 col-md-4 col-sm-6">
+            <mat-form-field appearance="outline" class="modern-form-field">
+              <mat-label>Estado</mat-label>
+              <mat-select [formControl]="estado">
+                <mat-option *ngFor="let e of estadosDeclaracion" [value]="e.id">{{ e.nombre }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
 
-    <!-- Cargo -->
-    <ng-container matColumnDef="cargo" >
-      <th mat-header-cell *matHeaderCellDef>Cargo</th>
-      <td mat-cell *matCellDef="let e">{{ e.cargo }}</td>
-    </ng-container>
+        <div class="filters-actions">
+          <button mat-raised-button color="primary" class="action-btn" (click)="buscar()">
+            <mat-icon>search</mat-icon>
+            Buscar
+          </button>
+          <button mat-raised-button color="warn" class="action-btn" (click)="limpiar()">
+            <mat-icon>clear</mat-icon>
+            Limpiar
+          </button>
+          <button mat-raised-button color="accent" class="action-btn" (click)="export()">
+            <mat-icon>download</mat-icon>
+            Exportar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 
-    <!-- Estado -->
-    <ng-container matColumnDef="estado" >
-      <th mat-header-cell *matHeaderCellDef>Estado</th>
-      <td mat-cell *matCellDef="let e">
-        <span [ngClass]="getEstadoPillClass(e.declaEstado)" class="estado-pill">{{ e.declaEstado }}</span>
-      </td>
-    </ng-container>
+<!-- VISTA DE ESCRITORIO -->
+<div class="d-none d-md-block desktop-view">
+  <!-- Barra de acciones superior -->
+  <div class="table-header">
+    <div class="table-actions">
+      <button mat-raised-button color="primary" class="primary-action-btn" 
+              (click)="descargarSeleccionados()"
+              [disabled]="selection.selected.length === 0">
+        <mat-icon>download</mat-icon>
+        Descargar Seleccionados
+      </button>
+    </div>
+  </div>
 
-    <!-- Enviado por -->
-    <ng-container matColumnDef="enviadoPor">
-      <th mat-header-cell *matHeaderCellDef>Enviado por</th>
-      <td mat-cell *matCellDef="let e">{{ e.remitente }}</td>
-    </ng-container>
+  <!-- Tabla con diseño mejorado -->
+  <div class="table-container">
+    <table mat-table [dataSource]="dataSource" class="modern-table" [class.loading]="isLoading">
+      <!-- Selección -->
+      <ng-container matColumnDef="select">
+        <th mat-header-cell *matHeaderCellDef class="header-cell checkbox-cell">
+          <mat-checkbox color="primary"
+                        (change)="masterToggle()"
+                        [checked]="isAllSelected()"
+                        [indeterminate]="isSomeSelected()">
+          </mat-checkbox>
+        </th>
+        <td mat-cell *matCellDef="let element" class="data-cell checkbox-cell">
+          <mat-checkbox color="primary"
+                        (click)="$event.stopPropagation()"
+                        (change)="toggle(element)"
+                        [checked]="selection.isSelected(element)">
+          </mat-checkbox>
+        </td>
+      </ng-container>
 
-    <!-- Acciones -->
-    <ng-container matColumnDef="acciones">
-      <th mat-header-cell *matHeaderCellDef>Acciones</th>
-      <td mat-cell *matCellDef="let e" class="actions-cell">
-        <button mat-icon-button color="accent" (click)="bitacora(e)" matTooltip="Bitácora">
-          <img src="assets/icons/icons-btn-tabla_bitacora.svg" style="width:20px; height:20px;">
-        </button>
-        <button mat-icon-button color="primary" (click)="derivar(e)" matTooltip="Derivar">
-          <img src="assets/icons/icons-btn-tabla_derivar.svg" style="width:20px; height:20px;">
-        </button>
-        <button mat-icon-button color="accent" (click)="enviarAJefeServicio(e)" matTooltip="Enviar a Jefe de Servicio">
-          <img src="assets/icons/icons-btn-tabla_enviar.svg" style="width:20px; height:20px;">
-        </button>
-      </td>
-    </ng-container>
+      <!-- ID -->
+      <ng-container matColumnDef="id">
+        <th mat-header-cell *matHeaderCellDef class="header-cell">ID</th>
+        <td mat-cell *matCellDef="let e" class="data-cell">{{ e.id }}</td>
+      </ng-container>
 
-    <!-- Cabecera / filas -->
-    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-    <tr mat-row        *matRowDef="let row; columns: displayedColumns;"></tr>
-  </table>
+      <!-- Fecha -->
+      <ng-container matColumnDef="fechaDeclaracion">
+        <th mat-header-cell *matHeaderCellDef class="header-cell">Fecha Declaración</th>
+        <td mat-cell *matCellDef="let e" class="data-cell">{{ e.fecha  }}</td>
+      </ng-container>
 
-  <!-- ▸ Paginador -->
-  <div class="d-flex justify-content-center mt-3">
-    <mat-paginator [pageSizeOptions]="[5,10,20]"
-                   showFirstLastButtons
-                   [length]="dataSource?.data?.length">
+      <!-- Tipo -->
+      <ng-container matColumnDef="tipoDeclaracion">
+        <th mat-header-cell *matHeaderCellDef class="header-cell">Tipo</th>
+        <td mat-cell *matCellDef="let e" class="data-cell">{{ e.declaTipo }}</td>
+      </ng-container>
+
+      <!-- Numeral -->
+      <ng-container matColumnDef="numeral">
+        <th mat-header-cell *matHeaderCellDef class="header-cell">Numeral</th>
+        <td mat-cell *matCellDef="let e" class="data-cell">{{ e.anio }}</td>
+      </ng-container>
+
+      <!-- RUT -->
+      <ng-container matColumnDef="rut">
+        <th mat-header-cell *matHeaderCellDef class="header-cell">RUT</th>
+        <td mat-cell *matCellDef="let e" class="data-cell">{{ e.rut }}</td>
+      </ng-container>
+
+      <!-- Declarante -->
+      <ng-container matColumnDef="declarante">
+        <th mat-header-cell *matHeaderCellDef class="header-cell">Declarante</th>
+        <td mat-cell *matCellDef="let e" class="data-cell">{{ e.declarante }}</td>
+      </ng-container>
+
+      <!-- Servicio -->
+      <ng-container matColumnDef="servicio">
+        <th mat-header-cell *matHeaderCellDef class="header-cell">Servicio</th>
+        <td mat-cell *matCellDef="let e" class="data-cell">{{ e.servicio }}</td>
+      </ng-container>
+
+      <!-- Cargo -->
+      <ng-container matColumnDef="cargo">
+        <th mat-header-cell *matHeaderCellDef class="header-cell">Cargo</th>
+        <td mat-cell *matCellDef="let e" class="data-cell">{{ e.cargo }}</td>
+      </ng-container>
+
+      <!-- Estado -->
+      <ng-container matColumnDef="estado">
+        <th mat-header-cell *matHeaderCellDef class="header-cell">Estado</th>
+        <td mat-cell *matCellDef="let e" class="data-cell">
+          <span [ngClass]="getEstadoPillClass(e.declaEstado)" class="modern-estado-pill">{{ e.declaEstado }}</span>
+        </td>
+      </ng-container>
+
+      <!-- Enviado por -->
+      <ng-container matColumnDef="enviadoPor">
+        <th mat-header-cell *matHeaderCellDef class="header-cell">Enviado por</th>
+        <td mat-cell *matCellDef="let e" class="data-cell">{{ e.remitente }}</td>
+      </ng-container>
+
+      <!-- Acciones -->
+      <ng-container matColumnDef="acciones">
+        <th mat-header-cell *matHeaderCellDef class="header-cell">Acciones</th>
+        <td mat-cell *matCellDef="let e" class="actions-cell">
+          <div class="action-buttons">
+
+
+            <button mat-icon-button color="accent" (click)="bitacora(e)" matTooltip="Bitácora" class="action-btn">
+              <img src="assets/icons/icon-btn-tabla_bitacora.svg" style="width:20px; height:20px;">
+            </button>
+
+
+            <button mat-icon-button color="primary" 
+                    (click)="derivar(e)" 
+                    matTooltip="Derivar" 
+                    class="action-btn"
+                    [disabled]="e.declaEstado !== 'PENDIENTE REVISOR' || derivarLoading">
+              <mat-spinner *ngIf="derivarLoading && currentDeclaracionToDerivar?.id === e.id" 
+                          diameter="20" 
+                          strokeWidth="2">
+              </mat-spinner>
+              <img *ngIf="!(derivarLoading && currentDeclaracionToDerivar?.id === e.id)" 
+                   src="assets/icons/icon-btn-tabla_archivar.svg" 
+                   style="width:20px; height:20px;">
+            </button>
+
+            
+            <button mat-icon-button color="accent" 
+                    (click)="enviarAJefeServicio(e)" 
+                    matTooltip="Enviar a Jefe de Servicio" 
+                    class="action-btn"
+                    [disabled]="currentDeclaracionEnviando === e.id">
+              <mat-spinner *ngIf="currentDeclaracionEnviando === e.id" 
+                          diameter="20" 
+                          strokeWidth="2">
+              </mat-spinner>
+              <img *ngIf="currentDeclaracionEnviando !== e.id" 
+                   src="assets/icons/icon-btn-tabla_archivar.svg" 
+                   style="width:20px; height:20px;">
+            </button>
+
+
+          </div>
+        </td>
+      </ng-container>
+
+      <!-- Cabecera / filas -->
+      <tr mat-header-row *matHeaderRowDef="displayedColumns" class="header-row"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="data-row"></tr>
+    </table>
+  </div>
+
+  <!-- Paginador mejorado -->
+  <div class="pagination-container">
+    <mat-paginator 
+      class="modern-paginator" 
+      [pageSizeOptions]="[5,10,20]"
+      showFirstLastButtons
+      [length]="dataSource?.data?.length"
+      aria-label="Paginador de Revisores">
     </mat-paginator>
   </div>
+</div>
+
+<!-- VISTA MOBILE -->
+<div class="d-block d-md-none mobile-view">
+  <!-- Botón de acción principal en mobile -->
+  <div class="mobile-actions">
+    <button mat-raised-button color="primary" class="mobile-primary-btn" 
+            (click)="descargarSeleccionados()"
+            [disabled]="selection.selected.length === 0">
+      <mat-icon>download</mat-icon>
+      Descargar Seleccionados
+    </button>
+  </div>
+
+  <!-- Lista de tarjetas mobile -->
+  <div class="mobile-list" [class.loading]="isLoading">
+    <div class="mobile-card" *ngFor="let e of dataSource.data">
+      <div class="card-header">
+        <div class="card-title">
+          <mat-checkbox color="primary"
+                        (click)="$event.stopPropagation()"
+                        (change)="toggle(e)"
+                        [checked]="selection.isSelected(e)"
+                        class="card-checkbox">
+          </mat-checkbox>
+          <span class="declaration-number">ID: {{ e.id }}</span>
+        </div>
+        <div class="card-actions">
+          <button mat-icon-button [matMenuTriggerFor]="menu" class="menu-btn">
+            <mat-icon>more_vert</mat-icon>
+          </button>
+          <mat-menu #menu="matMenu">
+            <button mat-menu-item (click)="bitacora(e); $event.stopPropagation()">
+              <mat-icon>list</mat-icon>
+              <span>Bitácora</span>
+            </button>
+            <button mat-menu-item 
+                    (click)="derivar(e); $event.stopPropagation()"
+                    [disabled]="e.declaEstado !== 'PENDIENTE REVISOR' || derivarLoading">
+              <mat-spinner *ngIf="derivarLoading && currentDeclaracionToDerivar?.id === e.id" 
+                          diameter="18" 
+                          strokeWidth="2">
+              </mat-spinner>
+              <mat-icon *ngIf="!(derivarLoading && currentDeclaracionToDerivar?.id === e.id)">send</mat-icon>
+              <span>{{ (derivarLoading && currentDeclaracionToDerivar?.id === e.id) ? 'Derivando...' : 'Derivar' }}</span>
+            </button>
+            <button mat-menu-item 
+                    (click)="enviarAJefeServicio(e); $event.stopPropagation()"
+                    [disabled]="currentDeclaracionEnviando === e.id">
+              <mat-spinner *ngIf="currentDeclaracionEnviando === e.id" 
+                          diameter="18" 
+                          strokeWidth="2">
+              </mat-spinner>
+              <mat-icon *ngIf="currentDeclaracionEnviando !== e.id">supervisor_account</mat-icon>
+              <span>{{ currentDeclaracionEnviando === e.id ? 'Enviando...' : 'Enviar a Jefe de Servicio' }}</span>
+            </button>
+          </mat-menu>
+        </div>
+      </div>
+      
+      <div class="card-content">
+        <div class="info-row">
+          <span class="info-label">Fecha Declaración:</span>
+          <span class="info-value">{{ e.fecha  }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Tipo:</span>
+          <span class="info-value">{{ e.declaTipo }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Numeral:</span>
+          <span class="info-value">{{ e.anio }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">RUT:</span>
+          <span class="info-value">{{ e.rut }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Declarante:</span>
+          <span class="info-value">{{ e.declarante }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Servicio:</span>
+          <span class="info-value">{{ e.servicio }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Cargo:</span>
+          <span class="info-value">{{ e.cargo }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Estado:</span>
+          <span [ngClass]="getEstadoPillClass(e.declaEstado)" class="modern-estado-pill">
+            {{ e.declaEstado }}
+          </span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Enviado por:</span>
+          <span class="info-value">{{ e.remitente }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Paginador mobile -->
+  <div class="mobile-pagination">
+    <mat-paginator 
+      class="modern-paginator" 
+      [pageSizeOptions]="[5,10,20]"
+      showFirstLastButtons
+      [length]="dataSource?.data?.length"
+      aria-label="Paginador de Revisores">
+    </mat-paginator>
+  </div>
+</div>
+
+<!-- Modal de Bitácora -->
+<div class="bitacora-modal-overlay" *ngIf="showBitacoraModal" (click)="cerrarBitacoraModal()">
+  <div class="bitacora-modal-container" (click)="$event.stopPropagation()">
+    <!-- Header del modal -->
+    <div class="bitacora-modal-header">
+      <div class="modal-title">
+        <mat-icon class="modal-icon">history</mat-icon>
+        <h3>Bitácora de Declaración #{{ currentDeclaracionId }}</h3>
+      </div>
+      <button mat-icon-button class="close-btn" (click)="cerrarBitacoraModal()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <!-- Contenido del modal -->
+    <div class="bitacora-modal-content">
+      <!-- Spinner de carga -->
+      <div *ngIf="bitacoraLoading" class="bitacora-loading">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Cargando bitácora...</p>
+      </div>
+
+      <!-- Tabla de bitácoras -->
+      <div *ngIf="!bitacoraLoading && bitacoraData.length > 0" class="bitacora-table-container">
+        <table class="bitacora-table">
+          <thead>
+            <tr>
+              <th>Usuario</th>
+              <th>Fecha</th>
+              <th>Acción</th>
+              <th>Perfil</th>
+              <th>Observaciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let bitacora of bitacoraData; let i = index" 
+                [class.even-row]="i % 2 === 0">
+              <td class="usuario-cell">
+                <div class="usuario-info">
+                  <mat-icon class="user-icon">person</mat-icon>
+                  <span>{{ bitacora.usuario }}</span>
+                </div>
+              </td>
+              <td class="fecha-cell">
+                <div class="fecha-info">
+                  <mat-icon class="date-icon">schedule</mat-icon>
+                  <span>{{ bitacora.fecha }}</span>
+                </div>
+              </td>
+              <td class="accion-cell">
+                <span [ngClass]="getAccionPillClass(bitacora.accion)" class="accion-pill">
+                  {{ bitacora.accion }}
+                </span>
+              </td>
+              <td class="perfil-cell">
+                <div class="perfil-badge">
+                  <mat-icon class="role-icon">badge</mat-icon>
+                  <span>{{ bitacora.perfil }}</span>
+                </div>
+              </td>
+              <td class="observaciones-cell">
+                <div class="observaciones-content" [matTooltip]="bitacora.observaciones">
+                  {{ bitacora.observaciones }}
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Mensaje cuando no hay datos -->
+      <div *ngIf="!bitacoraLoading && bitacoraData.length === 0" class="bitacora-empty">
+        <mat-icon class="empty-icon">info</mat-icon>
+        <p>No hay registros de bitácora para esta declaración.</p>
+      </div>
+    </div>
+
+    <!-- Footer del modal con paginación -->
+    <div class="bitacora-modal-footer" *ngIf="bitacoraData.length > 0">
+      <mat-paginator 
+        class="bitacora-paginator"
+        [length]="bitacoraTotalItems"
+        [pageSize]="bitacoraPageSize"
+        [pageIndex]="bitacoraCurrentPage"
+        [pageSizeOptions]="[5, 10, 15]"
+        (page)="onBitacoraPaginaChange($event)"
+        showFirstLastButtons>
+      </mat-paginator>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Derivar -->
+<div class="derivar-modal-overlay" *ngIf="showDerivarModal" (click)="cerrarDerivarModal()">
+  <div class="derivar-modal-container" (click)="$event.stopPropagation()">
+    <!-- Header del modal -->
+    <div class="derivar-modal-header">
+      <div class="modal-title">
+        <mat-icon class="modal-icon">send</mat-icon>
+        <h3>Derivar Declaración #{{ currentDeclaracionToDerivar?.id }}</h3>
+      </div>
+      <button mat-icon-button class="close-btn" (click)="cerrarDerivarModal()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <!-- Contenido del modal -->
+    <div class="derivar-modal-content">
+      <!-- Spinner de carga -->
+      <div *ngIf="derivarLoading" class="derivar-loading">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Cargando visadores...</p>
+      </div>
+
+      <!-- Formulario -->
+      <div *ngIf="!derivarLoading" class="derivar-form">
+        <!-- Seleccionar Visador -->
+        <div class="form-group">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Seleccionar Visador</mat-label>
+            <mat-select [(value)]="visadorSeleccionado" required>
+              <mat-option *ngFor="let visador of visadores" [value]="visador">
+                {{ visador.nombre }}
+              </mat-option>
+            </mat-select>
+            <mat-hint>Seleccione el visador al que desea derivar la declaración</mat-hint>
+          </mat-form-field>
+        </div>
+
+        <!-- Observación -->
+        <div class="form-group">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Observación</mat-label>
+            <textarea 
+              matInput 
+              [(ngModel)]="observacionDerivar" 
+              placeholder="Ingrese una observación..."
+              rows="4"
+              maxlength="500"
+              required>
+            </textarea>
+            <mat-hint align="end">{{ observacionDerivar.length }}/500</mat-hint>
+          </mat-form-field>
+        </div>
+
+        <!-- Mensaje cuando no hay visadores -->
+        <div *ngIf="visadores.length === 0" class="no-visadores">
+          <mat-icon class="warning-icon">warning</mat-icon>
+          <p>No hay visadores disponibles para esta declaración.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer del modal -->
+    <div class="derivar-modal-footer">
+      <button mat-button 
+              (click)="cerrarDerivarModal()" 
+              color="warn"
+              [disabled]="derivarLoading">
+        Cancelar
+      </button>
+      <button mat-raised-button 
+              color="primary" 
+              (click)="confirmarDerivar()"
+              [disabled]="!visadorSeleccionado || !observacionDerivar.trim() || derivarLoading || visadores.length === 0">
+        <mat-spinner *ngIf="derivarLoading" diameter="20" strokeWidth="2" style="margin-right: 8px;"></mat-spinner>
+        <mat-icon *ngIf="!derivarLoading">send</mat-icon>
+        {{ derivarLoading ? 'Derivando...' : 'Derivar' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Overlay de loading para acciones específicas -->
+<div class="action-loading-overlay" *ngIf="enviarJefeServicioLoading || (derivarLoading && !showDerivarModal)">
+  <div class="action-loading-content">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p class="loading-text">
+      {{ enviarJefeServicioLoading ? 'Enviando al Jefe de Servicio...' : 'Derivando declaración...' }}
+    </p>
+  </div>
+</div>
+
 </div>

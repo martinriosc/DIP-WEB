@@ -166,18 +166,28 @@ export class DeclaracionService {
 
   /**
    * Obtiene la bitácora de una declaración
+   * @param idDeclaracion - El ID de la declaración
+   * @param page - La página de la bitácora
+   * @param limit - El límite de registros por página
+   * @returns La bitácora de la declaración
    */
-  obtenerBitacora(idDeclaracion: number): Observable<ApiResponse<any>> {
-    const url = `${this.apiUrl}/pr/service/transparenciaActiva/listarBitacora?idDeclaracion=${idDeclaracion}`;
+  obtenerBitacora(idDeclaracion: number, page: number, limit: number): Observable<ApiResponse<any>> {
+    const url = `${this.apiUrl}/pr/service/bitacora/getBitacoras?declaracionId=${idDeclaracion}&page=${page}&start=0&limit=${limit}&sort=%5B%7B%22property%22%3A%22fecha%22%2C%22direction%22%3A%22ASC%22%7D%5D`;
     return this.http.get<ApiResponse<any>>(url, { withCredentials: true });
   }
 
   /**
+   * http://localhost:8080/patrimonio.web/pr/service/declaracion/archivarDeclaracion
+
    * Archiva una declaración
    */
-  archivarDeclaracion(idDeclaracion: number): Observable<ApiResponse<any>> {
-    const url = `${this.apiUrl}/pr/service/declaracion/archivar`;
-    return this.http.post<ApiResponse<any>>(url, { idDeclaracion }, { withCredentials: true });
+
+  archivarDeclaracion(idDeclaracion: number, observacion: string): Observable<any> {
+    const url = `${this.apiUrl}/pr/service/declaracion/archivarDeclaracion`;
+    const body = new HttpParams()
+      .set('observacion', observacion)
+      .set('idDeclaraciones', idDeclaracion.toString());
+    return this.http.post<any>(url, body, { withCredentials: true });
   }
 
   /**
@@ -303,5 +313,35 @@ export class DeclaracionService {
       .set('limit', limit);
     return this.http.get<ApiResponse<any>>(`${this.apiUrl}/pr/service/procesoMasivo/${fn}`,
       { params, withCredentials: true });
+  }
+
+  /**
+   * Envía una declaración a un visador específico
+   */
+  enviarVisador(declaracionId: number, idVisador: number, observacion: string, rol: number): Observable<any> {
+    const body = new HttpParams()
+      .set('declaracionId', declaracionId.toString())
+      .set('idVisador', idVisador.toString())
+      .set('observacion', observacion)
+      .set('rol', rol.toString());
+
+    return this.http.post<any>(`${this.apiUrl}/pr/service/declaracion/enviarVisador`, body.toString(), {
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      withCredentials: true
+    });
+  }
+
+  /**
+   * Envía una declaración al jefe de servicio
+   */
+  enviarJefeServicio(declaracionId: number, rol: number): Observable<any> {
+    const body = new HttpParams()
+      .set('declaracionId', declaracionId.toString())
+      .set('rol', rol.toString());
+
+    return this.http.post<any>(`${this.apiUrl}/pr/service/declaracion/enviarJefeServicio`, body.toString(), {
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      withCredentials: true
+    });
   }
 } 

@@ -37,33 +37,33 @@ export class AdministracionComponent implements OnInit {
 
   // Navegación principal
   mainNav = [
-    { label: 'Usuarios', route: '/administracion/usuarios', section: 'usuarios' },
-    { label: 'Parámetros', route: '/administracion/parametros/servicio', section: 'parametros' },
-    { label: 'Textos', route: '/administracion/textos', section: 'textos' },
-    { label: 'Declaraciones', route: '/administracion/declaraciones', section: 'declaraciones' },
-    { label: 'Transparencia Activa', route: '/administracion/transparencia-activa/pendientes', section: 'transparencia-activa' },
-    { label: 'Reportes', route: '/administracion/reportes', section: 'reportes' }
+    { label: 'Usuarios', route: '/administracion/usuarios', section: 'usuarios', icon: 'people' },
+    { label: 'Parámetros', route: '/administracion/parametros/servicio', section: 'parametros', icon: 'settings' },
+    { label: 'Textos', route: '/administracion/textos', section: 'textos', icon: 'text_fields' },
+    { label: 'Declaraciones', route: '/administracion/declaraciones', section: 'declaraciones', icon: 'description' },
+    { label: 'Transparencia Activa', route: '/administracion/transparencia-activa/pendientes', section: 'transparencia-activa', icon: 'visibility' },
+    { label: 'Reportes', route: '/administracion/reportes', section: 'reportes', icon: 'assessment' }
   ];
 
   // Submenú para 'parametros'
   parametrosNav = [
-    { label: 'Servicio', route: '/administracion/parametros/servicio' },
-    { label: 'UTM', route: '/administracion/parametros/utm' },
-    { label: 'Marca Vehículo', route: '/administracion/parametros/marca-vehiculo' },
-    { label: 'Tipo Vehículo', route: '/administracion/parametros/tipo-vehiculo' },
-    { label: 'Profesión', route: '/administracion/parametros/profesion' },
-    { label: 'Actividad', route: '/administracion/parametros/actividad' },
-    { label: 'PDF Reservado', route: '/administracion/parametros/pdf-reservado' },
-    { label: 'JSON Reservado', route: '/administracion/parametros/json-reservado' },
-    { label: 'Configuración', route: '/administracion/parametros/configuracion' }
+    { label: 'Servicio', route: '/administracion/parametros/servicio', icon: 'business' },
+    { label: 'UTM', route: '/administracion/parametros/utm', icon: 'location_on' },
+    { label: 'Marca Vehículo', route: '/administracion/parametros/marca-vehiculo', icon: 'directions_car' },
+    { label: 'Tipo Vehículo', route: '/administracion/parametros/tipo-vehiculo', icon: 'local_shipping' },
+    { label: 'Profesión', route: '/administracion/parametros/profesion', icon: 'work' },
+    { label: 'Actividad', route: '/administracion/parametros/actividad', icon: 'assignment' },
+    { label: 'PDF Reservado', route: '/administracion/parametros/pdf-reservado', icon: 'picture_as_pdf' },
+    { label: 'JSON Reservado', route: '/administracion/parametros/json-reservado', icon: 'code' },
+    { label: 'Configuración', route: '/administracion/parametros/configuracion', icon: 'tune' }
   ];
 
   // Submenú para 'transparencia-activa'
   transparenciaNav = [
-    { label: 'Pendientes', route: '/administracion/transparencia-activa/pendientes' },
-    { label: 'Procesadas', route: '/administracion/transparencia-activa/procesadas' },
-    { label: 'Publicadas', route: '/administracion/transparencia-activa/publicadas' },
-    { label: 'Con Errores', route: '/administracion/transparencia-activa/con-errores' }
+    { label: 'Pendientes', route: '/administracion/transparencia-activa/pendientes', icon: 'schedule' },
+    { label: 'Procesadas', route: '/administracion/transparencia-activa/procesadas', icon: 'check_circle' },
+    { label: 'Publicadas', route: '/administracion/transparencia-activa/publicadas', icon: 'publish' },
+    { label: 'Con Errores', route: '/administracion/transparencia-activa/con-errores', icon: 'error' }
   ];
 
   isActiveSection(section: string): boolean {

@@ -1,6 +1,6 @@
 import { LeyReservadoService } from './../../services/ley-reservado.service';
 import { Component, ViewChild, AfterViewInit, OnInit } from '@angular/core';
-import { FormControl } from '@angular/forms';
+import { FormControl, FormBuilder, Validators } from '@angular/forms';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatDialog } from '@angular/material/dialog';
@@ -60,6 +60,23 @@ export class DeclaracionListComponent implements AfterViewInit, OnInit {
     'acciones'
   ];
 
+  // Propiedades para el modal de bitácoras
+  showBitacoraModal = false;
+  bitacoraData: any[] = [];
+  bitacoraLoading = false;
+  bitacoraPageSize = 5;
+  bitacoraCurrentPage = 0;
+  bitacoraTotalItems = 0;
+  currentDeclaracionId = 0;
+
+  // Propiedades para el modal de archivado
+  showArchivarModal = false;
+  archivarForm = this._fb.group({
+    observacion: ['', [Validators.required, Validators.minLength(10)]]
+  });
+  archivarLoading = false;
+  currentDeclaracionToArchive: Declaracion | null = null;
+
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   private initialLoadDone = false;
@@ -79,14 +96,16 @@ export class DeclaracionListComponent implements AfterViewInit, OnInit {
     private _valoresObligatorios: ValoresObligatoriosService,
     private _auth: AuthService,
     private _declaracionHelper: DeclaracionHelperService,
-    private _toastr: ToastrService
+    private _toastr: ToastrService,
+    private _fb: FormBuilder
   ) {
     this._declaracionHelper.resetState();
-   }
+  }
 
   ngOnInit(): void {
     this.cargarFiltros();
     this.cargarDeclaraciones();
+    this.ajustarModalParaSidebar();
   }
 
 
@@ -215,12 +234,17 @@ export class DeclaracionListComponent implements AfterViewInit, OnInit {
   // Devuelve la clase/pill para el estado
   getEstadoPillClass(estado: string): string {
     switch (estado) {
-      case 'RECEPCIONADA':
+      case 'BORRADOR':
         return 'pill pill-success';
-      case 'ARCHIVADA':
+      case 'PENDIENTE FIRMAR':
+      case 'FIRMADA':
+      case 'PENDIENTE REVISOR':
+        return 'pill pill-primary';
+      case 'ENVIADA A ORGANISMO FISCALIZADOR':
+      case 'RECEPCIONADA POR ORGANISMO FISCALIZADOR':
         return 'pill pill-secondary';
-      case 'RECIBIDA':
-        return 'pill pill-warning';
+      case 'ARCHIVADA':
+        return 'pill pill-default';
       default:
         return 'pill pill-default';
     }
@@ -247,34 +271,151 @@ export class DeclaracionListComponent implements AfterViewInit, OnInit {
   }
 
   bitacora(element: Declaracion) {
-    this._declaracion.obtenerBitacora(Number(element.id))
+    this.currentDeclaracionId = Number(element.id);
+    this.bitacoraCurrentPage = 0;
+    this.ajustarModalParaSidebar();
+    this.cargarBitacora();
+    this.showBitacoraModal = true;
+  }
+
+  cargarBitacora() {
+    this.bitacoraLoading = true;
+    const startIndex = this.bitacoraCurrentPage * this.bitacoraPageSize;
+    
+    this._declaracion.obtenerBitacora(this.currentDeclaracionId, startIndex + 1, this.bitacoraPageSize)
       .subscribe({
         next: (response) => {
           if (response.success) {
-            // Aquí puedes mostrar la bitácora en un diálogo
-            console.log('Bitácora:', response.data);
+            this.bitacoraData = response.data || [];
+            this.bitacoraTotalItems = response.total || this.bitacoraData.length;
+          } else {
+            this.bitacoraData = [];
+            this.bitacoraTotalItems = 0;
           }
+          this.bitacoraLoading = false;
         },
         error: (error) => {
           console.error('Error al obtener bitácora:', error);
+          this.bitacoraData = [];
+          this.bitacoraTotalItems = 0;
+          this.bitacoraLoading = false;
+          this._toastr.error('Error al cargar la bitácora');
         }
       });
   }
 
-  archivar(element: Declaracion) {
-    if (confirm('¿Está seguro de archivar esta declaración?')) {
-      this._declaracion.archivarDeclaracion(Number(element.id))
-        .subscribe({
-          next: (response) => {
-            if (response.success) {
-              this.cargarDeclaraciones();
-            }
-          },
-          error: (error) => {
-            console.error('Error al archivar declaración:', error);
-          }
-        });
+  cerrarBitacoraModal() {
+    this.showBitacoraModal = false;
+    this.bitacoraData = [];
+    this.currentDeclaracionId = 0;
+  }
+
+  onBitacoraPaginaChange(event: any) {
+    this.bitacoraCurrentPage = event.pageIndex;
+    this.bitacoraPageSize = event.pageSize;
+    this.cargarBitacora();
+  }
+
+  getAccionPillClass(accion: string): string {
+    switch (accion.toUpperCase()) {
+      case 'BORRADOR':
+        return 'pill pill-success';
+      case 'ENVÍA A MINISTRO DE FE':
+      case 'PENDIENTE FIRMAR':
+        return 'pill pill-primary';
+      case 'FIRMA':
+      case 'FIRMADA':
+        return 'pill pill-primary';
+      case 'ENVIA A ORGANISMO FISCALIZADOR':
+      case 'RECEPCIONA ORGANISMO FISCALIZADOR':
+        return 'pill pill-secondary';
+      case 'ARCHIVADA':
+        return 'pill pill-default';
+      default:
+        return 'pill pill-default';
     }
+  }
+
+  /**
+   * Verifica si una declaración puede ser archivada
+   */
+  puedeArchivar(element: Declaracion): boolean {
+    const estadosArchivables = ['PENDIENTE FIRMAR', 'PENDIENTE REVISOR', 'FIRMADA'];
+    return estadosArchivables.includes(element.declaEstado);
+  }
+
+  /**
+   * Abre el modal para archivar una declaración
+   */
+  archivar(element: Declaracion) {
+    this.currentDeclaracionToArchive = element;
+    this.archivarForm.reset();
+    this.ajustarModalParaSidebar();
+    this.showArchivarModal = true;
+  }
+
+  /**
+   * Cierra el modal de archivado
+   */
+  cerrarArchivarModal() {
+    this.showArchivarModal = false;
+    this.archivarForm.reset();
+    this.currentDeclaracionToArchive = null;
+    this.archivarLoading = false;
+  }
+
+  /**
+   * Confirma y procesa el archivado de la declaración
+   */
+  confirmarArchivado() {
+    if (!this.currentDeclaracionToArchive || this.archivarLoading) {
+      return;
+    }
+
+    // Marcar todos los campos como tocados para mostrar errores de validación
+    this.archivarForm.markAllAsTouched();
+
+    if (this.archivarForm.invalid) {
+      this._toastr.error('Debe ingresar una observación válida para archivar la declaración');
+      return;
+    }
+
+    const observacion = this.archivarForm.get('observacion')?.value?.trim() || '';
+
+    // Mostrar SweetAlert de confirmación
+    Swal.fire({
+      title: '¿Está seguro de archivar esta declaración?',
+      text: 'Esta acción no se puede deshacer.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sí, archivar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed && this.currentDeclaracionToArchive) {
+        this.archivarLoading = true;
+        
+        this._declaracion.archivarDeclaracion(Number(this.currentDeclaracionToArchive.id), observacion)
+          .subscribe({
+            next: (response) => {
+              if (response) {
+                this._toastr.success('Declaración archivada exitosamente');
+                this.cerrarArchivarModal();
+                this.cargarDeclaraciones();
+              } else {
+                this._toastr.error('Error al archivar la declaración');
+                this.archivarLoading = false;
+              }
+            },
+            error: (error) => {
+              console.error('Error al archivar declaración:', error);
+              this._toastr.error('Error al archivar la declaración');
+              this.archivarLoading = false;
+            }
+          });
+      }
+    });
   }
 
   eliminar(element: Declaracion) {
@@ -303,7 +444,7 @@ export class DeclaracionListComponent implements AfterViewInit, OnInit {
           });
       }
     })
-    
+
   }
 
   descargarDeclaracion(element: Declaracion, tipo: 'completa' | 'publica' = 'completa') {
@@ -342,5 +483,43 @@ export class DeclaracionListComponent implements AfterViewInit, OnInit {
     this.currentPage = event.pageIndex;
     this.pageSize = event.pageSize;
     this.cargarDeclaraciones();
+  }
+
+  private ajustarModalParaSidebar() {
+    // Lista de selectores comunes para sidebars
+    const sidebarSelectors = [
+      '.sidebar',
+      '.mat-sidenav',
+      '.sidenav', 
+      '.side-nav',
+      '.mat-drawer',
+      'nav[role="navigation"]',
+      '.app-sidebar',
+      '.main-sidebar',
+      '.navigation-sidebar'
+    ];
+    
+    let sidebarDetected = false;
+    
+    for (const selector of sidebarSelectors) {
+      const sidebar = document.querySelector(selector);
+      if (sidebar) {
+        const sidebarRect = sidebar.getBoundingClientRect();
+        const sidebarWidth = sidebarRect.width;
+        
+        if (sidebarWidth > 0 && window.getComputedStyle(sidebar).display !== 'none') {
+          document.documentElement.style.setProperty('--sidebar-width', `${sidebarWidth}px`);
+          sidebarDetected = true;
+          console.log(`Sidebar detectado: ${selector}, ancho: ${sidebarWidth}px`);
+          break;
+        }
+      }
+    }
+    
+    if (!sidebarDetected) {
+      // Remover la variable CSS si no hay sidebar
+      document.documentElement.style.removeProperty('--sidebar-width');
+      console.log('No se detectó sidebar, usando ancho completo');
+    }
   }
 }

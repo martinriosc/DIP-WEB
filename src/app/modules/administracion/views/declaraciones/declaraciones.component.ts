@@ -13,7 +13,8 @@ interface DeclaracionAdmin {
 @Component({
   selector: 'app-declaraciones',
   templateUrl: './declaraciones.component.html',
-  styleUrls: ['./declaraciones.component.scss']
+  styleUrls: ['./declaraciones.component.scss'],
+  standalone: false
 })
 export class DeclaracionesComponent implements OnInit {
 

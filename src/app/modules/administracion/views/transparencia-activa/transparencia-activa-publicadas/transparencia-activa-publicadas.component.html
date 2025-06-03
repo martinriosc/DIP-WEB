@@ -1,90 +1,197 @@
 <div class="container-fluid">
-  <h2 class="mb-3">Transparencia Activa - Publicadas</h2>
+  <!-- Breadcrumb -->
+  <nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a routerLink="/">Inicio</a>
+      </li>
+      <li class="breadcrumb-item">
+        <a routerLink="/administracion">Administración</a>
+      </li>
+      <li class="breadcrumb-item">
+        <a routerLink="/administracion/transparencia-activa">Transparencia Activa</a>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">
+        Publicadas
+      </li>
+    </ol>
+  </nav>
 
-  <button mat-raised-button color="primary" (click)="crearPublicada()">
-    <mat-icon>post_add</mat-icon>
-    Crear Publicada
-  </button>
+  <!-- Título del componente -->
+  <div class="page-header">
+    <h2 class="page-title">Transparencia Activa - Publicadas 
+      <span class="item-count">({{ dataSource?.length || 0 }})</span>
+    </h2>
+  </div>
 
-  <table mat-table [dataSource]="dataSource" class="mat-elevation-z8 w-100 mt-3">
-    <!-- ID -->
-    <ng-container matColumnDef="id">
-      <th mat-header-cell *matHeaderCellDef>ID</th>
-      <td mat-cell *matCellDef="let element">{{ element.id }}</td>
-    </ng-container>
-
-    <!-- RUT Declarante -->
-    <ng-container matColumnDef="rutDeclarante">
-      <th mat-header-cell *matHeaderCellDef>RUT Declarante</th>
-      <td mat-cell *matCellDef="let element">{{ element.rutDeclarante }}</td>
-    </ng-container>
-
-    <!-- FechaPublicada -->
-    <ng-container matColumnDef="fechaPublicada">
-      <th mat-header-cell *matHeaderCellDef>Fecha Publicada</th>
-      <td mat-cell *matCellDef="let element">{{ element.fechaPublicada }}</td>
-    </ng-container>
-
-    <!-- Tipo -->
-    <ng-container matColumnDef="tipo">
-      <th mat-header-cell *matHeaderCellDef>Tipo</th>
-      <td mat-cell *matCellDef="let element">{{ element.tipo }}</td>
-    </ng-container>
-
-    <!-- Estado -->
-    <ng-container matColumnDef="estado">
-      <th mat-header-cell *matHeaderCellDef>Estado</th>
-      <td mat-cell *matCellDef="let element">{{ element.estado }}</td>
-    </ng-container>
-
-    <!-- Acciones -->
-    <ng-container matColumnDef="acciones">
-      <th mat-header-cell *matHeaderCellDef>Acciones</th>
-      <td mat-cell *matCellDef="let element" class="actions-cell">
-        <button mat-icon-button color="primary" (click)="editarPublicada(element)" matTooltip="Editar">
-          <mat-icon>edit</mat-icon>
+  <!-- VISTA DE ESCRITORIO: TABLA (visible desde md en adelante) -->
+  <div class="d-none d-md-block desktop-view">
+    <!-- Barra de acciones superior -->
+    <div class="table-header">
+      <div class="table-actions">
+        <button mat-raised-button color="primary" class="primary-action-btn" (click)="crearPublicada()">
+          <mat-icon>publish</mat-icon>
+          Crear Publicada
         </button>
-        <button mat-icon-button color="warn" (click)="eliminarPublicada(element)" matTooltip="Eliminar">
-          <mat-icon>delete</mat-icon>
-        </button>
-      </td>
-    </ng-container>
+      </div>
+    </div>
 
-    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-    <tr mat-row        *matRowDef="let row; columns: displayedColumns;"></tr>
-  </table>
+    <!-- Tabla con diseño mejorado -->
+    <div class="table-container">
+      <table mat-table [dataSource]="dataSource" class="modern-table">
+        <!-- ID -->
+        <ng-container matColumnDef="id">
+          <th mat-header-cell *matHeaderCellDef class="header-cell">ID</th>
+          <td mat-cell *matCellDef="let element" class="data-cell">{{ element.id }}</td>
+        </ng-container>
+
+        <!-- RUT Declarante -->
+        <ng-container matColumnDef="rutDeclarante">
+          <th mat-header-cell *matHeaderCellDef class="header-cell">RUT Declarante</th>
+          <td mat-cell *matCellDef="let element" class="data-cell">{{ element.rutDeclarante }}</td>
+        </ng-container>
+
+        <!-- Fecha Publicada -->
+        <ng-container matColumnDef="fechaPublicada">
+          <th mat-header-cell *matHeaderCellDef class="header-cell">Fecha Publicada</th>
+          <td mat-cell *matCellDef="let element" class="data-cell">{{ element.fechaPublicada }}</td>
+        </ng-container>
+
+        <!-- Tipo -->
+        <ng-container matColumnDef="tipo">
+          <th mat-header-cell *matHeaderCellDef class="header-cell">Tipo</th>
+          <td mat-cell *matCellDef="let element" class="data-cell">
+            <span class="modern-tipo-pill">
+              {{ element.tipo }}
+            </span>
+          </td>
+        </ng-container>
+
+        <!-- Estado -->
+        <ng-container matColumnDef="estado">
+          <th mat-header-cell *matHeaderCellDef class="header-cell">Estado</th>
+          <td mat-cell *matCellDef="let element" class="data-cell text-center">
+            <span class="modern-estado-pill publicado">
+              {{ element.estado }}
+            </span>
+          </td>
+        </ng-container>
+
+        <!-- Acciones -->
+        <ng-container matColumnDef="acciones">
+          <th mat-header-cell *matHeaderCellDef class="header-cell">Acciones</th>
+          <td mat-cell *matCellDef="let element" class="data-cell">
+            <div class="actions-container">
+              <button mat-icon-button color="primary" (click)="editarPublicada(element)" 
+                      matTooltip="Editar publicada" class="action-btn edit-btn">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button color="warn" (click)="eliminarPublicada(element)" 
+                      matTooltip="Eliminar publicada" class="action-btn delete-btn">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Header y Filas -->
+        <tr mat-header-row *matHeaderRowDef="displayedColumns" class="header-row"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="data-row"></tr>
+      </table>
+
+      <!-- Mensaje cuando no hay datos -->
+      <div *ngIf="!dataSource?.length" class="no-data-message">
+        <mat-icon>publish</mat-icon>
+        <h3>No hay documentos publicados</h3>
+        <p>No se han encontrado documentos de transparencia activa publicados</p>
+        <button mat-raised-button color="primary" (click)="crearPublicada()">
+          <mat-icon>publish</mat-icon>
+          Crear Publicada
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- VISTA MÓVIL: CARDS (visible solo en pantallas pequeñas) -->
+  <div class="d-block d-md-none mobile-view">
+    <div class="mobile-header">
+      <button mat-fab color="primary" (click)="crearPublicada()" class="fab-add">
+        <mat-icon>add</mat-icon>
+      </button>
+    </div>
+
+    <div class="mobile-cards-container">
+      <div *ngFor="let element of dataSource" class="publicada-card">
+        <div class="card-header">
+          <div class="publicada-info">
+            <h4>{{ element.rutDeclarante }}</h4>
+            <span class="publicada-tipo">{{ element.tipo }}</span>
+            <span class="publicada-fecha">{{ element.fechaPublicada }}</span>
+          </div>
+          <span class="mobile-status-pill publicado">
+            {{ element.estado }}
+          </span>
+        </div>
+        
+        <div class="card-actions">
+          <button mat-stroked-button color="primary" (click)="editarPublicada(element)">
+            <mat-icon>edit</mat-icon>
+            Editar
+          </button>
+          <button mat-stroked-button color="warn" (click)="eliminarPublicada(element)">
+            <mat-icon>delete</mat-icon>
+            Eliminar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
-<!-- MODAL -->
+<!-- MODAL (ng-template) -->
 <ng-template #publicadasModal>
-  <h2 mat-dialog-title>
-    {{ editMode ? 'Editar Publicada' : 'Crear Publicada' }}
-  </h2>
-  <div mat-dialog-content>
+  <div class="modal-header">
+    <h2 mat-dialog-title>
+      {{ editMode ? 'Editar Publicada' : 'Crear Publicada' }}
+    </h2>
+  </div>
+
+  <div mat-dialog-content class="modal-content">
     <form [formGroup]="formPublicada" class="form-publicada-modal">
-      <mat-form-field appearance="outline" class="w-100">
+      <mat-form-field appearance="outline" class="modern-form-field">
         <mat-label>RUT Declarante</mat-label>
         <input matInput formControlName="rutDeclarante" />
+        <mat-icon matSuffix>person</mat-icon>
       </mat-form-field>
 
-      <mat-form-field appearance="outline" class="w-100">
+      <mat-form-field appearance="outline" class="modern-form-field">
         <mat-label>Fecha Publicada</mat-label>
         <input matInput formControlName="fechaPublicada" />
+        <mat-icon matSuffix>date_range</mat-icon>
       </mat-form-field>
 
-      <mat-form-field appearance="outline" class="w-100">
+      <mat-form-field appearance="outline" class="modern-form-field">
         <mat-label>Tipo</mat-label>
         <input matInput formControlName="tipo" />
+        <mat-icon matSuffix>category</mat-icon>
       </mat-form-field>
 
-      <mat-form-field appearance="outline" class="w-100">
+      <mat-form-field appearance="outline" class="modern-form-field">
         <mat-label>Estado</mat-label>
         <input matInput formControlName="estado" />
+        <mat-icon matSuffix>flag</mat-icon>
       </mat-form-field>
     </form>
   </div>
-  <div mat-dialog-actions>
-    <button mat-button (click)="cerrarModal()">Cancelar</button>
-    <button mat-raised-button color="primary" (click)="guardar()">Guardar</button>
+
+  <div mat-dialog-actions class="modal-actions">
+    <button mat-button (click)="cerrarModal()" class="cancel-btn">
+      <mat-icon>close</mat-icon>
+      Cancelar
+    </button>
+    <button mat-raised-button color="primary" (click)="guardar()" class="save-btn">
+      <mat-icon>save</mat-icon>
+      Guardar
+    </button>
   </div>
 </ng-template>

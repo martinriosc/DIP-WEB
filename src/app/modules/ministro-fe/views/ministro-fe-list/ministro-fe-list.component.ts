@@ -8,9 +8,11 @@ import {
   TipoDeclaracion
 } from 'src/app/modules/declaraciones/services/declaracion.service';
 import { merge, debounceTime, switchMap, tap } from 'rxjs';
+import { ToastrService } from 'ngx-toastr';
 
 /* Modelo de fila */
 export interface DeclaracionMinistroFe {
+  id: number;
   idDeclaracion: number;
   fechaDeclaracion: string;
   tipoDeclaracion: string;
@@ -96,8 +98,17 @@ isLoading   = false;
   selectionEnviadas   = new SelectionModel<DeclaracionMinistroFe>(true, []);
   selectionArchivadas = new SelectionModel<DeclaracionMinistroFe>(true, []);
 
+  /* ══════════════ Propiedades para el modal de bitácora ══════════════ */
+  showBitacoraModal = false;
+  bitacoraData: any[] = [];
+  bitacoraLoading = false;
+  bitacoraPageSize = 5;
+  bitacoraCurrentPage = 0;
+  bitacoraTotalItems = 0;
+  currentDeclaracionId = 0;
+
   /* ──────────────────────────── Constructor ───────────────────── */
-  constructor(private _declaracion: DeclaracionService) {}
+  constructor(private _declaracion: DeclaracionService, private toastr: ToastrService) {}
 
   /* ───────────────────────────── Lifecycle ────────────────────── */
   ngOnInit(): void {
@@ -248,15 +259,83 @@ isLoading   = false;
 
   /* ────────────────────── Barra de acciones ───────────────────── */
 
-  onBitacora(){
-
+  onBitacora(element: DeclaracionMinistroFe) {
+    this.currentDeclaracionId = Number(element.id);
+    this.bitacoraCurrentPage = 0;
+    this.ajustarModalParaSidebar();
+    this.cargarBitacora();
+    this.showBitacoraModal = true;
   }
+
+  cargarBitacora() {
+    this.bitacoraLoading = true;
+    const startIndex = this.bitacoraCurrentPage * this.bitacoraPageSize;
+    
+    this._declaracion.obtenerBitacora(this.currentDeclaracionId, startIndex + 1, this.bitacoraPageSize)
+      .subscribe({
+        next: (response) => {
+          if (response.success) {
+            this.bitacoraData = response.data || [];
+            this.bitacoraTotalItems = response.total || this.bitacoraData.length;
+          } else {
+            this.bitacoraData = [];
+            this.bitacoraTotalItems = 0;
+          }
+          this.bitacoraLoading = false;
+        },
+        error: (error) => {
+          console.error('Error al obtener bitácora:', error);
+          this.bitacoraData = [];
+          this.bitacoraTotalItems = 0;
+          this.bitacoraLoading = false;
+          this.toastr.error('Error al cargar la bitácora');
+        }
+      });
+  }
+
+  cerrarBitacoraModal() {
+    this.showBitacoraModal = false;
+    this.bitacoraData = [];
+    this.currentDeclaracionId = 0;
+  }
+
+  onBitacoraPaginaChange(event: any) {
+    this.bitacoraCurrentPage = event.pageIndex;
+    this.bitacoraPageSize = event.pageSize;
+    this.cargarBitacora();
+  }
+
+  getAccionPillClass(accion: string): string {
+    switch (accion.toUpperCase()) {
+      case 'BORRADOR':
+        return 'pill pill-success';
+      case 'ENVÍA A MINISTRO DE FE':
+      case 'PENDIENTE FIRMAR':
+        return 'pill pill-primary';
+      case 'FIRMA':
+      case 'FIRMADA':
+        return 'pill pill-primary';
+      case 'ENVIA A ORGANISMO FISCALIZADOR':
+      case 'RECEPCIONA ORGANISMO FISCALIZADOR':
+        return 'pill pill-secondary';
+      case 'ARCHIVADA':
+        return 'pill pill-default';
+      default:
+        return 'pill pill-default';
+    }
+  }
+
+  private ajustarModalParaSidebar() {
+    // Método para ajustar el modal si hay una sidebar activa
+    // Puedes implementar lógica específica aquí si es necesario
+  }
+
   onFirmar(): void {
     const ids = this.selectionPendientes.selected.map(d => d.idDeclaracion);
     if (!ids.length) return;
     this._declaracion.validarProcesoActivo().subscribe(flag => {
       if (flag.data) { alert('Hay un proceso masivo activo'); return; }
-      this._declaracion.archivarDeclaracion(ids[0]).subscribe(() => this.loadBandeja());
+      this._declaracion.archivarDeclaracion(ids[0], 'Declaración archivada por el usuario').subscribe(() => this.loadBandeja());
     });
   }
 
@@ -298,11 +377,20 @@ isLoading   = false;
 
   /* ─────────────────────── Pills de estado ────────────────────── */
   pillClass(estado: string): string {
-    switch ((estado || '').toUpperCase()) {
-      case 'RECEPCIONADA': return 'pill pill-success';
-      case 'ARCHIVADA':    return 'pill pill-secondary';
-      case 'RECIBIDA':     return 'pill pill-warning';
-      default:             return 'pill pill-default';
+    switch (estado) {
+      case 'BORRADOR':
+        return 'pill pill-success';
+      case 'PENDIENTE FIRMAR':
+      case 'FIRMADA':
+      case 'PENDIENTE REVISOR':
+        return 'pill pill-primary';
+      case 'ENVIADA A ORGANISMO FISCALIZADOR':
+      case 'RECEPCIONADA POR ORGANISMO FISCALIZADOR':
+        return 'pill pill-secondary';
+      case 'ARCHIVADA':
+        return 'pill pill-default';
+      default:
+        return 'pill pill-default';
     }
   }
 }

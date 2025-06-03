@@ -1,281 +1,396 @@
 <div class="container-fluid">
-  <!-- Título -->
-  <h2 class="mb-3">Organismo Fiscalizador</h2>
+  <!-- Breadcrumb -->
+  <nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a routerLink="/">Inicio</a>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">
+        Organismo Fiscalizador
+      </li>
+    </ol>
+  </nav>
 
-  <!-- Filtros -->
-  <div class="row mb-2">
-    <!-- Fecha Declaración (Desde / Hasta) -->
-    <div class="col-md-2">
-      <mat-form-field appearance="outline" class="small-form-field w-100">
-        <mat-label>Fecha Declaración</mat-label>
-        <input
-          matInput
-          [matDatepicker]="picker1"
-          [formControl]="fechaDeclaracionDesde"
-          placeholder="Desde"
-        />
-        <mat-datepicker-toggle matSuffix [for]="picker1"></mat-datepicker-toggle>
-        <mat-datepicker #picker1></mat-datepicker>
-      </mat-form-field>
-    </div>
-    <div class="col-md-2">
-      <mat-form-field appearance="outline" class="small-form-field w-100">
-        <mat-label>&nbsp;</mat-label>
-        <input
-          matInput
-          [matDatepicker]="picker2"
-          [formControl]="fechaDeclaracionHasta"
-          placeholder="Hasta"
-        />
-        <mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
-        <mat-datepicker #picker2></mat-datepicker>
-      </mat-form-field>
+  <!-- Título del componente -->
+  <div class="page-header">
+    <h2 class="page-title">Organismo Fiscalizador 
+      <span class="item-count">({{ dataSource?.data?.length || 0 }})</span>
+    </h2>
+  </div>
+
+  <!-- Sección de filtros mejorada -->
+  <div class="filters-section">
+    <div class="filters-header" (click)="toggleFiltros()">
+      <span class="filters-title">
+        <mat-icon class="filters-icon">filter_list</mat-icon>
+        Filtros avanzados
+      </span>
+      <mat-icon class="toggle-icon" [class.rotated]="showFilters">
+        keyboard_arrow_down
+      </mat-icon>
     </div>
 
-    <!-- Fecha de Recepción (Desde / Hasta) -->
-    <div class="col-md-2">
-      <mat-form-field appearance="outline" class="small-form-field w-100">
-        <mat-label>Fecha de Recepción</mat-label>
-        <input
-          matInput
-          [matDatepicker]="picker3"
-          [formControl]="fechaRecepcionDesde"
-          placeholder="Desde"
-        />
-        <mat-datepicker-toggle matSuffix [for]="picker3"></mat-datepicker-toggle>
-        <mat-datepicker #picker3></mat-datepicker>
-      </mat-form-field>
-    </div>
-    <div class="col-md-2">
-      <mat-form-field appearance="outline" class="small-form-field w-100">
-        <mat-label>&nbsp;</mat-label>
-        <input
-          matInput
-          [matDatepicker]="picker4"
-          [formControl]="fechaRecepcionHasta"
-          placeholder="Hasta"
-        />
-        <mat-datepicker-toggle matSuffix [for]="picker4"></mat-datepicker-toggle>
-        <mat-datepicker #picker4></mat-datepicker>
-      </mat-form-field>
-    </div>
+    <div class="filters-container" [class.expanded]="showFilters">
+      <div class="filters-content">
+        <div class="row g-3">
+          <!-- Fecha Declaración (Desde) -->
+          <div class="col-lg-2 col-md-3 col-sm-6">
+            <mat-form-field appearance="outline" class="modern-form-field">
+              <mat-label>Fecha Declaración (Desde)</mat-label>
+              <input matInput [matDatepicker]="picker1" [formControl]="fechaDeclaracionDesde" placeholder="Desde">
+              <mat-datepicker-toggle matSuffix [for]="picker1"></mat-datepicker-toggle>
+              <mat-datepicker #picker1></mat-datepicker>
+            </mat-form-field>
+          </div>
 
-    <!-- Tipo Declaración -->
-    <div class="col-md-2">
-      <mat-form-field appearance="outline" class="small-form-field w-100">
-        <mat-label>Tipo Declaración</mat-label>
-        <mat-select [formControl]="tipoDeclaracion">
-          <mat-option value="">Todos</mat-option>
-          <mat-option value="PRIMERA DECLARACIÓN">PRIMERA DECLARACIÓN</mat-option>
-          <mat-option value="ACTUALIZACION PERIÓDICA">ACTUALIZACION PERIÓDICA</mat-option>
-          <mat-option value="DECLARACIÓN VOLUNTARIA">DECLARACIÓN VOLUNTARIA</mat-option>
-          <!-- Ajusta según tus opciones reales -->
-        </mat-select>
-      </mat-form-field>
-    </div>
+          <!-- Fecha Declaración (Hasta) -->
+          <div class="col-lg-2 col-md-3 col-sm-6">
+            <mat-form-field appearance="outline" class="modern-form-field">
+              <mat-label>Fecha Declaración (Hasta)</mat-label>
+              <input matInput [matDatepicker]="picker2" [formControl]="fechaDeclaracionHasta" placeholder="Hasta">
+              <mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
+              <mat-datepicker #picker2></mat-datepicker>
+            </mat-form-field>
+          </div>
 
-    <!-- Estado -->
-    <div class="col-md-2">
-      <mat-form-field appearance="outline" class="small-form-field w-100">
-        <mat-label>Estado</mat-label>
-        <mat-select [formControl]="estado">
-          <mat-option value="">Todos</mat-option>
-          <mat-option value="FIRMADA">FIRMADA</mat-option>
-          <mat-option value="ARCHIVADA">ARCHIVADA</mat-option>
-          <mat-option value="RECEPCIONADA">RECEPCIONADA</mat-option>
-        </mat-select>
-      </mat-form-field>
+          <!-- Fecha de Recepción (Desde) -->
+          <div class="col-lg-2 col-md-3 col-sm-6">
+            <mat-form-field appearance="outline" class="modern-form-field">
+              <mat-label>Fecha Recepción (Desde)</mat-label>
+              <input matInput [matDatepicker]="picker3" [formControl]="fechaRecepcionDesde" placeholder="Desde">
+              <mat-datepicker-toggle matSuffix [for]="picker3"></mat-datepicker-toggle>
+              <mat-datepicker #picker3></mat-datepicker>
+            </mat-form-field>
+          </div>
+
+          <!-- Fecha de Recepción (Hasta) -->
+          <div class="col-lg-2 col-md-3 col-sm-6">
+            <mat-form-field appearance="outline" class="modern-form-field">
+              <mat-label>Fecha Recepción (Hasta)</mat-label>
+              <input matInput [matDatepicker]="picker4" [formControl]="fechaRecepcionHasta" placeholder="Hasta">
+              <mat-datepicker-toggle matSuffix [for]="picker4"></mat-datepicker-toggle>
+              <mat-datepicker #picker4></mat-datepicker>
+            </mat-form-field>
+          </div>
+
+          <!-- Tipo Declaración -->
+          <div class="col-lg-2 col-md-3 col-sm-6">
+            <mat-form-field appearance="outline" class="modern-form-field">
+              <mat-label>Tipo Declaración</mat-label>
+              <mat-select [formControl]="tipoDeclaracion">
+                <mat-option value="">Todos</mat-option>
+                <mat-option value="PRIMERA DECLARACIÓN">PRIMERA DECLARACIÓN</mat-option>
+                <mat-option value="ACTUALIZACION PERIÓDICA">ACTUALIZACION PERIÓDICA</mat-option>
+                <mat-option value="DECLARACIÓN VOLUNTARIA">DECLARACIÓN VOLUNTARIA</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <!-- Estado -->
+          <div class="col-lg-2 col-md-3 col-sm-6">
+            <mat-form-field appearance="outline" class="modern-form-field">
+              <mat-label>Estado</mat-label>
+              <mat-select [formControl]="estado">
+                <mat-option value="">Todos</mat-option>
+                <mat-option value="FIRMADA">FIRMADA</mat-option>
+                <mat-option value="ARCHIVADA">ARCHIVADA</mat-option>
+                <mat-option value="RECEPCIONADA">RECEPCIONADA</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <!-- R.U.N. Declarante -->
+          <div class="col-lg-2 col-md-3 col-sm-6">
+            <mat-form-field appearance="outline" class="modern-form-field">
+              <mat-label>R.U.N. Declarante</mat-label>
+              <input matInput [formControl]="runDeclarante" placeholder="R.U.N. DECLARANTE">
+            </mat-form-field>
+          </div>
+
+          <!-- Nombre Declarante -->
+          <div class="col-lg-2 col-md-3 col-sm-6">
+            <mat-form-field appearance="outline" class="modern-form-field">
+              <mat-label>Nombre Declarante</mat-label>
+              <input matInput [formControl]="nombreDeclarante" placeholder="NOMBRE DECLARANTE">
+            </mat-form-field>
+          </div>
+
+          <!-- Apellido Paterno -->
+          <div class="col-lg-2 col-md-3 col-sm-6">
+            <mat-form-field appearance="outline" class="modern-form-field">
+              <mat-label>Apellido Paterno</mat-label>
+              <input matInput [formControl]="apellidoPaterno" placeholder="APELLIDO PATERNO">
+            </mat-form-field>
+          </div>
+
+          <!-- Apellido Materno -->
+          <div class="col-lg-2 col-md-3 col-sm-6">
+            <mat-form-field appearance="outline" class="modern-form-field">
+              <mat-label>Apellido Materno</mat-label>
+              <input matInput [formControl]="apellidoMaterno" placeholder="APELLIDO MATERNO">
+            </mat-form-field>
+          </div>
+
+          <!-- Servicio -->
+          <div class="col-lg-2 col-md-3 col-sm-6">
+            <mat-form-field appearance="outline" class="modern-form-field">
+              <mat-label>Servicio</mat-label>
+              <input matInput [formControl]="servicio" placeholder="SERVICIO">
+            </mat-form-field>
+          </div>
+
+          <!-- Cargo -->
+          <div class="col-lg-2 col-md-3 col-sm-6">
+            <mat-form-field appearance="outline" class="modern-form-field">
+              <mat-label>Cargo</mat-label>
+              <input matInput [formControl]="cargo" placeholder="CARGO">
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="filters-actions">
+          <button mat-raised-button color="primary" class="action-btn" (click)="buscar()">
+            <mat-icon>search</mat-icon>
+            Buscar
+          </button>
+          <button mat-raised-button color="warn" class="action-btn" (click)="limpiar()">
+            <mat-icon>clear</mat-icon>
+            Limpiar
+          </button>
+          <button mat-raised-button color="accent" class="action-btn" (click)="exportar()">
+            <mat-icon>file_download</mat-icon>
+            Exportar
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 
-  <div class="row mb-2">
-    <!-- R.U.N. Declarante -->
-    <div class="col-md-2">
-      <mat-form-field appearance="outline" class="small-form-field w-100">
-        <mat-label>R.U.N. Declarante</mat-label>
-        <input
-          matInput
-          [formControl]="runDeclarante"
-          placeholder="R.U.N. DECLARANTE"
-        />
-      </mat-form-field>
+  <!-- VISTA DE ESCRITORIO: TABLA (visible desde md en adelante) -->
+  <div class="d-none d-md-block desktop-view">
+    <!-- Barra de acciones superior -->
+    <div class="table-header">
+
+      <div class="table-actions">
+        <button mat-raised-button color="accent" class="primary-action-btn" (click)="descargarVersionCompletaJSON()">
+          <mat-icon>file_download</mat-icon>
+          Descargar JSON
+        </button>
+        <button mat-raised-button color="warn" class="primary-action-btn" (click)="descargarVersionCompleta()">
+          <mat-icon>file_download</mat-icon>
+          Descargar Completa
+        </button>
+      </div>
     </div>
 
-    <!-- Nombre Declarante -->
-    <div class="col-md-2">
-      <mat-form-field appearance="outline" class="small-form-field w-100">
-        <mat-label>Nombre Declarante</mat-label>
-        <input
-          matInput
-          [formControl]="nombreDeclarante"
-          placeholder="NOMBRE DECLARANTE"
-        />
-      </mat-form-field>
+    <!-- Spinner de carga -->
+    <div *ngIf="isLoading" class="loading-overlay">
+      <div class="loading-content">
+        <mat-spinner diameter="50"></mat-spinner>
+        <p class="loading-text">Cargando declaraciones...</p>
+      </div>
     </div>
 
-    <!-- Apellido Paterno -->
-    <div class="col-md-2">
-      <mat-form-field appearance="outline" class="small-form-field w-100">
-        <mat-label>Apellido Paterno</mat-label>
-        <input
-          matInput
-          [formControl]="apellidoPaterno"
-          placeholder="APELLIDO PATERNO"
-        />
-      </mat-form-field>
+    <!-- Tabla con diseño mejorado -->
+    <div class="table-container">
+      <table mat-table [dataSource]="dataSource" class="modern-table small-table" [class.loading]="isLoading">
+        <!-- ID Declaración -->
+        <ng-container matColumnDef="idDeclaracion">
+          <th mat-header-cell *matHeaderCellDef class="header-cell">ID Declaración</th>
+          <td mat-cell *matCellDef="let element" class="data-cell">{{ element.idDeclaracion }}</td>
+        </ng-container>
+
+        <!-- Fecha de Declaración -->
+        <ng-container matColumnDef="fechaDeclaracion">
+          <th mat-header-cell *matHeaderCellDef class="header-cell">Fecha de Declaración</th>
+          <td mat-cell *matCellDef="let element" class="data-cell">{{ element.fechaDeclaracion  }}</td>
+        </ng-container>
+
+        <!-- Fecha de Recepción -->
+        <ng-container matColumnDef="fechaRecepcion">
+          <th mat-header-cell *matHeaderCellDef class="header-cell">Fecha de Recepción</th>
+          <td mat-cell *matCellDef="let element" class="data-cell">{{ element.fechaRecepcion  }}</td>
+        </ng-container>
+
+        <!-- Tipo Declaración -->
+        <ng-container matColumnDef="tipoDeclaracion">
+          <th mat-header-cell *matHeaderCellDef class="header-cell">Tipo Declaración</th>
+          <td mat-cell *matCellDef="let element" class="data-cell">{{ element.tipoDeclaracion }}</td>
+        </ng-container>
+
+        <!-- R.U.N. Declarante -->
+        <ng-container matColumnDef="runDeclarante">
+          <th mat-header-cell *matHeaderCellDef class="header-cell">R.U.N. Declarante</th>
+          <td mat-cell *matCellDef="let element" class="data-cell">{{ element.runDeclarante }}</td>
+        </ng-container>
+
+        <!-- Nombre Declarante -->
+        <ng-container matColumnDef="nombreDeclarante">
+          <th mat-header-cell *matHeaderCellDef class="header-cell">Nombre Declarante</th>
+          <td mat-cell *matCellDef="let element" class="data-cell">{{ element.nombreDeclarante }}</td>
+        </ng-container>
+
+        <!-- Apellido Paterno -->
+        <ng-container matColumnDef="apellidoPaterno">
+          <th mat-header-cell *matHeaderCellDef class="header-cell">Apellido Paterno</th>
+          <td mat-cell *matCellDef="let element" class="data-cell">{{ element.apellidoPaterno }}</td>
+        </ng-container>
+
+        <!-- Apellido Materno -->
+        <ng-container matColumnDef="apellidoMaterno">
+          <th mat-header-cell *matHeaderCellDef class="header-cell">Apellido Materno</th>
+          <td mat-cell *matCellDef="let element" class="data-cell">{{ element.apellidoMaterno }}</td>
+        </ng-container>
+
+        <!-- Servicio -->
+        <ng-container matColumnDef="servicio">
+          <th mat-header-cell *matHeaderCellDef class="header-cell">Servicio</th>
+          <td mat-cell *matCellDef="let element" class="data-cell">{{ element.servicio }}</td>
+        </ng-container>
+
+        <!-- Cargo -->
+        <ng-container matColumnDef="cargo">
+          <th mat-header-cell *matHeaderCellDef class="header-cell">Cargo</th>
+          <td mat-cell *matCellDef="let element" class="data-cell">{{ element.cargo }}</td>
+        </ng-container>
+
+        <!-- Estado -->
+        <ng-container matColumnDef="estado">
+          <th mat-header-cell *matHeaderCellDef class="header-cell">Estado</th>
+          <td mat-cell *matCellDef="let element" class="data-cell text-center">
+            <span [ngClass]="getEstadoPillClass(element.estado)" class="modern-estado-pill">
+              {{ element.estado }}
+            </span>
+          </td>
+        </ng-container>
+
+        <!-- Acciones -->
+        <ng-container matColumnDef="acciones">
+          <th mat-header-cell *matHeaderCellDef class="header-cell">Acciones</th>
+          <td mat-cell *matCellDef="let element" class="actions-cell">
+            <div class="action-buttons">
+              <button mat-icon-button color="primary" (click)="verDetalle(element)" matTooltip="Ver detalle" class="action-btn">
+                <mat-icon>visibility</mat-icon>
+              </button>
+              <button mat-icon-button color="accent" (click)="descargar(element)" matTooltip="Descargar" class="action-btn">
+                <mat-icon>file_download</mat-icon>
+              </button>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Cabecera y Filas -->
+        <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky:true" class="header-row"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="data-row"></tr>
+      </table>
     </div>
 
-    <!-- Apellido Materno -->
-    <div class="col-md-2">
-      <mat-form-field appearance="outline" class="small-form-field w-100">
-        <mat-label>Apellido Materno</mat-label>
-        <input
-          matInput
-          [formControl]="apellidoMaterno"
-          placeholder="APELLIDO MATERNO"
-        />
-      </mat-form-field>
-    </div>
-
-    <!-- Servicio -->
-    <div class="col-md-2">
-      <mat-form-field appearance="outline" class="small-form-field w-100">
-        <mat-label>Servicio</mat-label>
-        <input
-          matInput
-          [formControl]="servicio"
-          placeholder="SERVICIO"
-        />
-      </mat-form-field>
-    </div>
-
-    <!-- Cargo -->
-    <div class="col-md-2">
-      <mat-form-field appearance="outline" class="small-form-field w-100">
-        <mat-label>Cargo</mat-label>
-        <input
-          matInput
-          [formControl]="cargo"
-          placeholder="CARGO"
-        />
-      </mat-form-field>
+    <!-- Paginador mejorado -->
+    <div class="pagination-container">
+      <mat-paginator 
+        class="modern-paginator" 
+        [pageSizeOptions]="[5, 25, 50]" 
+        showFirstLastButtons
+        [length]="totalItems" 
+        [pageSize]="pageSize" 
+        (page)="onPageChange($event)" 
+        aria-label="Paginador de Declaraciones">
+      </mat-paginator>
     </div>
   </div>
 
-  <!-- Botones de acción: Buscar, Limpiar, Exportar -->
-  <div class="row mb-3">
-    <div class="col-12 d-flex justify-content-end">
-      <button mat-raised-button color="primary" class="me-2" (click)="buscar()">
-        Buscar
+  <!-- VISTA MOBILE -->
+  <div class="d-block d-md-none mobile-view">
+    <!-- Acciones móviles -->
+    <div class="mobile-actions">
+      <button mat-raised-button color="accent" class="mobile-primary-btn" (click)="descargarVersionCompletaJSON()">
+        <mat-icon>file_download</mat-icon>
+        Descargar JSON
       </button>
-      <button mat-raised-button color="warn" class="me-2" (click)="limpiar()">
-        Limpiar
-      </button>
-      <button mat-raised-button color="accent" (click)="exportar()">
-        Exportar
-      </button>
+    </div>
+
+    <!-- Spinner de carga mobile -->
+    <div *ngIf="isLoading" class="loading-overlay">
+      <div class="loading-content">
+        <mat-spinner diameter="50"></mat-spinner>
+        <p class="loading-text">Cargando declaraciones...</p>
+      </div>
+    </div>
+
+    <!-- Lista de tarjetas mobile -->
+    <div class="mobile-list" [class.loading]="isLoading">
+      <div class="mobile-card" *ngFor="let element of dataSource?.data">
+        <div class="card-header">
+          <div class="card-title">
+            <span class="declaration-number">{{ element.idDeclaracion }}</span>
+          </div>
+          <div class="card-actions">
+            <button mat-icon-button [matMenuTriggerFor]="menu" class="menu-btn">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #menu="matMenu">
+              <button mat-menu-item (click)="verDetalle(element); $event.stopPropagation()">
+                <mat-icon>visibility</mat-icon>
+                <span>Ver detalle</span>
+              </button>
+              <button mat-menu-item (click)="descargar(element); $event.stopPropagation()">
+                <mat-icon>file_download</mat-icon>
+                <span>Descargar</span>
+              </button>
+            </mat-menu>
+          </div>
+        </div>
+        
+        <div class="card-content">
+          <div class="info-row">
+            <span class="info-label">Fecha Declaración:</span>
+            <span class="info-value">{{ element.fechaDeclaracion  }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Fecha Recepción:</span>
+            <span class="info-value">{{ element.fechaRecepcion  }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Tipo:</span>
+            <span class="info-value">{{ element.tipoDeclaracion }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Declarante:</span>
+            <span class="info-value">{{ element.nombreDeclarante }} {{ element.apellidoPaterno }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">R.U.N.:</span>
+            <span class="info-value">{{ element.runDeclarante }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Servicio:</span>
+            <span class="info-value">{{ element.servicio }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Cargo:</span>
+            <span class="info-value">{{ element.cargo }}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Estado:</span>
+            <span [ngClass]="getEstadoPillClass(element.estado)" class="modern-estado-pill">
+              {{ element.estado }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Paginador mobile -->
+    <div class="mobile-pagination">
+      <mat-paginator 
+        class="modern-paginator" 
+        [pageSizeOptions]="[5, 10, 25]" 
+        showFirstLastButtons
+        [length]="totalItems" 
+        [pageSize]="pageSize" 
+        (page)="onPageChange($event)" 
+        aria-label="Paginador de Declaraciones">
+      </mat-paginator>
     </div>
   </div>
-
-  <hr />
-
-  <!-- Título de la Sección: Declaraciones Encontradas -->
-  <div class="mb-2">
-    <span class="fw-bold">Declaraciones Encontradas</span>
-  </div>
-
-  <!-- Botones de descarga (JSON y versión completa) -->
-  <div class="mb-2 d-flex align-items-center gap-3">
-    <button mat-raised-button color="accent" (click)="descargarVersionCompletaJSON()">
-      Descargar declaración (versión completa JSON)
-    </button>
-    <button mat-raised-button color="warn" (click)="descargarVersionCompleta()">
-      Descargar declaración (versión completa)
-    </button>
-  </div>
-
-  <!-- TABLA -->
-  <table mat-table [dataSource]="dataSource" class="small-table mat-elevation-z8 w-100">
-    <!-- Cabeceras basadas en la imagen:
-         Id Declaración | Fecha de Declaración | Fecha de Recepción | Tipo Declaración
-         | Periodo | Numeral | R.U.T. Declarante | Nombre Declarante | Servicio | Cargo | Estado
-    -->
-    <!-- Id Declaración -->
-    <ng-container matColumnDef="idDeclaracion" >
-      <th mat-header-cell *matHeaderCellDef>Id Declaración</th>
-      <td mat-cell *matCellDef="let element">{{ element.idDeclaracion }}</td>
-    </ng-container>
-
-    <!-- Fecha Declaración -->
-    <ng-container matColumnDef="fechaDeclaracion" >
-      <th mat-header-cell *matHeaderCellDef>Fecha de Declaración</th>
-      <td mat-cell *matCellDef="let element">{{ element.fechaDeclaracion }}</td>
-    </ng-container>
-
-    <!-- Fecha Recepción -->
-    <ng-container matColumnDef="fechaRecepcion" >
-      <th mat-header-cell *matHeaderCellDef>Fecha de Recepción</th>
-      <td mat-cell *matCellDef="let element">{{ element.fechaRecepcion }}</td>
-    </ng-container>
-
-    <!-- Tipo Declaración -->
-    <ng-container matColumnDef="tipoDeclaracion" >
-      <th mat-header-cell *matHeaderCellDef>Tipo Declaración</th>
-      <td mat-cell *matCellDef="let element">{{ element.tipoDeclaracion }}</td>
-    </ng-container>
-
-    <!-- Periodo -->
-    <ng-container matColumnDef="periodo" >
-      <th mat-header-cell *matHeaderCellDef>Periodo</th>
-      <td mat-cell *matCellDef="let element">{{ element.periodo }}</td>
-    </ng-container>
-
-    <!-- Numeral -->
-    <ng-container matColumnDef="numeral" >
-      <th mat-header-cell *matHeaderCellDef>Numeral</th>
-      <td mat-cell *matCellDef="let element">{{ element.numeral }}</td>
-    </ng-container>
-
-    <!-- R.U.T. Declarante -->
-    <ng-container matColumnDef="rutDeclarante" >
-      <th mat-header-cell *matHeaderCellDef>R.U.T. Declarante</th>
-      <td mat-cell *matCellDef="let element">{{ element.rutDeclarante }}</td>
-    </ng-container>
-
-    <!-- Nombre Declarante -->
-    <ng-container matColumnDef="nombreDeclarante" >
-      <th mat-header-cell *matHeaderCellDef>Nombre Declarante</th>
-      <td mat-cell *matCellDef="let element">{{ element.nombreDeclarante }}</td>
-    </ng-container>
-
-    <!-- Servicio -->
-    <ng-container matColumnDef="servicio" >
-      <th mat-header-cell *matHeaderCellDef>Servicio</th>
-      <td mat-cell *matCellDef="let element">{{ element.servicio }}</td>
-    </ng-container>
-
-    <!-- Cargo -->
-    <ng-container matColumnDef="cargo" >
-      <th mat-header-cell *matHeaderCellDef>Cargo</th>
-      <td mat-cell *matCellDef="let element">{{ element.cargo }}</td>
-    </ng-container>
-
-    <!-- Estado -->
-    <ng-container matColumnDef="estado" >
-      <th mat-header-cell *matHeaderCellDef>Estado</th>
-      <td mat-cell *matCellDef="let element">{{ element.estado }}</td>
-    </ng-container>
-
-    <!-- Filas header y data -->
-    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-    <tr mat-row        *matRowDef="let row; columns: displayedColumns;"></tr>
-  </table>
-
-  <!-- Mensaje "Sin Registro de Declaraciones" si el array está vacío -->
-  <div class="text-center py-3" *ngIf="dataSource.data?.length === 0">
-    <strong>Sin Registro de Declaraciones</strong>
-  </div>
-
-  <!-- Paginador, si lo requieres (desactivado en la captura). 
-       Podrías agregar un MatPaginator en tu TS si deseas. -->
 </div>

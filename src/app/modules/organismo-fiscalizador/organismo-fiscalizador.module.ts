@@ -18,6 +18,8 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatStepperModule } from '@angular/material/stepper';
 import { MatTableModule } from '@angular/material/table';
 import { MatTabsModule } from '@angular/material/tabs';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 @NgModule({
   declarations: [
 
@@ -43,6 +45,8 @@ import { MatTabsModule } from '@angular/material/tabs';
     MatPaginatorModule,
     MatTabsModule,
     MatStepperModule,
+    MatMenuModule,
+    MatProgressSpinnerModule,
 
 
   ]

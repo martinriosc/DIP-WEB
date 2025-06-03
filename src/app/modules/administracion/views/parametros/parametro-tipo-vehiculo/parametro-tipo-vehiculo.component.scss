@@ -1,22 +1,431 @@
+// Variables de colores para Tipo Vehículo
+$primary-color: #1976d2;
+$primary-light: #e3f2fd;
+$primary-dark: #1565c0;
+$secondary-color: #424242;
+$success-color: #4caf50;
+$warning-color: #ff9800;
+$error-color: #f44336;
+$vehiculo-color: #4caf50;
+$vehiculo-light: #e8f5e8;
+$vehiculo-dark: #388e3c;
+$background-light: #fafafa;
+$border-color: #e0e0e0;
+$text-primary: #212121;
+$text-secondary: #757575;
+
+// Contenedor principal
 .container-fluid {
-  padding: 1rem;
+  padding: 1.5rem;
+  background-color: #f8f9fa;
+  min-height: 100vh;
 }
 
-.mt-3 {
-  margin-top: 1rem;
+// Header de página
+.page-header {
+  margin-bottom: 2rem;
+  
+  .page-title {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: $text-primary;
+    margin: 0;
+    
+    .item-count {
+      font-size: 1rem;
+      font-weight: 400;
+      color: $text-secondary;
+      background: $vehiculo-light;
+      padding: 0.25rem 0.75rem;
+      border-radius: 1rem;
+      margin-left: 0.5rem;
+    }
+  }
 }
 
-.actions-cell {
-  align-items: center;
-  gap: 0.5rem;
+// Vista de escritorio
+.desktop-view {
+  .table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    
+    .table-actions {
+      .primary-action-btn {
+        background: linear-gradient(135deg, $vehiculo-color, $vehiculo-dark);
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+        border: none;
+        
+        &:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+        }
+      }
+    }
+  }
+  
+  .table-container {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    
+    .modern-table {
+      width: 100%;
+      
+      .header-row {
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        
+        .header-cell {
+          font-weight: 600;
+          color: $text-primary;
+          font-size: 0.9rem;
+          padding: 1rem 0.75rem;
+          border-bottom: 2px solid $vehiculo-color;
+        }
+      }
+      
+      .data-row {
+        transition: all 0.3s ease;
+        
+        &:hover {
+          background-color: $vehiculo-light;
+        }
+        
+        .data-cell {
+          padding: 1rem 0.75rem;
+          border-bottom: 1px solid $border-color;
+          vertical-align: middle;
+          
+          &.text-center {
+            text-align: center;
+          }
+          
+          &.descripcion-cell {
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+          }
+        }
+      }
+      
+      // Pills de estado
+      .modern-estado-pill {
+        padding: 0.25rem 0.75rem;
+        border-radius: 1rem;
+        font-size: 0.8rem;
+        font-weight: 500;
+        text-align: center;
+        display: inline-block;
+        min-width: 70px;
+        
+        &.activo {
+          background: linear-gradient(135deg, $success-color, #45a049);
+          color: white;
+        }
+        
+        &.inactivo {
+          background: linear-gradient(135deg, #9e9e9e, #757575);
+          color: white;
+        }
+      }
+      
+      // Contenedor de acciones
+      .actions-container {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: center;
+        
+        .action-btn {
+          width: 36px;
+          height: 36px;
+          border-radius: 6px;
+          transition: all 0.3s ease;
+          
+          &.edit-btn:hover {
+            background: $primary-light;
+            transform: scale(1.1);
+          }
+          
+          &.delete-btn:hover {
+            background: #ffebee;
+            transform: scale(1.1);
+          }
+        }
+      }
+    }
+    
+    // Mensaje sin datos
+    .no-data-message {
+      text-align: center;
+      padding: 3rem 2rem;
+      color: $text-secondary;
+      
+      mat-icon {
+        font-size: 4rem;
+        width: 4rem;
+        height: 4rem;
+        color: $border-color;
+        margin-bottom: 1rem;
+      }
+      
+      h3 {
+        margin: 1rem 0 0.5rem;
+        color: $text-primary;
+        font-weight: 500;
+      }
+      
+      p {
+        margin-bottom: 2rem;
+        font-size: 0.95rem;
+      }
+      
+      button {
+        background: linear-gradient(135deg, $vehiculo-color, $vehiculo-dark);
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 500;
+        border: none;
+        
+        &:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+        }
+      }
+    }
+  }
 }
 
-.w-100 {
-  width: 100%;
+// Vista móvil
+.mobile-view {
+  .mobile-header {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 1.5rem;
+    
+    .fab-add {
+      background: linear-gradient(135deg, $vehiculo-color, $vehiculo-dark);
+      box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+      
+      &:hover {
+        transform: scale(1.05);
+      }
+    }
+  }
+  
+  .mobile-cards-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    
+    .tipo-card {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      border-left: 4px solid $vehiculo-color;
+      
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+      }
+      
+      .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+        
+        .tipo-info {
+          flex: 1;
+          
+          h4 {
+            margin: 0 0 0.25rem;
+            color: $text-primary;
+            font-weight: 600;
+            font-size: 1.1rem;
+          }
+          
+          .tipo-descripcion {
+            margin: 0;
+            color: $text-secondary;
+            font-size: 0.9rem;
+            line-height: 1.4;
+          }
+        }
+        
+        .mobile-status-pill {
+          padding: 0.25rem 0.75rem;
+          border-radius: 1rem;
+          font-size: 0.75rem;
+          font-weight: 500;
+          
+          &.activo {
+            background: $success-color;
+            color: white;
+          }
+          
+          &.inactivo {
+            background: #9e9e9e;
+            color: white;
+          }
+        }
+      }
+      
+      .card-actions {
+        display: flex;
+        gap: 0.75rem;
+        
+        button {
+          flex: 1;
+          padding: 0.5rem;
+          border-radius: 6px;
+          font-size: 0.9rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5rem;
+          
+          mat-icon {
+            font-size: 18px;
+            width: 18px;
+            height: 18px;
+          }
+        }
+      }
+    }
+  }
 }
 
-.form-tipo-modal {
+// Estilos del modal
+.modal-header {
+  background: linear-gradient(135deg, $vehiculo-color, $vehiculo-dark);
+  color: white;
+  padding: 1.5rem;
+  margin: -24px -24px 0;
+  
+  h2 {
+    margin: 0;
+    font-weight: 500;
+  }
+}
+
+.modal-content {
+  padding: 2rem 0;
+  
+  .form-tipo-modal {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    
+    .modern-form-field {
+      width: 100%;
+      
+      ::ng-deep {
+        .mat-mdc-form-field-outline {
+          border-radius: 8px;
+        }
+        
+        .mat-mdc-form-field-focus-overlay {
+          border-radius: 8px;
+        }
+      }
+    }
+    
+    .checkbox-container {
+      margin-top: 1rem;
+      
+      .modern-checkbox {
+        ::ng-deep {
+          .mat-mdc-checkbox {
+            .mat-mdc-checkbox-ripple {
+              border-radius: 8px;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+.modal-actions {
+  padding-top: 1.5rem;
+  border-top: 1px solid $border-color;
   display: flex;
-  flex-direction: column;
   gap: 1rem;
+  justify-content: flex-end;
+  
+  .cancel-btn {
+    color: $text-secondary;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    
+    &:hover {
+      background: $background-light;
+    }
+  }
+  
+  .save-btn {
+    background: linear-gradient(135deg, $vehiculo-color, $vehiculo-dark);
+    color: white;
+    padding: 0.5rem 1.5rem;
+    border-radius: 6px;
+    font-weight: 500;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+    }
+  }
+}
+
+// Responsividad
+@media (max-width: 768px) {
+  .container-fluid {
+    padding: 1rem;
+  }
+  
+  .page-header {
+    .page-title {
+      font-size: 1.5rem;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .container-fluid {
+    padding: 0.75rem;
+  }
+  
+  .mobile-view {
+    .mobile-cards-container {
+      .tipo-card {
+        padding: 1rem;
+        
+        .card-actions {
+          flex-direction: column;
+          
+          button {
+            padding: 0.75rem;
+          }
+        }
+      }
+    }
+  }
 }

@@ -20,6 +20,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { RouterModule } from '@angular/router';
+import { MatMenuModule } from '@angular/material/menu';
 @NgModule({
   declarations: [
     RevisorListComponent
@@ -45,6 +46,7 @@ import { RouterModule } from '@angular/router';
     MatTooltipModule,
     MatTabsModule,
     MatProgressSpinnerModule,
+    MatMenuModule,
     RouterModule
   ]
 })

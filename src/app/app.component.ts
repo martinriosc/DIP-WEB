@@ -27,7 +27,7 @@ export class AppComponent implements OnInit, OnDestroy {
     { title: 'Inicio', route: '/inicio', icon: 'assets/icons/icon-menu-home.svg' },
     { title: 'Mis Declaraciones', route: '/declaraciones', icon: 'assets/icons/icon-menu-mis_declaraciones.svg' },
     { title: 'Revisor', route: '/revisor', icon: 'assets/icons/icon-menu-revisor.svg' },
-    { title: 'Ministro de Fe', route: '/ministro-fe', icon: 'assets/icons/icon-menu-ministro_fe.svg' },
+    { title: 'Ministro de Fe', route: '/ministro-fe', icon: 'assets/icons/icon-menu-ministro_de_fe.svg' },
     { title: 'Administración', route: '/administracion', icon: 'assets/icons/icon-menu-administracion.svg' },
     { title: 'Organismo Fiscalizador', route: '/organismo-fiscalizador', icon: 'assets/icons/icon-menu-organismo_fiscalizador.svg' },
     { title: 'Transparencia Pasiva', route: '/transparencia-pasiva', icon: 'assets/icons/icon-menu-transparencia_pasiva.svg' },

@@ -1,33 +1,71 @@
-<div class="administracion-wrapper">
-  <!-- Fila principal: secciones top-level -->
-  <nav class="main-nav">
-    <ul>
-      <li *ngFor="let item of mainNav"
-          [class.active]="isActiveSection(item.section)">
-        <a [routerLink]="item.route">
-          {{ item.label }}
-        </a>
+<div class="container-fluid">
+  <!-- Breadcrumb -->
+  <nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a routerLink="/">Inicio</a>
       </li>
-    </ul>
+      <li class="breadcrumb-item active" aria-current="page">
+        Administración
+      </li>
+    </ol>
   </nav>
 
-  <!-- Fila secundaria: solo se muestra si la sección es 'parametros' o 'transparencia-activa' -->
-  <nav class="sub-nav" *ngIf="currentSection === 'parametros'">
-    <ul>
-      <li *ngFor="let sub of parametrosNav">
-        <a [routerLink]="sub.route">{{ sub.label }}</a>
-      </li>
-    </ul>
-  </nav>
-  <nav class="sub-nav" *ngIf="currentSection === 'transparencia-activa'">
-    <ul>
-      <li *ngFor="let sub of transparenciaNav">
-        <a [routerLink]="sub.route">{{ sub.label }}</a>
-      </li>
-    </ul>
-  </nav>
+  <!-- Título del componente -->
+  <div class="page-header">
+    <h2 class="page-title">Panel de Administración</h2>
+  </div>
 
-  <!-- Aquí se monta el contenido de la sección actual -->
+  <!-- Navegación principal modernizada -->
+  <div class="navigation-section">
+    <div class="nav-header">
+      <span class="nav-title">
+        <mat-icon class="nav-icon">settings</mat-icon>
+        Módulos de Administración
+      </span>
+    </div>
+
+    <div class="nav-container">
+      <div class="main-nav-modern">
+        <div class="nav-grid">
+          <div *ngFor="let item of mainNav" 
+               class="nav-item" 
+               [class.active]="isActiveSection(item.section)"
+               [routerLink]="item.route">
+            <mat-icon>{{ item.icon || 'dashboard' }}</mat-icon>
+            <span>{{ item.label }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Subnavegación moderna -->
+      <div class="sub-nav-modern" *ngIf="currentSection === 'parametros'">
+        <div class="sub-nav-header">Parámetros del Sistema</div>
+        <div class="sub-nav-grid">
+          <div *ngFor="let sub of parametrosNav" 
+               class="sub-nav-item"
+               [routerLink]="sub.route">
+            <mat-icon>{{ sub.icon || 'settings' }}</mat-icon>
+            <span>{{ sub.label }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sub-nav-modern" *ngIf="currentSection === 'transparencia-activa'">
+        <div class="sub-nav-header">Transparencia Activa</div>
+        <div class="sub-nav-grid">
+          <div *ngFor="let sub of transparenciaNav" 
+               class="sub-nav-item"
+               [routerLink]="sub.route">
+            <mat-icon>{{ sub.icon || 'visibility' }}</mat-icon>
+            <span>{{ sub.label }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenido principal -->
   <div class="admin-content">
     <router-outlet></router-outlet>
   </div>

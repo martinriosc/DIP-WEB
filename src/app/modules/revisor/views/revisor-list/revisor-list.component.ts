@@ -9,10 +9,14 @@ import {
   Servicio,
   EstadoDeclaracion
 } from '../../../declaraciones/services/declaracion.service';
+import { VisadorService } from '../../services/visador.service';
 import { Declaracion } from '../../../../shared/models/AllModels';
 import { AuthService } from '../../../auth/services/auth.service';
 import { HttpParams } from '@angular/common/http';
 import { forkJoin } from 'rxjs';
+import { ToastrService } from 'ngx-toastr';
+import { MatDialog } from '@angular/material/dialog';
+import Swal from 'sweetalert2';
 
 /* ─────────────── Tabs ─────────────── */
 type TabId = 'pendientes' | 'enviados';
@@ -69,11 +73,35 @@ export class RevisorListComponent implements AfterViewInit, OnInit {
   ];
   selection = new SelectionModel<Declaracion>(true, []);
 
+  /* ══════════════ Propiedades para el modal de bitácora ══════════════ */
+  showBitacoraModal = false;
+  bitacoraData: any[] = [];
+  bitacoraLoading = false;
+  bitacoraPageSize = 5;
+  bitacoraCurrentPage = 0;
+  bitacoraTotalItems = 0;
+  currentDeclaracionId = 0;
+
+  /* ══════════════ Propiedades para el modal de derivar ══════════════ */
+  showDerivarModal = false;
+  derivarLoading = false;
+  visadores: any[] = [];
+  visadorSeleccionado: any = null;
+  observacionDerivar = '';
+  currentDeclaracionToDerivar: Declaracion | null = null;
+
+  /* ══════════════ Estado de loading para acciones ══════════════ */
+  enviarJefeServicioLoading = false;
+  currentDeclaracionEnviando: number | null = null;
+
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   constructor(
     private declaracionService: DeclaracionService,
-    private authService: AuthService
+    private authService: AuthService,
+    private toastrService: ToastrService,
+    private visadorService: VisadorService,
+    private dialog: MatDialog
   ) {}
 
   /* ══════════════ LIFE-CYCLE ══════════════════ */
@@ -215,9 +243,269 @@ export class RevisorListComponent implements AfterViewInit, OnInit {
   toggle(row: Declaracion): void { this.selection.toggle(row); }
 
   /* ══════════════ ACCIONES SOBRE FILAS ═════════ */
-  bitacora(d: Declaracion)  { /* … */ }
-  derivar(d: Declaracion)   { /* … */ }
-  enviarAJefeServicio(d: Declaracion) { /* … */ }
+  bitacora(d: Declaracion) {
+    this.currentDeclaracionId = Number(d.id);
+    this.bitacoraCurrentPage = 0;
+    this.ajustarModalParaSidebar();
+    this.cargarBitacora();
+    this.showBitacoraModal = true;
+  }
+
+  cargarBitacora() {
+    this.bitacoraLoading = true;
+    const startIndex = this.bitacoraCurrentPage * this.bitacoraPageSize;
+    
+    this.declaracionService.obtenerBitacora(this.currentDeclaracionId, startIndex + 1, this.bitacoraPageSize)
+      .subscribe({
+        next: (response) => {
+          if (response.success) {
+            this.bitacoraData = response.data || [];
+            this.bitacoraTotalItems = response.total || this.bitacoraData.length;
+          } else {
+            this.bitacoraData = [];
+            this.bitacoraTotalItems = 0;
+          }
+          this.bitacoraLoading = false;
+        },
+        error: (error) => {
+          console.error('Error al obtener bitácora:', error);
+          this.bitacoraData = [];
+          this.bitacoraTotalItems = 0;
+          this.bitacoraLoading = false;
+          this.toastrService.error('Error al cargar la bitácora');
+        }
+      });
+  }
+
+  cerrarBitacoraModal() {
+    this.showBitacoraModal = false;
+    this.bitacoraData = [];
+    this.currentDeclaracionId = 0;
+  }
+
+  onBitacoraPaginaChange(event: any) {
+    this.bitacoraCurrentPage = event.pageIndex;
+    this.bitacoraPageSize = event.pageSize;
+    this.cargarBitacora();
+  }
+
+  getAccionPillClass(accion: string): string {
+    switch (accion.toUpperCase()) {
+      case 'BORRADOR':
+        return 'pill pill-success';
+      case 'ENVÍA A MINISTRO DE FE':
+      case 'PENDIENTE FIRMAR':
+        return 'pill pill-primary';
+      case 'FIRMA':
+      case 'FIRMADA':
+        return 'pill pill-primary';
+      case 'ENVIA A ORGANISMO FISCALIZADOR':
+      case 'RECEPCIONA ORGANISMO FISCALIZADOR':
+        return 'pill pill-secondary';
+      case 'ARCHIVADA':
+        return 'pill pill-default';
+      default:
+        return 'pill pill-default';
+    }
+  }
+
+  private ajustarModalParaSidebar() {
+    // Método para ajustar el modal si hay una sidebar activa
+    // Puedes implementar lógica específica aquí si es necesario
+  }
+
+  derivar(d: Declaracion) { 
+    // Verificar que la declaración esté en estado PENDIENTE REVISOR
+    if (d.declaEstado !== 'PENDIENTE REVISOR') {
+      this.toastrService.warning('Solo se pueden derivar declaraciones con estado PENDIENTE REVISOR');
+      return;
+    }
+
+    this.currentDeclaracionToDerivar = d;
+    this.cargarVisadores(d.id);
+    this.showDerivarModal = true;
+  }
+
+  enviarAJefeServicio(d: Declaracion) { 
+    Swal.fire({
+      title: '¿Está seguro?',
+      text: '¿Desea enviar esta declaración al Jefe de Servicio?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sí, enviar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Opción 1: Usar SweetAlert con loading (más elegante)
+        Swal.fire({
+          title: 'Enviando...',
+          text: 'Enviando declaración al Jefe de Servicio',
+          icon: 'info',
+          allowOutsideClick: false,
+          allowEscapeKey: false,
+          showConfirmButton: false,
+          didOpen: () => {
+            Swal.showLoading();
+          }
+        });
+
+        // Opción 2: Usar overlay global (comentado, pero disponible)
+        // this.enviarJefeServicioLoading = true;
+
+        this.currentDeclaracionEnviando = Number(d.id);
+        this.declaracionService.enviarJefeServicio(Number(d.id), 2).subscribe({
+          next: (response) => {
+            Swal.close();
+            if (response === true) {
+              Swal.fire({
+                title: '¡Éxito!',
+                text: 'Declaración enviada al Jefe de Servicio exitosamente',
+                icon: 'success',
+                confirmButtonText: 'Aceptar'
+              });
+              this.buscar(); // Actualizar la lista
+            } else {
+              Swal.fire({
+                title: 'Error',
+                text: 'Error al enviar la declaración al Jefe de Servicio',
+                icon: 'error',
+                confirmButtonText: 'Aceptar'
+              });
+            }
+          },
+          error: (error) => {
+            console.error('Error al enviar declaración al Jefe de Servicio:', error);
+            Swal.close();
+            Swal.fire({
+              title: 'Error',
+              text: 'Error al enviar la declaración al Jefe de Servicio',
+              icon: 'error',
+              confirmButtonText: 'Aceptar'
+            });
+          },
+          complete: () => {
+            this.currentDeclaracionEnviando = null;
+            // this.enviarJefeServicioLoading = false; // Para overlay global
+          }
+        });
+      }
+    });
+  }
+
+  /* ══════════════ FUNCIONES DEL MODAL DE DERIVAR ══════════════ */
+  cargarVisadores(idDeclaracion: number) {
+    this.derivarLoading = true;
+    this.visadorService.getVisadorByDeclaraciones(idDeclaracion.toString()).subscribe({
+      next: (response) => {
+        if (response.success) {
+          this.visadores = response.data || [];
+        } else {
+          this.visadores = [];
+          this.toastrService.error('Error al cargar los visadores');
+        }
+        this.derivarLoading = false;
+      },
+      error: (error) => {
+        console.error('Error al cargar visadores:', error);
+        this.visadores = [];
+        this.derivarLoading = false;
+        this.toastrService.error('Error al cargar los visadores');
+      }
+    });
+  }
+
+  /* ══════════════ FUNCIÓN ALTERNATIVA CON OVERLAY GLOBAL ══════════════ */
+  enviarAJefeServicioConOverlay(d: Declaracion) {
+    Swal.fire({
+      title: '¿Está seguro?',
+      text: '¿Desea enviar esta declaración al Jefe de Servicio?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sí, enviar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Usar overlay global en lugar de SweetAlert loading
+        this.enviarJefeServicioLoading = true;
+        this.currentDeclaracionEnviando = Number(d.id);
+        
+        this.declaracionService.enviarJefeServicio(Number(d.id), 2).subscribe({
+          next: (response) => {
+            if (response === true) {
+              this.toastrService.success('Declaración enviada al Jefe de Servicio exitosamente');
+              this.buscar(); // Actualizar la lista
+            } else {
+              this.toastrService.error('Error al enviar la declaración al Jefe de Servicio');
+            }
+          },
+          error: (error) => {
+            console.error('Error al enviar declaración al Jefe de Servicio:', error);
+            this.toastrService.error('Error al enviar la declaración al Jefe de Servicio');
+          },
+          complete: () => {
+            this.currentDeclaracionEnviando = null;
+            this.enviarJefeServicioLoading = false;
+          }
+        });
+      }
+    });
+  }
+
+  confirmarDerivar() {
+    if (!this.visadorSeleccionado) {
+      this.toastrService.warning('Debe seleccionar un visador');
+      return;
+    }
+
+    if (!this.observacionDerivar.trim()) {
+      this.toastrService.warning('Debe ingresar una observación');
+      return;
+    }
+
+    if (!this.currentDeclaracionToDerivar) {
+      return;
+    }
+
+    this.derivarLoading = true;
+
+    this.declaracionService.enviarVisador(
+      Number(this.currentDeclaracionToDerivar.id),
+      this.visadorSeleccionado.id,
+      this.observacionDerivar.trim(),
+      2
+    ).subscribe({
+      next: (response) => {
+        if (response === true) {
+          this.toastrService.success('Declaración derivada exitosamente');
+          this.cerrarDerivarModal();
+          this.buscar(); // Actualizar la lista
+        } else {
+          this.toastrService.error('Error al derivar la declaración');
+        }
+      },
+      error: (error) => {
+        console.error('Error al derivar declaración:', error);
+        this.toastrService.error('Error al derivar la declaración');
+      },
+      complete: () => {
+        this.derivarLoading = false;
+      }
+    });
+  }
+
+  cerrarDerivarModal() {
+    this.showDerivarModal = false;
+    this.visadores = [];
+    this.visadorSeleccionado = null;
+    this.observacionDerivar = '';
+    this.currentDeclaracionToDerivar = null;
+    this.derivarLoading = false;
+  }
+
   export(): void { /* … */ }
 
   descargarSeleccionados(): void {
@@ -233,18 +521,20 @@ export class RevisorListComponent implements AfterViewInit, OnInit {
 
   /* ══════════════ PILLS DE ESTADO ══════════════ */
   getEstadoPillClass(estado: string): string {
-    switch ((estado || '').toLowerCase()) {
-      case 'activo':
-      case 'aprobado':
-      case 'completado':  return 'pill pill-success';
-      case 'inactivo':
-      case 'rechazado':
-      case 'cancelado':   return 'pill pill-danger';
-      case 'pendiente':
-      case 'en revisión': return 'pill pill-warning';
-      case 'enviado':
-      case 'derivado':    return 'pill pill-info';
-      default:            return 'pill pill-secondary';
+    switch (estado) {
+      case 'BORRADOR':
+        return 'pill pill-success';
+      case 'PENDIENTE FIRMAR':
+      case 'FIRMADA':
+      case 'PENDIENTE REVISOR':
+        return 'pill pill-primary';
+      case 'ENVIADA A ORGANISMO FISCALIZADOR':
+      case 'RECEPCIONADA POR ORGANISMO FISCALIZADOR':
+        return 'pill pill-secondary';
+      case 'ARCHIVADA':
+        return 'pill pill-default';
+      default:
+        return 'pill pill-default';
     }
   }
 }

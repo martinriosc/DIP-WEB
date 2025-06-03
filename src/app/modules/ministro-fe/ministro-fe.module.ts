@@ -19,9 +19,11 @@ import { MatStepperModule } from '@angular/material/stepper';
 import { MatTableModule } from '@angular/material/table';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatTooltipModule } from '@angular/material/tooltip';
 @NgModule({
   declarations: [
-  
+
     MinistroFeListComponent
   ],
   imports: [
@@ -40,11 +42,13 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     MatTableModule,
     MatButtonModule,
     MatIconModule,
-    MatPaginatorModule    ,
+    MatPaginatorModule,
     MatTabsModule,
     MatStepperModule,
     MatDialogModule,
-        MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatMenuModule,
+    MatTooltipModule
 
   ]
 })

@@ -24,6 +24,8 @@ export class VisadorService {
    * Obtiene los visadores por múltiples declaraciones
    */
   getVisadorByDeclaraciones(idDeclaracion: string): Observable<ApiResponse> {
-    return this.http.get<ApiResponse>(`${this.apiUrl}/pr/service/visador/getVisadorByDeclaraciones?idDeclaracion=${idDeclaracion}`, { withCredentials: true });
+    const _dc = new Date().getTime();
+    const url = `${this.apiUrl}/pr/service/visador/getVisadorByDeclaraciones?_dc=${_dc}&query=&idDeclaracion=${idDeclaracion}&page=1&start=0&limit=25`;
+    return this.http.get<ApiResponse>(url, { withCredentials: true });
   }
 } 

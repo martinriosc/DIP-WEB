@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { MatTableDataSource } from '@angular/material/table';
+import { PageEvent } from '@angular/material/paginator';
 
 /**
  * Interfaz para representar las declaraciones
@@ -13,8 +14,10 @@ export interface DeclaracionFiscalizador {
   tipoDeclaracion: string;   // Ej.: 'ACTUALIZACION PERIÓDICA'
   periodo: string | number;  // Ej.: 2024
   numeral: number | string;
-  rutDeclarante: string;     // Ej.: '15381086-9'
+  runDeclarante: string;     // Ej.: '15381086-9'
   nombreDeclarante: string;  // Ej.: 'CHRISTIAN ALEJANDRO'
+  apellidoPaterno: string;   // Ej.: 'RODRIGUEZ'
+  apellidoMaterno: string;   // Ej.: 'SANCHEZ'
   servicio: string;          // Ej.: 'CONTRALORÍA GENERAL...'
   cargo: string;             // Ej.: 'JEFE DE UNIDAD'
   estado: string;            // Ej.: 'FIRMADA', 'ARCHIVADA', etc.
@@ -26,6 +29,14 @@ export interface DeclaracionFiscalizador {
   styleUrls: ['./organismo-fiscalizador-list.component.scss']
 })
 export class OrganismoFiscalizadorListComponent implements OnInit {
+
+  // Propiedades para la UI
+  showFilters = false;
+  isLoading = false;
+
+  // Propiedades para paginación
+  totalItems = 0;
+  pageSize = 25;
 
   // Título: "Organismo Fiscalizador"
   // Filtros:
@@ -57,8 +68,10 @@ export class OrganismoFiscalizadorListComponent implements OnInit {
       tipoDeclaracion: 'ACTUALIZACION PERIÓDICA',
       periodo: 2025,
       numeral: 22,
-      rutDeclarante: '15381086-9',
+      runDeclarante: '15381086-9',
       nombreDeclarante: 'CHRISTIAN ALEJANDRO',
+      apellidoPaterno: 'RODRIGUEZ',
+      apellidoMaterno: 'SANCHEZ',
       servicio: 'CONTRALORÍA GENERAL - TESTING',
       cargo: 'JEFE DE UNIDAD',
       estado: 'FIRMADA'
@@ -70,8 +83,10 @@ export class OrganismoFiscalizadorListComponent implements OnInit {
       tipoDeclaracion: 'ACTUALIZACION PERIÓDICA',
       periodo: 2025,
       numeral: 23,
-      rutDeclarante: '12123123-2',
+      runDeclarante: '12123123-2',
       nombreDeclarante: 'CHRISTIAN ALEJANDRO',
+      apellidoPaterno: 'MARTINEZ',
+      apellidoMaterno: 'LOPEZ',
       servicio: 'CONTRALORÍA GENERAL - TESTING',
       cargo: 'JEFE DE UNIDAD',
       estado: 'PENDIENTE'
@@ -87,21 +102,61 @@ export class OrganismoFiscalizadorListComponent implements OnInit {
     'fechaDeclaracion',
     'fechaRecepcion',
     'tipoDeclaracion',
-    'periodo',
-    'numeral',
-    'rutDeclarante',
+    'runDeclarante',
     'nombreDeclarante',
+    'apellidoPaterno',
+    'apellidoMaterno',
     'servicio',
     'cargo',
-    'estado'
+    'estado',
+    'acciones'
   ];
 
-  constructor() {}
+  constructor() {
+    this.totalItems = this.data.length;
+  }
 
   ngOnInit(): void {}
 
+  // Método para alternar filtros
+  toggleFiltros() {
+    this.showFilters = !this.showFilters;
+  }
+
+  // Método para obtener clases CSS de pills de estado
+  getEstadoPillClass(estado: string): string {
+    switch (estado?.toUpperCase()) {
+      case 'FIRMADA':
+        return 'pill-success';
+      case 'PENDIENTE':
+        return 'pill-warning';
+      case 'ARCHIVADA':
+        return 'pill-secondary';
+      case 'RECEPCIONADA':
+        return 'pill-primary';
+      default:
+        return 'pill-default';
+    }
+  }
+
+  // Método para manejar cambios de página
+  onPageChange(event: PageEvent) {
+    this.pageSize = event.pageSize;
+    console.log('Página cambiada:', event);
+  }
+
+  // Métodos de acciones
+  verDetalle(element: DeclaracionFiscalizador) {
+    console.log('Ver detalle de declaración:', element.idDeclaracion);
+  }
+
+  descargar(element: DeclaracionFiscalizador) {
+    console.log('Descargar declaración:', element.idDeclaracion);
+  }
+
   // Botones: Buscar, Limpiar, Exportar
   buscar() {
+    this.isLoading = true;
     console.log('Buscar con filtros:', {
       fechaDeclaracionDesde: this.fechaDeclaracionDesde.value,
       fechaDeclaracionHasta: this.fechaDeclaracionHasta.value,
@@ -116,6 +171,11 @@ export class OrganismoFiscalizadorListComponent implements OnInit {
       servicio: this.servicio.value,
       cargo: this.cargo.value,
     });
+
+    // Simular llamada async
+    setTimeout(() => {
+      this.isLoading = false;
+    }, 1000);
   }
 
   limpiar() {
@@ -132,7 +192,7 @@ export class OrganismoFiscalizadorListComponent implements OnInit {
     this.servicio.reset();
     this.cargo.reset();
     console.log('Filtros limpiados');
-    this.dataSource.data = [];
+    this.dataSource.data = this.data;
   }
 
   exportar() {
@@ -144,6 +204,7 @@ export class OrganismoFiscalizadorListComponent implements OnInit {
   descargarVersionCompletaJSON() {
     console.log('Descargar declaración (versión completa JSON)...');
   }
+  
   descargarVersionCompleta() {
     console.log('Descargar declaración (versión completa)...');
   }
