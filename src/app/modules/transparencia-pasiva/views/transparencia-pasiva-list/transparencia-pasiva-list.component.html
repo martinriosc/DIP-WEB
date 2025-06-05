@@ -185,7 +185,7 @@
         <!-- ID Declaración -->
         <ng-container matColumnDef="idDeclaracion">
           <th mat-header-cell *matHeaderCellDef class="header-cell">ID Declaración</th>
-          <td mat-cell *matCellDef="let element" class="data-cell">{{ element.idDeclaracion }}</td>
+          <td mat-cell *matCellDef="let element" class="data-cell">{{ element.id }}</td>
         </ng-container>
 
         <!-- Fecha de Declaración -->
@@ -203,7 +203,7 @@
         <!-- Tipo Declaración -->
         <ng-container matColumnDef="tipoDeclaracion">
           <th mat-header-cell *matHeaderCellDef class="header-cell">Tipo Declaración</th>
-          <td mat-cell *matCellDef="let element" class="data-cell">{{ element.tipoDeclaracion }}</td>
+          <td mat-cell *matCellDef="let element" class="data-cell">{{ element.declaTipo }}</td>
         </ng-container>
 
         <!-- Rut Declarante -->
@@ -218,18 +218,7 @@
           <td mat-cell *matCellDef="let element" class="data-cell">{{ element.nombreDeclarante }}</td>
         </ng-container>
 
-        <!-- Apellido Paterno -->
-        <ng-container matColumnDef="apellidoPaterno">
-          <th mat-header-cell *matHeaderCellDef class="header-cell">Apellido Paterno</th>
-          <td mat-cell *matCellDef="let element" class="data-cell">{{ element.apellidoPaterno }}</td>
-        </ng-container>
-
-        <!-- Apellido Materno -->
-        <ng-container matColumnDef="apellidoMaterno">
-          <th mat-header-cell *matHeaderCellDef class="header-cell">Apellido Materno</th>
-          <td mat-cell *matCellDef="let element" class="data-cell">{{ element.apellidoMaterno }}</td>
-        </ng-container>
-
+      
         <!-- Servicio -->
         <ng-container matColumnDef="servicio">
           <th mat-header-cell *matHeaderCellDef class="header-cell">Servicio</th>
@@ -246,8 +235,8 @@
         <ng-container matColumnDef="estado">
           <th mat-header-cell *matHeaderCellDef class="header-cell">Estado</th>
           <td mat-cell *matCellDef="let element" class="data-cell text-center">
-            <span [ngClass]="getEstadoPillClass(element.estado)" class="modern-estado-pill">
-              {{ element.estado }}
+            <span [ngClass]="getEstadoPillClass(element.declaEstado)" class="modern-estado-pill">
+              {{ element.declaEstado }}
             </span>
           </td>
         </ng-container>
@@ -257,11 +246,8 @@
           <th mat-header-cell *matHeaderCellDef class="header-cell">Acciones</th>
           <td mat-cell *matCellDef="let element" class="actions-cell">
             <div class="action-buttons">
-              <button mat-icon-button color="primary" (click)="verDetalle(element)" matTooltip="Ver detalle" class="action-btn">
-                <mat-icon>visibility</mat-icon>
-              </button>
-              <button mat-icon-button color="accent" (click)="descargar(element)" matTooltip="Descargar" class="action-btn">
-                <mat-icon>file_download</mat-icon>
+              <button mat-icon-button color="warn" (click)="verBitacora(element)" matTooltip="Ver bitácora" class="action-btn">
+                <img src="assets/icons/icon-btn-tabla_bitacora.svg">
               </button>
             </div>
           </td>
@@ -317,6 +303,10 @@
               <mat-icon>more_vert</mat-icon>
             </button>
             <mat-menu #menu="matMenu">
+              <button mat-menu-item (click)="verBitacora(element); $event.stopPropagation()">
+                <img src="assets/icons/icon-btn-tabla_bitacora.svg">
+                <span>Ver bitácora</span>
+              </button>
               <button mat-menu-item (click)="verDetalle(element); $event.stopPropagation()">
                 <mat-icon>visibility</mat-icon>
                 <span>Ver detalle</span>
@@ -340,11 +330,11 @@
           </div>
           <div class="info-row">
             <span class="info-label">Tipo:</span>
-            <span class="info-value">{{ element.tipoDeclaracion }}</span>
+            <span class="info-value">{{ element.declaTipo }}</span>
           </div>
           <div class="info-row">
             <span class="info-label">Declarante:</span>
-            <span class="info-value">{{ element.nombreDeclarante }} {{ element.apellidoPaterno }}</span>
+            <span class="info-value">{{ element.nombreDeclarante }} </span>
           </div>
           <div class="info-row">
             <span class="info-label">Rut:</span>
@@ -360,8 +350,8 @@
           </div>
           <div class="info-row">
             <span class="info-label">Estado:</span>
-            <span [ngClass]="getEstadoPillClass(element.estado)" class="modern-estado-pill">
-              {{ element.estado }}
+            <span [ngClass]="getEstadoPillClass(element.declaEstado)" class="modern-estado-pill">
+              {{ element.declaEstado }}
             </span>
           </div>
         </div>
@@ -379,6 +369,97 @@
         (page)="onPageChange($event)" 
         aria-label="Paginador de Declaraciones">
       </mat-paginator>
+    </div>
+  </div>
+
+  <!-- Modal de Bitácora -->
+  <div class="modal-overlay" *ngIf="showBitacoraModal" (click)="cerrarBitacoraModal()">
+    <div class="modal-content bitacora-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <mat-icon class="modal-icon">history</mat-icon>
+          Bitácora de Declaración #{{ currentDeclaracionId }}
+        </h3>
+        <button mat-icon-button class="close-btn" (click)="cerrarBitacoraModal()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Spinner de carga de bitácora -->
+        <div *ngIf="bitacoraLoading" class="loading-overlay">
+          <div class="loading-content">
+            <mat-spinner diameter="40"></mat-spinner>
+            <p class="loading-text">Cargando bitácora...</p>
+          </div>
+        </div>
+
+        <!-- Tabla de bitácora -->
+        <div *ngIf="!bitacoraLoading && bitacoraData.length > 0" class="bitacora-table-container">
+          <table class="bitacora-table">
+            <thead>
+              <tr>
+                <th>Usuario</th>
+                <th>Fecha</th>
+                <th>Acción</th>
+                <th>Perfil</th>
+                <th>Observaciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let bitacora of bitacoraData; let i = index" 
+                  [class.even-row]="i % 2 === 0">
+                <td class="usuario-cell">
+                  <div class="usuario-info">
+                    <mat-icon class="user-icon">person</mat-icon>
+                    <span>{{ bitacora.usuario }}</span>
+                  </div>
+                </td>
+                <td class="fecha-cell">
+                  <div class="fecha-info">
+                    <mat-icon class="date-icon">schedule</mat-icon>
+                    <span>{{ bitacora.fecha }}</span>
+                  </div>
+                </td>
+                <td class="accion-cell">
+                  <span [ngClass]="getAccionPillClass(bitacora.accion)" class="accion-pill">
+                    {{ bitacora.accion }}
+                  </span>
+                </td>
+                <td class="perfil-cell">
+                  <div class="perfil-badge">
+                    <mat-icon class="role-icon">badge</mat-icon>
+                    <span>{{ bitacora.perfil }}</span>
+                  </div>
+                </td>
+                <td class="observaciones-cell">
+                  <div class="observaciones-content" [matTooltip]="bitacora.observaciones">
+                    {{ bitacora.observaciones }}
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Mensaje cuando no hay datos en bitácora -->
+        <div *ngIf="!bitacoraLoading && bitacoraData.length === 0" class="bitacora-empty">
+          <mat-icon class="empty-icon">info</mat-icon>
+          <p>No hay registros de bitácora para esta declaración.</p>
+        </div>
+
+        <!-- Paginador de bitácora -->
+        <div class="bitacora-pagination" *ngIf="bitacoraTotalItems > 0">
+          <mat-paginator 
+            class="modern-paginator small" 
+            [pageSizeOptions]="[5, 10, 25]" 
+            [length]="bitacoraTotalItems" 
+            [pageSize]="bitacoraPageSize" 
+            [pageIndex]="bitacoraCurrentPage"
+            (page)="onBitacoraPageChange($event)">
+          </mat-paginator>
+        </div>
+      </div>
     </div>
   </div>
 </div>

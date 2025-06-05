@@ -154,7 +154,9 @@ export class RevisorListComponent implements AfterViewInit, OnInit {
       next: res => {
         this.totalPendientes = res.pendientes.data ?? 0;
         this.totalEnviados   = res.enviados.data   ?? 0;
-        this.isLoading = false;
+        setTimeout(() => {
+          this.isLoading = false;
+        }, 1000);
       },
       error: err => { console.error(err); this.isLoading = false; }
     });

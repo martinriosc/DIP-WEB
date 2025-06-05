@@ -1,0 +1,295 @@
+<div class="container-fluid">
+  <!-- Breadcrumb -->
+  <nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a routerLink="/">Inicio</a>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">
+        Auditoría DIP
+      </li>
+    </ol>
+  </nav>
+
+  <!-- Título del componente -->
+  <div class="page-header">
+    <h2 class="page-title">Auditoría DIP
+      <span class="item-count">({{ dataSource?.data!.length }})</span>
+    </h2>
+  </div>
+
+  <!-- Sección de filtros mejorada -->
+  <div class="filters-section">
+    <div class="filters-header" (click)="toggleFiltros()">
+      <span class="filters-title">
+        <mat-icon class="filters-icon">filter_list</mat-icon>
+        Filtros avanzados
+      </span>
+      <mat-icon class="toggle-icon" [class.rotated]="showFilters">
+        keyboard_arrow_down
+      </mat-icon>
+    </div>
+
+    <div class="filters-container" [class.expanded]="showFilters">
+      <div class="filters-content">
+        <div class="row g-3">
+          <!-- Fecha Inicio -->
+          <div class="col-lg-2 col-md-3 col-sm-6">
+            <mat-form-field appearance="outline" class="modern-form-field">
+              <mat-label>Fecha Inicio</mat-label>
+              <input matInput [matDatepicker]="pickerInicio" [formControl]="fechaInicio">
+              <mat-datepicker-toggle matSuffix [for]="pickerInicio"></mat-datepicker-toggle>
+              <mat-datepicker #pickerInicio></mat-datepicker>
+            </mat-form-field>
+          </div>
+
+          <!-- Fecha Fin -->
+          <div class="col-lg-2 col-md-3 col-sm-6">
+            <mat-form-field appearance="outline" class="modern-form-field">
+              <mat-label>Fecha Fin</mat-label>
+              <input matInput [matDatepicker]="pickerFin" [formControl]="fechaFin">
+              <mat-datepicker-toggle matSuffix [for]="pickerFin"></mat-datepicker-toggle>
+              <mat-datepicker #pickerFin></mat-datepicker>
+            </mat-form-field>
+          </div>
+
+          <!-- Tipo -->
+          <div class="col-lg-2 col-md-3 col-sm-6">
+            <mat-form-field appearance="outline" class="modern-form-field">
+              <mat-label>Tipo</mat-label>
+              <mat-select [formControl]="tipo">
+                <mat-option *ngFor="let tipo of tipos" [value]="tipo.id">
+                  {{tipo.nombre}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <!-- Estado -->
+          <div class="col-lg-2 col-md-3 col-sm-6">
+            <mat-form-field appearance="outline" class="modern-form-field">
+              <mat-label>Estado</mat-label>
+              <mat-select [formControl]="estado">
+                <mat-option *ngFor="let estado of estados" [value]="estado.id">
+                  {{estado.nombre}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <!-- Número -->
+          <div class="col-lg-2 col-md-3 col-sm-6">
+            <mat-form-field appearance="outline" class="modern-form-field">
+              <mat-label>Número</mat-label>
+              <input type="text" matInput [formControl]="numero">
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="filters-actions">
+          <button mat-raised-button color="primary" class="action-btn" (click)="buscar()">
+            <mat-icon>search</mat-icon>
+            Buscar
+          </button>
+          <button mat-raised-button color="warn" class="action-btn" (click)="limpiar()">
+            <mat-icon>clear</mat-icon>
+            Limpiar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<!-- VISTA DE ESCRITORIO: TABLA (visible desde md en adelante) -->
+<div class="d-none d-md-block desktop-view">
+  <!-- Barra de acciones superior -->
+  <div class="table-header">
+    <div class="table-actions">
+      <button mat-raised-button color="primary" class="primary-action-btn" (click)="crear()">
+        <mat-icon>add</mat-icon>
+        Nueva Auditoría DIP
+      </button>
+    </div>
+  </div>
+
+  <!-- Spinner de carga -->
+  <div *ngIf="isLoading" class="loading-overlay">
+    <div class="loading-content">
+      <mat-spinner diameter="50"></mat-spinner>
+      <p class="loading-text">Cargando auditorías DIP...</p>
+    </div>
+  </div>
+
+  <!-- Tabla con diseño mejorado -->
+  <div class="table-container">
+    <table mat-table [dataSource]="dataSource" class="modern-table" [class.loading]="isLoading">
+      <!-- ID -->
+      <ng-container matColumnDef="id">
+        <th mat-header-cell *matHeaderCellDef class="header-cell"> ID </th>
+        <td mat-cell *matCellDef="let element" class="data-cell"> {{ element.id }} </td>
+      </ng-container>
+
+      <!-- Fecha -->
+      <ng-container matColumnDef="fecha">
+        <th mat-header-cell *matHeaderCellDef class="header-cell"> Fecha </th>
+        <td mat-cell *matCellDef="let element" class="data-cell">
+          {{ element.fecha | date:'dd/MM/yyyy' }}
+        </td>
+      </ng-container>
+
+      <!-- Número -->
+      <ng-container matColumnDef="numero">
+        <th mat-header-cell *matHeaderCellDef class="header-cell"> Número </th>
+        <td mat-cell *matCellDef="let element" class="data-cell">
+          {{ element.numero }}
+        </td>
+      </ng-container>
+
+      <!-- Tipo -->
+      <ng-container matColumnDef="tipo">
+        <th mat-header-cell *matHeaderCellDef class="header-cell"> Tipo </th>
+        <td mat-cell *matCellDef="let element" class="data-cell">
+          {{ element.tipo }}
+        </td>
+      </ng-container>
+
+      <!-- Estado -->
+      <ng-container matColumnDef="estado">
+        <th mat-header-cell *matHeaderCellDef class="header-cell"> Estado </th>
+        <td mat-cell *matCellDef="let element" class="data-cell text-center">
+          <span [ngClass]="getEstadoPillClass(element.estado)" class="modern-estado-pill">
+            {{ element.estado }}
+          </span>
+        </td>
+      </ng-container>
+
+      <!-- Descripción -->
+      <ng-container matColumnDef="descripcion">
+        <th mat-header-cell *matHeaderCellDef class="header-cell"> Descripción </th>
+        <td mat-cell *matCellDef="let element" class="data-cell">
+          {{ element.descripcion }}
+        </td>
+      </ng-container>
+
+      <!-- Acciones -->
+      <ng-container matColumnDef="acciones">
+        <th mat-header-cell *matHeaderCellDef class="header-cell"> Acciones </th>
+        <td mat-cell *matCellDef="let element" class="actions-cell">
+          <div class="action-buttons">
+            <button mat-icon-button color="primary" (click)="ver(element)" matTooltip="Ver detalle" class="action-btn">
+              <img src="assets/icons/icon-btn-tabla_ver.svg">
+            </button>
+            <button mat-icon-button color="accent" (click)="editar(element)" matTooltip="Editar" class="action-btn">
+              <img src="assets/icons/icon-btn-tabla_editar.svg">
+            </button>
+            <button mat-icon-button color="warn" (click)="eliminar(element)" matTooltip="Eliminar" class="action-btn">
+              <img src="assets/icons/icon-btn-tabla_eliminar.svg">
+            </button>
+          </div>
+        </td>
+      </ng-container>
+
+      <!-- Cabecera y Filas -->
+      <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky:true" class="header-row"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="data-row"></tr>
+    </table>
+  </div>
+
+  <!-- Paginador mejorado -->
+  <div class="pagination-container">
+    <mat-paginator 
+      class="modern-paginator" 
+      [pageSizeOptions]="[5, 25, 50]" 
+      showFirstLastButtons
+      [length]="totalItems" 
+      [pageSize]="pageSize" 
+      (page)="onPageChange($event)" 
+      aria-label="Paginador de Auditoría DIP">
+    </mat-paginator>
+  </div>
+</div>
+
+<!-- VISTA MOBILE -->
+<div class="d-block d-md-none mobile-view">
+  <!-- Botón Nueva Auditoría DIP en mobile -->
+  <div class="mobile-actions">
+    <button mat-raised-button color="primary" class="mobile-primary-btn" (click)="crear()">
+      <mat-icon>add</mat-icon>
+      Nueva Auditoría DIP
+    </button>
+  </div>
+
+  <!-- Spinner de carga mobile -->
+  <div *ngIf="isLoading" class="loading-overlay">
+    <div class="loading-content">
+      <mat-spinner diameter="50"></mat-spinner>
+      <p class="loading-text">Cargando auditorías DIP...</p>
+    </div>
+  </div>
+
+  <!-- Lista de tarjetas mobile -->
+  <div class="mobile-list" [class.loading]="isLoading">
+    <div class="mobile-card" *ngFor="let element of dataSource.data">
+      <div class="card-header">
+        <div class="card-title">
+          <span class="item-number">{{ element.numero }}</span>
+        </div>
+        <div class="card-actions">
+          <button mat-icon-button [matMenuTriggerFor]="menu" class="menu-btn">
+            <mat-icon>more_vert</mat-icon>
+          </button>
+          <mat-menu #menu="matMenu">
+            <button mat-menu-item (click)="ver(element); $event.stopPropagation()">
+              <mat-icon>visibility</mat-icon>
+              <span>Ver detalle</span>
+            </button>
+            <button mat-menu-item (click)="editar(element); $event.stopPropagation()">
+              <mat-icon>edit</mat-icon>
+              <span>Editar</span>
+            </button>
+            <button mat-menu-item (click)="eliminar(element); $event.stopPropagation()">
+              <mat-icon>delete</mat-icon>
+              <span>Eliminar</span>
+            </button>
+          </mat-menu>
+        </div>
+      </div>
+      
+      <div class="card-content">
+        <div class="info-row">
+          <span class="info-label">Fecha:</span>
+          <span class="info-value">{{ element.fecha | date:'dd/MM/yyyy' }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Tipo:</span>
+          <span class="info-value">{{ element.tipo }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Estado:</span>
+          <span [ngClass]="getEstadoPillClass(element.estado)" class="modern-estado-pill">
+            {{ element.estado }}
+          </span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Descripción:</span>
+          <span class="info-value">{{ element.descripcion }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Paginador mobile -->
+  <div class="mobile-pagination">
+    <mat-paginator 
+      class="modern-paginator" 
+      [pageSizeOptions]="[5, 10, 25]" 
+      showFirstLastButtons
+      [length]="totalItems" 
+      [pageSize]="pageSize" 
+      (page)="onPageChange($event)" 
+      aria-label="Paginador de Auditoría DIP">
+    </mat-paginator>
+  </div>
+</div>
+
+</div> 

@@ -337,17 +337,20 @@ export interface BandejaLeyReservado {
 /* BandejaUAdip */
 export interface BandejaUAdip {
   id: number;
-  fechaRecepcion: Date;
-  fechaDeclaracion: Date;
+  fechaDeclaracion: string;
+  fechaRecepcion: string;
+  declaTipo: string;
   rutDeclarante: string;
   nombreDeclarante: string;
-  declaTipo: string;
   servicio: string;
   cargo: string;
   declaEstado: string;
   sujetoObligado: number;
   sujetoObligadoOriginal: string;
+  declaranteId: number;
   code: string;
+  recepcion: string;
+  reservado: boolean;
   periodo: number;
 }
 

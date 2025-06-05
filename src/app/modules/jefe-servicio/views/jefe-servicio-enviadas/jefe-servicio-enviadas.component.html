@@ -1,0 +1,183 @@
+<!-- VISTA DE ESCRITORIO -->
+<div class="d-none d-md-block desktop-view">
+  <!-- Tabla con diseño mejorado -->
+  <div class="table-container">
+    <table mat-table [dataSource]="dataSource" class="modern-table">
+      <!-- Checkbox -->
+      <ng-container matColumnDef="select">
+        <th mat-header-cell *matHeaderCellDef class="header-cell checkbox-cell">
+          <mat-checkbox color="primary" 
+                        (change)="onMasterToggle()" 
+                        [checked]="isAllSelected()"
+                        [indeterminate]="isSomeSelected()">
+          </mat-checkbox>
+        </th>
+        <td mat-cell *matCellDef="let element" class="data-cell checkbox-cell">
+          <mat-checkbox color="primary" 
+                        (click)="$event.stopPropagation()" 
+                        (change)="onToggle(element)"
+                        [checked]="isSelected(element)">
+          </mat-checkbox>
+        </td>
+      </ng-container>
+
+      <!-- Id -->
+      <ng-container matColumnDef="idDeclaracion">
+        <th mat-header-cell *matHeaderCellDef class="header-cell">Id Declaración</th>
+        <td mat-cell *matCellDef="let e" class="data-cell">{{ e.id }}</td>
+      </ng-container>
+
+      <!-- Fecha -->
+      <ng-container matColumnDef="fechaDeclaracion">
+        <th mat-header-cell *matHeaderCellDef class="header-cell">Fecha Declaración</th>
+        <td mat-cell *matCellDef="let e" class="data-cell">{{ e.fechaFirmaDeclarante }}</td>
+      </ng-container>
+
+      <!-- Tipo -->
+      <ng-container matColumnDef="tipoDeclaracion">
+        <th mat-header-cell *matHeaderCellDef class="header-cell">Tipo Declaración</th>
+        <td mat-cell *matCellDef="let e" class="data-cell">{{ e.declaTipo }}</td>
+      </ng-container>
+
+      <!-- Numeral -->
+      <ng-container matColumnDef="numeral">
+        <th mat-header-cell *matHeaderCellDef class="header-cell">Numeral</th>
+        <td mat-cell *matCellDef="let e" class="data-cell">{{ e.sujetoObligado }}</td>
+      </ng-container>
+
+      <!-- RUT -->
+      <ng-container matColumnDef="rut">
+        <th mat-header-cell *matHeaderCellDef class="header-cell">R.U.N.</th>
+        <td mat-cell *matCellDef="let e" class="data-cell">{{ e.runUsuario }}</td>
+      </ng-container>
+
+      <!-- Declarante -->
+      <ng-container matColumnDef="declarante">
+        <th mat-header-cell *matHeaderCellDef class="header-cell">Declarante</th>
+        <td mat-cell *matCellDef="let e" class="data-cell">{{ e.nombreUsuario }}</td>
+      </ng-container>
+
+      <!-- Servicio -->
+      <ng-container matColumnDef="servicio">
+        <th mat-header-cell *matHeaderCellDef class="header-cell">Servicio</th>
+        <td mat-cell *matCellDef="let e" class="data-cell">{{ e.servicio }}</td>
+      </ng-container>
+
+      <!-- Cargo -->
+      <ng-container matColumnDef="cargo">
+        <th mat-header-cell *matHeaderCellDef class="header-cell">Cargo</th>
+        <td mat-cell *matCellDef="let e" class="data-cell">{{ e.cargo }}</td>
+      </ng-container>
+
+      <!-- Estado -->
+      <ng-container matColumnDef="estado">
+        <th mat-header-cell *matHeaderCellDef class="header-cell">Estado</th>
+        <td mat-cell *matCellDef="let e" class="data-cell">
+          <span class="estado-pill" [ngClass]="pillClass(e.estado)">{{ e.estado }}</span>
+        </td>
+      </ng-container>
+
+      <!-- Enviado Por -->
+      <ng-container matColumnDef="enviadoPor">
+        <th mat-header-cell *matHeaderCellDef class="header-cell">Enviado Por</th>
+        <td mat-cell *matCellDef="let e" class="data-cell">{{ e.enviadoPor }}</td>
+      </ng-container>
+
+      <!-- Acciones -->
+      <ng-container matColumnDef="acciones">
+        <th mat-header-cell *matHeaderCellDef class="header-cell">Acciones</th>
+        <td mat-cell *matCellDef="let element" class="data-cell actions-cell">
+          <button mat-icon-button color="primary" 
+                  [matTooltip]="'Ver bitácora de ID: ' + element.id"
+                  (click)="onBitacora(element)">
+            <mat-icon>visibility</mat-icon>
+          </button>
+          <button mat-icon-button color="primary" 
+                  [matTooltip]="'Descargar declaración'"
+                  (click)="onDescargar(element)">
+            <mat-icon>download</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+  </div>
+</div>
+
+<!-- VISTA MOBILE -->
+<div class="d-block d-md-none mobile-view">
+  <!-- Lista de tarjetas mobile -->
+  <div class="mobile-list" [class.loading]="isLoading">
+    <div class="mobile-card" *ngFor="let e of dataSource.data">
+      <div class="card-header">
+        <div class="card-title">
+          <mat-checkbox color="primary"
+                        (click)="$event.stopPropagation()"
+                        (change)="onToggle(e)"
+                        [checked]="isSelected(e)"
+                        class="card-checkbox">
+          </mat-checkbox>
+          <span class="declaration-number">ID: {{ e.idDeclaracion }}</span>
+        </div>
+        <div class="card-actions">
+          <button mat-icon-button [matMenuTriggerFor]="menu" class="menu-btn">
+            <mat-icon>more_vert</mat-icon>
+          </button>
+          <mat-menu #menu="matMenu">
+            <button mat-menu-item (click)="onBitacora(e); $event.stopPropagation()">
+              <mat-icon>visibility</mat-icon>
+              <span>Bitácora</span>
+            </button>
+            <button mat-menu-item (click)="onDescargar(e); $event.stopPropagation()">
+              <mat-icon>download</mat-icon>
+              <span>Descargar</span>
+            </button>
+          </mat-menu>
+        </div>
+      </div>
+      
+      <div class="card-content">
+        <div class="info-row">
+          <span class="info-label">Fecha Declaración:</span>
+          <span class="info-value">{{ e.fechaDeclaracion }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Tipo Declaración:</span>
+          <span class="info-value">{{ e.tipoDeclaracion }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Numeral:</span>
+          <span class="info-value">{{ e.numeral }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">RUT:</span>
+          <span class="info-value">{{ e.rut }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Declarante:</span>
+          <span class="info-value">{{ e.declarante }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Servicio:</span>
+          <span class="info-value">{{ e.servicio }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Cargo:</span>
+          <span class="info-value">{{ e.cargo }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Estado:</span>
+          <span [ngClass]="pillClass(e.estado)" class="estado-pill">
+            {{ e.estado }}
+          </span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Enviado por:</span>
+          <span class="info-value">{{ e.enviadoPor }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 

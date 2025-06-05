@@ -6,6 +6,9 @@ import { MatCardModule } from '@angular/material/card';
 import { MinistroFeRoutingModule } from './ministro-fe-routing.module';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MinistroFeListComponent } from './views/ministro-fe-list/ministro-fe-list.component';
+import { MinistroFePendientesComponent } from './views/ministro-fe-pendientes/ministro-fe-pendientes.component';
+import { MinistroFeEnviadasComponent } from './views/ministro-fe-enviadas/ministro-fe-enviadas.component';
+import { MinistroFeArchivadasComponent } from './views/ministro-fe-archivadas/ministro-fe-archivadas.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatNativeDateModule } from '@angular/material/core';
@@ -21,10 +24,13 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
+
 @NgModule({
   declarations: [
-
-    MinistroFeListComponent
+    MinistroFeListComponent,
+    MinistroFePendientesComponent,
+    MinistroFeEnviadasComponent,
+    MinistroFeArchivadasComponent
   ],
   imports: [
     CommonModule,
@@ -49,7 +55,6 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     MatProgressSpinnerModule,
     MatMenuModule,
     MatTooltipModule
-
   ]
 })
 export class MinistroFeModule { }

@@ -7,6 +7,7 @@ import {
   EstadoDeclaracion,
   TipoDeclaracion
 } from 'src/app/modules/declaraciones/services/declaracion.service';
+import { MinistroFeService, ProcesoMasivo, Exportacion } from '../../services/ministro-fe.service';
 import { merge, debounceTime, switchMap, tap } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 
@@ -48,9 +49,7 @@ export class MinistroFeListComponent implements OnInit {
 
   tabs = [
     { id: 'pendientes' as TabId,         label: 'Pendientes',                              count: () => this.pendientesCount == 0 ? '' : this.pendientesCount },
-    { id: 'firma-envio-masivo' as TabId, label: 'Para firma y envío (proceso masivo)',     count: () => this.firmaEnvioCount == 0 ? '' : this.firmaEnvioCount  },
     { id: 'enviadas' as TabId,           label: 'Enviadas / Recepcionadas',                count: () => this.enviadasCount == 0 ? '' : this.enviadasCount },
-    { id: 'archivo-masivo' as TabId,     label: 'Para Archivo (proceso masivo)',           count: () => this.archivoMasivoCount == 0 ? '' : this.archivoMasivoCount },
     { id: 'archivadas' as TabId,         label: 'Archivadas',                              count: () => this.archivadasCount == 0 ? '' : this.archivadasCount }
   ];
 
@@ -107,8 +106,25 @@ isLoading   = false;
   bitacoraTotalItems = 0;
   currentDeclaracionId = 0;
 
+  /* ══════════════ Propiedades para procesos masivos ══════════════ */
+  procesosMasivos: ProcesoMasivo[] = [];
+  exportaciones: Exportacion[] = [];
+  procesosMasivosLoading = false;
+  exportacionesLoading = false;
+
+  /* ══════════════ Propiedades para modales de confirmación ══════════════ */
+  showConfirmModal = false;
+  confirmModalTitle = '';
+  confirmModalMessage = '';
+  confirmModalAction: () => void = () => {};
+  observacionModal = new FormControl('');
+
   /* ──────────────────────────── Constructor ───────────────────── */
-  constructor(private _declaracion: DeclaracionService, private toastr: ToastrService) {}
+  constructor(
+    private _declaracion: DeclaracionService, 
+    private _ministroFe: MinistroFeService,
+    private toastr: ToastrService
+  ) {}
 
   /* ───────────────────────────── Lifecycle ────────────────────── */
   ngOnInit(): void {
@@ -205,28 +221,34 @@ isLoading   = false;
     .subscribe(() => this.loadBandeja());
   }
 
-  /* ──────────────────────────── Tabs ──────────────────────────── */
+  /* ──────────────────────────── Tab management ────────────────── */
   setTab(tab: TabId): void {
-    if (this.currentTab === tab) return;
     this.currentTab = tab;
-    this.estados = [];
-    /* limpiamos selecciones al cambiar de bandeja */
-    this.selectionPendientes.clear();
-    this.selectionEnviadas.clear();
-    this.selectionArchivadas.clear();
-    let nroTab = 0;
-    if(tab === 'pendientes') nroTab = 1;
-    if(tab === 'firma-envio-masivo') nroTab = 6;
-    if(tab === 'enviadas') nroTab = 2;
-    if(tab === 'archivo-masivo') nroTab = 7;
-    if(tab === 'archivadas') nroTab = 5;
-    this._declaracion.obtenerEstadosDeclaracion(nroTab, 3).subscribe(e => (this.estados = e));
-    this.loadBandeja();
-    
+
+    /* Cargar estados según el tab */
+    const tipoBandejaMap: Record<TabId, number> = {
+      'pendientes': 1,
+      'firma-envio-masivo': 6,
+      'enviadas': 2,
+      'archivo-masivo': 7,
+      'archivadas': 5
+    };
+
+    this._declaracion.obtenerEstadosDeclaracion(tipoBandejaMap[tab], 3).subscribe(e => {
+      this.estados = e;
+      this.estado.setValue(''); // Reset filter
+    });
+
+    // Cargar datos adicionales según el tab
+    this.cargarProcesosMasivos();
+    this.cargarExportaciones();
+
+    /* Reset filters and reload */
+    this.limpiar();
   }
 
   /* ───────────────────── Selección genérica (checkbox) ────────── */
-  private getSelection(tab: TabId): SelectionModel<DeclaracionMinistroFe> {
+  getSelection(tab: TabId): SelectionModel<DeclaracionMinistroFe> {
     if (tab === 'enviadas') return this.selectionEnviadas;
     if (tab === 'archivadas' || tab === 'archivo-masivo') return this.selectionArchivadas;
     return this.selectionPendientes; // pendientes + firma/envío
@@ -331,48 +353,127 @@ isLoading   = false;
   }
 
   onFirmar(): void {
-    const ids = this.selectionPendientes.selected.map(d => d.idDeclaracion);
-    if (!ids.length) return;
-    this._declaracion.validarProcesoActivo().subscribe(flag => {
-      if (flag.data) { alert('Hay un proceso masivo activo'); return; }
-      this._declaracion.archivarDeclaracion(ids[0], 'Declaración archivada por el usuario').subscribe(() => this.loadBandeja());
-    });
+    const selection = this.getSelection(this.currentTab);
+    const selectedItems = selection.selected;
+    
+    if (selectedItems.length === 0) {
+      this.toastr.warning('Debe seleccionar al menos una declaración para firmar');
+      return;
+    }
+
+    if (selectedItems.length === 1) {
+      const element = selectedItems[0];
+      this.mostrarModalConfirmacion(
+        'Firmar Declaración',
+        `¿Está seguro de que desea firmar la declaración ${element.idDeclaracion}?`,
+        () => {
+          this._ministroFe.firmarDeclaracion(element.idDeclaracion, this.observacionModal.value || '').subscribe({
+            next: (response) => {
+              this.toastr.success('Declaración firmada correctamente');
+              this.loadBandeja();
+              selection.clear();
+              this.cerrarModalConfirmacion();
+            },
+            error: (error) => {
+              console.error('Error al firmar declaración:', error);
+              this.toastr.error('Error al firmar la declaración');
+            }
+          });
+        }
+      );
+    } else {
+      this.firmarEnviarSeleccionadas();
+    }
   }
 
   onDerivar(): void {
-    const ids = this.selectionPendientes.selected.map(d => d.idDeclaracion);
-    if (!ids.length) return;
-    this._declaracion.confirmarDatos(ids[0]).subscribe(() => this.loadBandeja());
+    const selection = this.getSelection(this.currentTab);
+    const selectedItems = selection.selected;
+    
+    if (selectedItems.length === 0) {
+      this.toastr.warning('Debe seleccionar al menos una declaración para derivar');
+      return;
+    }
+
+    // Por simplicidad, usamos un idVisador por defecto. 
+    // En una implementación real, se debería mostrar un modal para seleccionar el visador
+    const idVisadorDefault = 1;
+    
+    if (selectedItems.length === 1) {
+      const element = selectedItems[0];
+      this.mostrarModalConfirmacion(
+        'Derivar Declaración',
+        `¿Está seguro de que desea derivar la declaración ${element.idDeclaracion}?`,
+        () => {
+          this._ministroFe.enviarVisador(element.idDeclaracion, idVisadorDefault, this.observacionModal.value || '').subscribe({
+            next: (response) => {
+              this.toastr.success('Declaración derivada correctamente');
+              this.loadBandeja();
+              selection.clear();
+              this.cerrarModalConfirmacion();
+            },
+            error: (error) => {
+              console.error('Error al derivar declaración:', error);
+              this.toastr.error('Error al derivar la declaración');
+            }
+          });
+        }
+      );
+    }
   }
 
   onEnviarOrganismo(): void {
-    const ids = this.selectionPendientes.selected.map(d => d.idDeclaracion);
-    if (!ids.length) return;
-    this._declaracion.descargarDeclaracion(ids[0]).subscribe(() => {});
+    const selection = this.getSelection(this.currentTab);
+    const selectedItems = selection.selected;
+    
+    if (selectedItems.length === 0) {
+      this.toastr.warning('Debe seleccionar al menos una declaración');
+      return;
+    }
+
+    if (selectedItems.length === 1) {
+      this.enviarOrganismoFiscalizador(selectedItems[0]);
+    } else {
+      this.toastr.info('Para múltiples declaraciones, use las opciones de proceso masivo');
+    }
   }
 
   /* ─────────────────────── Filtros / export ───────────────────── */
   buscar(): void { this.loadBandeja(); }
 
   limpiar(): void {
-    this.enviadoPor.reset();
-    this.fechaDeclaracion.reset();
-    this.tipoDeclaracion.reset();
-    this.run.reset();
-    this.declarante.reset();
-    this.servicio.reset();
-    this.cargo.reset();
-    this.estado.reset();
-    this.buscar();
+    this.enviadoPor.setValue('');
+    this.fechaDeclaracion.setValue(null);
+    this.tipoDeclaracion.setValue('');
+    this.run.setValue('');
+    this.declarante.setValue('');
+    this.servicio.setValue('');
+    this.cargo.setValue('');
+    this.estado.setValue('');
+    this.loadBandeja();
   }
 
   exportar(): void {
-    /* lógica de exportación */
-    console.log('exportar');
+    this.iniciarExportacion();
   }
 
   descargarVersionCompleta(): void {
-    console.log('descargar versión completa - tab', this.currentTab);
+    const selection = this.getSelection(this.currentTab);
+    const selectedItems = selection.selected;
+    
+    if (selectedItems.length === 0) {
+      this.toastr.warning('Debe seleccionar al menos una declaración para descargar');
+      return;
+    }
+
+    if (selectedItems.length === 1) {
+      this.descargarDeclaracion(selectedItems[0]);
+    } else {
+      // Descargar múltiples declaraciones
+      selectedItems.forEach(item => {
+        this.descargarDeclaracion(item);
+      });
+    }
   }
 
   /* ─────────────────────── Pills de estado ────────────────────── */
@@ -392,5 +493,344 @@ isLoading   = false;
       default:
         return 'pill pill-default';
     }
+  }
+
+  /* ══════════════════════════ Nuevos métodos para integraciones ══════════════════════════ */
+
+  /**
+   * Carga los procesos masivos según el tab actual
+   */
+  cargarProcesosMasivos(): void {
+    this.procesosMasivosLoading = true;
+    
+    if (this.currentTab === 'pendientes') {
+      this._ministroFe.listarProcesosMasivos().subscribe({
+        next: (response) => {
+          this.procesosMasivos = response.data || [];
+          this.procesosMasivosLoading = false;
+        },
+        error: (error) => {
+          console.error('Error al cargar procesos masivos:', error);
+          this.toastr.error('Error al cargar procesos masivos');
+          this.procesosMasivosLoading = false;
+        }
+      });
+    } else if (['firma-envio-masivo', 'archivo-masivo'].includes(this.currentTab)) {
+      this._ministroFe.listarProcesosFirmarArchivarMasivos().subscribe({
+        next: (response) => {
+          this.procesosMasivos = response.data || [];
+          this.procesosMasivosLoading = false;
+        },
+        error: (error) => {
+          console.error('Error al cargar procesos masivos:', error);
+          this.toastr.error('Error al cargar procesos masivos');
+          this.procesosMasivosLoading = false;
+        }
+      });
+    }
+  }
+
+  /**
+   * Carga las exportaciones
+   */
+  cargarExportaciones(): void {
+    this.exportacionesLoading = true;
+    this._ministroFe.listarExportaciones().subscribe({
+      next: (response) => {
+        this.exportaciones = response.data || [];
+        this.exportacionesLoading = false;
+      },
+      error: (error) => {
+        console.error('Error al cargar exportaciones:', error);
+        this.toastr.error('Error al cargar exportaciones');
+        this.exportacionesLoading = false;
+      }
+    });
+  }
+
+  /**
+   * Inicia el proceso de exportación
+   */
+  iniciarExportacion(): void {
+    const filtro = this.construirFiltroActual();
+    
+    this._ministroFe.iniciarExportacion(filtro).subscribe({
+      next: (response) => {
+        this.toastr.success('Proceso de exportación iniciado correctamente');
+        this.cargarExportaciones(); // Recargar lista de exportaciones
+      },
+      error: (error) => {
+        console.error('Error al iniciar exportación:', error);
+        this.toastr.error('Error al iniciar el proceso de exportación');
+      }
+    });
+  }
+
+  /**
+   * Construye el filtro actual basado en los controles del formulario
+   */
+  private construirFiltroActual(): any {
+    const bandejaMap: Record<TabId, number> = {
+      'pendientes': 1,
+      'firma-envio-masivo': 6,
+      'enviadas': 2,
+      'archivo-masivo': 7,
+      'archivadas': 5
+    };
+
+    return {
+      remitente: this.enviadoPor.value ?? '',
+      fechaRecepcion: '',
+      fechaFirmaDeclarante: this.fechaDeclaracion.value
+        ? this.fechaDeclaracion.value.toISOString().slice(0, 10)
+        : '',
+      tipoId: this.tipoDeclaracion.value ?? '',
+      rut: this.run.value ?? '',
+      declarante: this.declarante.value ?? '',
+      servicioId: this.servicio.value ?? '',
+      cargo: this.cargo.value ?? '',
+      estadoId: this.estado.value ? +this.estado.value : 0,
+      rol: 3,
+      tipobandeja: bandejaMap[this.currentTab]
+    };
+  }
+
+  /**
+   * Descarga una declaración
+   */
+  descargarDeclaracion(element: DeclaracionMinistroFe): void {
+    this._ministroFe.descargarDeclaracion(element.idDeclaracion).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `declaracion_${element.idDeclaracion}.pdf`;
+        link.click();
+        window.URL.revokeObjectURL(url);
+        this.toastr.success('Declaración descargada correctamente');
+      },
+      error: (error) => {
+        console.error('Error al descargar declaración:', error);
+        this.toastr.error('Error al descargar la declaración');
+      }
+    });
+  }
+
+  /**
+   * Archiva las declaraciones seleccionadas
+   */
+  archivarSeleccionadas(): void {
+    const selection = this.getSelection(this.currentTab);
+    const selectedIds = selection.selected.map(item => item.idDeclaracion);
+    
+    if (selectedIds.length === 0) {
+      this.toastr.warning('Debe seleccionar al menos una declaración');
+      return;
+    }
+
+    this.mostrarModalConfirmacion(
+      'Archivar Declaraciones',
+      `¿Está seguro de que desea archivar ${selectedIds.length} declaración(es)?`,
+      () => {
+        this._ministroFe.archivarSeleccionadas(selectedIds, this.observacionModal.value || '').subscribe({
+          next: (response) => {
+            this.toastr.success('Declaraciones archivadas correctamente');
+            this.loadBandeja();
+            selection.clear();
+            this.cerrarModalConfirmacion();
+          },
+          error: (error) => {
+            console.error('Error al archivar declaraciones:', error);
+            this.toastr.error('Error al archivar las declaraciones');
+          }
+        });
+      }
+    );
+  }
+
+  /**
+   * Devuelve las declaraciones seleccionadas
+   */
+  devolverSeleccionadas(): void {
+    const selection = this.getSelection(this.currentTab);
+    const selectedIds = selection.selected.map(item => item.idDeclaracion);
+    
+    if (selectedIds.length === 0) {
+      this.toastr.warning('Debe seleccionar al menos una declaración');
+      return;
+    }
+
+    this.mostrarModalConfirmacion(
+      'Devolver Declaraciones',
+      `¿Está seguro de que desea devolver ${selectedIds.length} declaración(es)?`,
+      () => {
+        this._ministroFe.devolverSeleccionadas(selectedIds, this.observacionModal.value || '').subscribe({
+          next: (response) => {
+            this.toastr.success('Declaraciones devueltas correctamente');
+            this.loadBandeja();
+            selection.clear();
+            this.cerrarModalConfirmacion();
+          },
+          error: (error) => {
+            console.error('Error al devolver declaraciones:', error);
+            this.toastr.error('Error al devolver las declaraciones');
+          }
+        });
+      }
+    );
+  }
+
+  /**
+   * Firma y envía las declaraciones seleccionadas
+   */
+  firmarEnviarSeleccionadas(): void {
+    const selection = this.getSelection(this.currentTab);
+    const selectedIds = selection.selected.map(item => item.idDeclaracion);
+    
+    if (selectedIds.length === 0) {
+      this.toastr.warning('Debe seleccionar al menos una declaración');
+      return;
+    }
+
+    this.mostrarModalConfirmacion(
+      'Firmar y Enviar Declaraciones',
+      `¿Está seguro de que desea firmar y enviar ${selectedIds.length} declaración(es)?`,
+      () => {
+        this._ministroFe.firmarEnviarSeleccionadas(selectedIds, this.observacionModal.value || '').subscribe({
+          next: (response) => {
+            this.toastr.success('Declaraciones firmadas y enviadas correctamente');
+            this.loadBandeja();
+            selection.clear();
+            this.cerrarModalConfirmacion();
+          },
+          error: (error) => {
+            console.error('Error al firmar y enviar declaraciones:', error);
+            this.toastr.error('Error al firmar y enviar las declaraciones');
+          }
+        });
+      }
+    );
+  }
+
+  /**
+   * Devuelve todas las declaraciones de la bandeja actual
+   */
+  devolverTodasDeclaraciones(): void {
+    const filtro = this.construirFiltroActual();
+    
+    this.mostrarModalConfirmacion(
+      'Devolver Todas las Declaraciones',
+      '¿Está seguro de que desea devolver TODAS las declaraciones de esta bandeja?',
+      () => {
+        this._ministroFe.devolverTodoDeclaracion(filtro, this.observacionModal.value || '').subscribe({
+          next: (response) => {
+            this.toastr.success('Todas las declaraciones han sido devueltas correctamente');
+            this.loadBandeja();
+            this.cerrarModalConfirmacion();
+          },
+          error: (error) => {
+            console.error('Error al devolver todas las declaraciones:', error);
+            this.toastr.error('Error al devolver todas las declaraciones');
+          }
+        });
+      }
+    );
+  }
+
+  /**
+   * Firma y archiva todas las declaraciones de la bandeja actual
+   */
+  firmarArchivarTodasDeclaraciones(): void {
+    const filtro = this.construirFiltroActual();
+    
+    this.mostrarModalConfirmacion(
+      'Firmar y Archivar Todas las Declaraciones',
+      '¿Está seguro de que desea firmar y archivar TODAS las declaraciones de esta bandeja?',
+      () => {
+        this._ministroFe.firmarArchivarMasivo(filtro, this.observacionModal.value || '').subscribe({
+          next: (response) => {
+            this.toastr.success('Todas las declaraciones han sido firmadas y archivadas correctamente');
+            this.loadBandeja();
+            this.cerrarModalConfirmacion();
+          },
+          error: (error) => {
+            console.error('Error al firmar y archivar todas las declaraciones:', error);
+            this.toastr.error('Error al firmar y archivar todas las declaraciones');
+          }
+        });
+      }
+    );
+  }
+
+  /**
+   * Envía una declaración al organismo fiscalizador
+   */
+  enviarOrganismoFiscalizador(element: DeclaracionMinistroFe): void {
+    this.mostrarModalConfirmacion(
+      'Enviar a Organismo Fiscalizador',
+      `¿Está seguro de que desea enviar la declaración ${element.idDeclaracion} al organismo fiscalizador?`,
+      () => {
+        this._ministroFe.enviarCgrDeclaracion(element.idDeclaracion, this.observacionModal.value || '').subscribe({
+          next: (response) => {
+            this.toastr.success('Declaración enviada al organismo fiscalizador correctamente');
+            this.loadBandeja();
+            this.cerrarModalConfirmacion();
+          },
+          error: (error) => {
+            console.error('Error al enviar al organismo fiscalizador:', error);
+            this.toastr.error('Error al enviar la declaración al organismo fiscalizador');
+          }
+        });
+      }
+    );
+  }
+
+  /**
+   * Muestra el modal de confirmación
+   */
+  private mostrarModalConfirmacion(titulo: string, mensaje: string, accion: () => void): void {
+    this.confirmModalTitle = titulo;
+    this.confirmModalMessage = mensaje;
+    this.confirmModalAction = accion;
+    this.observacionModal.setValue('');
+    this.showConfirmModal = true;
+  }
+
+  /**
+   * Cierra el modal de confirmación
+   */
+  cerrarModalConfirmacion(): void {
+    this.showConfirmModal = false;
+    this.confirmModalTitle = '';
+    this.confirmModalMessage = '';
+    this.confirmModalAction = () => {};
+    this.observacionModal.setValue('');
+  }
+
+  /**
+   * Ejecuta la acción confirmada
+   */
+  ejecutarAccionConfirmada(): void {
+    this.confirmModalAction();
+  }
+
+  /**
+   * Descarga un archivo de exportación
+   */
+  descargarExportacion(exportacion: Exportacion): void {
+    if (exportacion.estado !== 'Completado') {
+      this.toastr.warning('La exportación aún no está completada');
+      return;
+    }
+
+    // Implementar descarga del archivo
+    // En una implementación real, esto podría ser una llamada al servicio para obtener el archivo
+    const url = `${this._ministroFe['apiUrl']}/pr/service/exportaciones/descargar/${exportacion.id}`;
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = exportacion.archivo;
+    link.click();
+    
+    this.toastr.success('Descargando archivo de exportación');
   }
 }

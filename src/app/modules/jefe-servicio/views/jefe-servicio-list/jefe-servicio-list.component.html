@@ -1,0 +1,479 @@
+<div class="container-fluid">
+  <div *ngIf="isLoading" class="loading-overlay">
+    <div class="loading-content">
+      <mat-spinner diameter="50"></mat-spinner>
+      <p class="loading-text">Cargando Jefe de Servicio...</p>
+    </div>
+  </div>
+  
+  <!-- Breadcrumb -->
+  <nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a routerLink="/">Inicio</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Jefe de Servicio</li>
+    </ol>
+  </nav>
+
+  <!-- Título -->
+  <div class="page-header">
+    <h2 class="page-title">Jefe de Servicio</h2>
+  </div>
+
+  <!-- Pestañas modernos -->
+  <div class="tabs-section">
+    <div class="modern-tabs">
+      <div class="tabs-container">
+        <button 
+          class="tab-button" 
+          *ngFor="let tab of tabs"
+          [class.active]="currentTab === tab.id"
+          (click)="setTab(tab.id)">
+          <span class="tab-label">{{ tab.label }}</span>
+          <span class="tab-count">({{ tab.count() }})</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sección de filtros mejorada -->
+  <div class="filters-section">
+    <div class="filters-header" (click)="showFilters = !showFilters">
+      <span class="filters-title">
+        <mat-icon class="filters-icon">filter_list</mat-icon>
+        Filtros avanzados
+      </span>
+      <mat-icon class="toggle-icon" [class.rotated]="showFilters">
+        keyboard_arrow_down
+      </mat-icon>
+    </div>
+
+    <div class="filters-container" [class.expanded]="showFilters">
+      <div class="filters-content">
+        <div class="row g-3">
+          <!-- Enviado por -->
+          <div class="col-lg-2 col-md-3 col-sm-6">
+            <mat-form-field appearance="outline" class="modern-form-field">
+              <mat-label>Enviado por</mat-label>
+              <input matInput [formControl]="enviadoPor">
+            </mat-form-field>
+          </div>
+
+          <!-- Fecha Declaración -->
+          <div class="col-lg-2 col-md-3 col-sm-6">
+            <mat-form-field appearance="outline" class="modern-form-field">
+              <mat-label>Fecha Declaración</mat-label>
+              <input matInput [matDatepicker]="pickerDec" [formControl]="fechaDeclaracion">
+              <mat-datepicker-toggle matSuffix [for]="pickerDec"></mat-datepicker-toggle>
+              <mat-datepicker #pickerDec></mat-datepicker>
+            </mat-form-field>
+          </div>
+
+          <!-- Tipo -->
+          <div class="col-lg-2 col-md-3 col-sm-6">
+            <mat-form-field appearance="outline" class="modern-form-field">
+              <mat-label>Tipo</mat-label>
+              <mat-select [formControl]="tipoDeclaracion">
+                <mat-option *ngFor="let t of tipos" [value]="t.id">{{ t.nombre }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <!-- R.U.N. -->
+          <div class="col-lg-2 col-md-3 col-sm-6">
+            <mat-form-field appearance="outline" class="modern-form-field">
+              <mat-label>R.U.N.</mat-label>
+              <input matInput [formControl]="run">
+            </mat-form-field>
+          </div>
+
+          <!-- Declarante -->
+          <div class="col-lg-2 col-md-3 col-sm-6">
+            <mat-form-field appearance="outline" class="modern-form-field">
+              <mat-label>Declarante</mat-label>
+              <input matInput [formControl]="declarante">
+            </mat-form-field>
+          </div>
+
+          <!-- Servicio -->
+          <div class="col-lg-2 col-md-3 col-sm-6">
+            <mat-form-field appearance="outline" class="modern-form-field">
+              <mat-label>Servicio</mat-label>
+              <mat-select [formControl]="servicio">
+                <mat-option *ngFor="let s of serviciosCombo" [value]="s.id">{{ s.nombre }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <!-- Cargo -->
+          <div class="col-lg-2 col-md-3 col-sm-6">
+            <mat-form-field appearance="outline" class="modern-form-field">
+              <mat-label>Cargo</mat-label>
+              <input matInput [formControl]="cargo">
+            </mat-form-field>
+          </div>
+
+          <!-- Estado -->
+          <div class="col-lg-2 col-md-3 col-sm-6">
+            <mat-form-field appearance="outline" class="modern-form-field">
+              <mat-label>Estado</mat-label>
+              <mat-select [formControl]="estado">
+                <mat-option *ngFor="let e of estados" [value]="e.id">{{ e.nombre }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="filters-actions">
+          <button mat-raised-button color="primary" class="action-btn" (click)="buscar()">
+            <mat-icon>search</mat-icon>
+            Buscar
+          </button>
+          <button mat-raised-button color="warn" class="action-btn" (click)="limpiar()">
+            <mat-icon>clear</mat-icon>
+            Limpiar
+          </button>
+          <button mat-raised-button color="accent" class="action-btn" (click)="exportar()">
+            <mat-icon>download</mat-icon>
+            Exportar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<!-- VISTA DE ESCRITORIO -->
+<div class="d-none d-md-block desktop-view">
+  <!-- Componentes según tab seleccionado -->
+  <app-jefe-servicio-pendientes 
+    *ngIf="currentTab === 'pendientes'"
+    [dataSource]="getDataSource(currentTab)"
+    [selection]="getSelection(currentTab)"
+    [isLoading]="isLoading"
+    (bitacora)="onBitacora($event)"
+    (firmar)="onFirmar()"
+    (derivar)="onDerivar()"
+    (enviarOrganismo)="enviarOrganismoFiscalizador($event)"
+    (descargar)="descargarDeclaracion($event)"
+    (archivarSeleccionadas)="archivarSeleccionadas()"
+    (masterToggle)="masterToggle(currentTab)"
+    (toggle)="toggle(currentTab, $event)">
+  </app-jefe-servicio-pendientes>
+
+  <app-jefe-servicio-firma-envio 
+    *ngIf="currentTab === 'firma-envio-masivo'"
+    [dataSource]="getDataSource(currentTab)"
+    [selection]="getSelection(currentTab)"
+    [isLoading]="isLoading"
+    (bitacora)="onBitacora($event)"
+    (descargar)="descargarDeclaracion($event)"
+    (firmarEnviarSeleccionadas)="firmarEnviarSeleccionadas()"
+    (devolverSeleccionadas)="devolverSeleccionadas()"
+    (firmarArchivarTodas)="firmarArchivarTodasDeclaraciones()"
+    (devolverTodas)="devolverTodasDeclaraciones()"
+    (masterToggle)="masterToggle(currentTab)"
+    (toggle)="toggle(currentTab, $event)">
+  </app-jefe-servicio-firma-envio>
+
+  <app-jefe-servicio-enviadas 
+    *ngIf="currentTab === 'enviadas'"
+    [dataSource]="getDataSource(currentTab)"
+    [selection]="getSelection(currentTab)"
+    [isLoading]="isLoading"
+    (bitacora)="onBitacora($event)"
+    (descargar)="descargarDeclaracion($event)"
+    (masterToggle)="masterToggle(currentTab)"
+    (toggle)="toggle(currentTab, $event)">
+  </app-jefe-servicio-enviadas>
+
+  <app-jefe-servicio-archivo-masivo 
+    *ngIf="currentTab === 'archivo-masivo'"
+    [dataSource]="getDataSource(currentTab)"
+    [selection]="getSelection(currentTab)"
+    [isLoading]="isLoading"
+    (bitacora)="onBitacora($event)"
+    (descargar)="descargarDeclaracion($event)"
+    (archivarSeleccionadas)="archivarSeleccionadas()"
+    (devolverSeleccionadas)="devolverSeleccionadas()"
+    (archivarTodas)="firmarArchivarTodasDeclaraciones()"
+    (devolverTodas)="devolverTodasDeclaraciones()"
+    (masterToggle)="masterToggle(currentTab)"
+    (toggle)="toggle(currentTab, $event)">
+  </app-jefe-servicio-archivo-masivo>
+
+  <app-jefe-servicio-archivadas 
+    *ngIf="currentTab === 'archivadas'"
+    [dataSource]="getDataSource(currentTab)"
+    [selection]="getSelection(currentTab)"
+    [isLoading]="isLoading"
+    (bitacora)="onBitacora($event)"
+    (descargar)="descargarDeclaracion($event)"
+    (masterToggle)="masterToggle(currentTab)"
+    (toggle)="toggle(currentTab, $event)">
+  </app-jefe-servicio-archivadas>
+
+  <!-- Paginador mejorado -->
+  <div class="pagination-container">
+    <mat-paginator 
+      class="modern-paginator" 
+      [pageSizeOptions]="[5, 10, 20]" 
+      showFirstLastButtons 
+      [length]="getDataSource(currentTab)?.data?.length"
+      aria-label="Paginador de Jefe de Servicio">
+    </mat-paginator>
+  </div>
+</div>
+
+<!-- Modal de Bitácora -->
+<div class="bitacora-modal-overlay" *ngIf="showBitacoraModal" (click)="cerrarBitacoraModal()">
+  <div class="bitacora-modal-container" (click)="$event.stopPropagation()">
+    <!-- Header del modal -->
+    <div class="bitacora-modal-header">
+      <div class="modal-title">
+        <mat-icon class="modal-icon">history</mat-icon>
+        <h3>Bitácora de Declaración #{{ currentDeclaracionId }}</h3>
+      </div>
+      <button mat-icon-button class="close-btn" (click)="cerrarBitacoraModal()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <!-- Contenido del modal -->
+    <div class="bitacora-modal-content">
+      <!-- Spinner de carga -->
+      <div *ngIf="bitacoraLoading" class="bitacora-loading">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Cargando bitácora...</p>
+      </div>
+
+      <!-- Tabla de bitácoras -->
+      <div *ngIf="!bitacoraLoading && bitacoraData.length > 0" class="bitacora-table-container">
+        <table class="bitacora-table">
+          <thead>
+            <tr>
+              <th>Usuario</th>
+              <th>Fecha</th>
+              <th>Acción</th>
+              <th>Perfil</th>
+              <th>Observaciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let bitacora of bitacoraData; let i = index" 
+                [class.even-row]="i % 2 === 0">
+              <td class="usuario-cell">
+                <div class="usuario-info">
+                  <mat-icon class="user-icon">person</mat-icon>
+                  <span>{{ bitacora.usuario }}</span>
+                </div>
+              </td>
+              <td class="fecha-cell">
+                <div class="fecha-info">
+                  <mat-icon class="date-icon">schedule</mat-icon>
+                  <span>{{ bitacora.fecha }}</span>
+                </div>
+              </td>
+              <td class="accion-cell">
+                <span [ngClass]="getAccionPillClass(bitacora.accion)" class="accion-pill">
+                  {{ bitacora.accion }}
+                </span>
+              </td>
+              <td class="perfil-cell">
+                <div class="perfil-badge">
+                  <mat-icon class="role-icon">badge</mat-icon>
+                  <span>{{ bitacora.perfil }}</span>
+                </div>
+              </td>
+              <td class="observaciones-cell">
+                <div class="observaciones-content" [matTooltip]="bitacora.observaciones">
+                  {{ bitacora.observaciones }}
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Mensaje cuando no hay datos -->
+      <div *ngIf="!bitacoraLoading && bitacoraData.length === 0" class="bitacora-empty">
+        <mat-icon class="empty-icon">info</mat-icon>
+        <p>No hay registros de bitácora para esta declaración.</p>
+      </div>
+    </div>
+
+    <!-- Footer del modal con paginación -->
+    <div class="bitacora-modal-footer" *ngIf="bitacoraData.length > 0">
+      <mat-paginator 
+        class="bitacora-paginator"
+        [length]="bitacoraTotalItems"
+        [pageSize]="bitacoraPageSize"
+        [pageIndex]="bitacoraCurrentPage"
+        [pageSizeOptions]="[5, 10, 15]"
+        (page)="onBitacoraPaginaChange($event)"
+        showFirstLastButtons>
+      </mat-paginator>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Confirmación -->
+<div class="modal-overlay" *ngIf="showConfirmModal" (click)="cerrarModalConfirmacion()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>{{ confirmModalTitle }}</h3>
+      <button class="close-btn" (click)="cerrarModalConfirmacion()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+    
+    <div class="modal-body">
+      <p>{{ confirmModalMessage }}</p>
+      
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Observaciones (opcional)</mat-label>
+        <textarea matInput 
+                  [formControl]="observacionModal" 
+                  rows="3"
+                  placeholder="Ingrese observaciones adicionales..."></textarea>
+      </mat-form-field>
+    </div>
+    
+    <div class="modal-footer">
+      <button mat-button (click)="cerrarModalConfirmacion()">Cancelar</button>
+      <button mat-raised-button 
+              color="primary" 
+              (click)="ejecutarAccionConfirmada()">
+        Confirmar
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Sección de Procesos Masivos -->
+<mat-card class="processes-card" *ngIf="['pendientes', 'firma-envio-masivo', 'archivo-masivo'].includes(currentTab)">
+  <mat-card-header>
+    <mat-card-title>
+      <mat-icon>settings</mat-icon>
+      Procesos Masivos
+    </mat-card-title>
+  </mat-card-header>
+  
+  <mat-card-content>
+    <div *ngIf="procesosMasivosLoading" class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+      <span>Cargando procesos masivos...</span>
+    </div>
+    
+    <div *ngIf="!procesosMasivosLoading && procesosMasivos.length === 0" class="no-data">
+      <mat-icon>info</mat-icon>
+      <span>No hay procesos masivos activos</span>
+    </div>
+    
+    <table mat-table [dataSource]="procesosMasivos" *ngIf="!procesosMasivosLoading && procesosMasivos.length > 0">
+      <ng-container matColumnDef="fecha">
+        <th mat-header-cell *matHeaderCellDef>Fecha</th>
+        <td mat-cell *matCellDef="let proceso">{{ proceso.fecha | date:'dd/MM/yyyy HH:mm' }}</td>
+      </ng-container>
+      
+      <ng-container matColumnDef="tipo">
+        <th mat-header-cell *matHeaderCellDef>Tipo</th>
+        <td mat-cell *matCellDef="let proceso">{{ proceso.tipo }}</td>
+      </ng-container>
+      
+      <ng-container matColumnDef="estado">
+        <th mat-header-cell *matHeaderCellDef>Estado</th>
+        <td mat-cell *matCellDef="let proceso">
+          <span class="estado-pill" [ngClass]="getAccionPillClass(proceso.estado)">
+            {{ proceso.estado }}
+          </span>
+        </td>
+      </ng-container>
+      
+      <ng-container matColumnDef="usuario">
+        <th mat-header-cell *matHeaderCellDef>Usuario</th>
+        <td mat-cell *matCellDef="let proceso">{{ proceso.usuario }}</td>
+      </ng-container>
+      
+      <ng-container matColumnDef="descripcion">
+        <th mat-header-cell *matHeaderCellDef>Descripción</th>
+        <td mat-cell *matCellDef="let proceso">{{ proceso.descripcion }}</td>
+      </ng-container>
+      
+      <tr mat-header-row *matHeaderRowDef="['fecha', 'tipo', 'estado', 'usuario', 'descripcion']"></tr>
+      <tr mat-row *matRowDef="let row; columns: ['fecha', 'tipo', 'estado', 'usuario', 'descripcion']"></tr>
+    </table>
+  </mat-card-content>
+</mat-card>
+
+<!-- Sección de Exportaciones -->
+<mat-card class="exports-card">
+  <mat-card-header>
+    <mat-card-title>
+      <mat-icon>file_download</mat-icon>
+      Exportaciones
+    </mat-card-title>
+    <mat-card-subtitle>
+      <button mat-raised-button 
+              color="accent" 
+              (click)="iniciarExportacion()"
+              [disabled]="exportacionesLoading">
+        <mat-icon>add</mat-icon>
+        Nueva Exportación
+      </button>
+    </mat-card-subtitle>
+  </mat-card-header>
+  
+  <mat-card-content>
+    <div *ngIf="exportacionesLoading" class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+      <span>Cargando exportaciones...</span>
+    </div>
+    
+    <div *ngIf="!exportacionesLoading && exportaciones.length === 0" class="no-data">
+      <mat-icon>info</mat-icon>
+      <span>No hay exportaciones disponibles</span>
+    </div>
+    
+    <table mat-table [dataSource]="exportaciones" *ngIf="!exportacionesLoading && exportaciones.length > 0">
+      <ng-container matColumnDef="fecha">
+        <th mat-header-cell *matHeaderCellDef>Fecha</th>
+        <td mat-cell *matCellDef="let exportacion">{{ exportacion.fecha | date:'dd/MM/yyyy HH:mm' }}</td>
+      </ng-container>
+      
+      <ng-container matColumnDef="modulo">
+        <th mat-header-cell *matHeaderCellDef>Módulo</th>
+        <td mat-cell *matCellDef="let exportacion">{{ exportacion.modulo }}</td>
+      </ng-container>
+      
+      <ng-container matColumnDef="usuario">
+        <th mat-header-cell *matHeaderCellDef>Usuario</th>
+        <td mat-cell *matCellDef="let exportacion">{{ exportacion.usuario }}</td>
+      </ng-container>
+      
+      <ng-container matColumnDef="estado">
+        <th mat-header-cell *matHeaderCellDef>Estado</th>
+        <td mat-cell *matCellDef="let exportacion">
+          <span class="estado-pill" [ngClass]="getAccionPillClass(exportacion.estado)">
+            {{ exportacion.estado }}
+          </span>
+        </td>
+      </ng-container>
+      
+      <ng-container matColumnDef="acciones">
+        <th mat-header-cell *matHeaderCellDef>Acciones</th>
+        <td mat-cell *matCellDef="let exportacion">
+          <button mat-icon-button 
+                  *ngIf="exportacion.estado === 'Completado'"
+                  [matTooltip]="'Descargar ' + exportacion.archivo"
+                  (click)="descargarExportacion(exportacion)">
+            <mat-icon>download</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+      
+      <tr mat-header-row *matHeaderRowDef="['fecha', 'modulo', 'usuario', 'estado', 'acciones']"></tr>
+      <tr mat-row *matRowDef="let row; columns: ['fecha', 'modulo', 'usuario', 'estado', 'acciones']"></tr>
+    </table>
+  </mat-card-content>
+</mat-card>
+
+</div> 

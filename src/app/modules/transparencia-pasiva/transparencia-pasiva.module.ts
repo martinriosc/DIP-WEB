@@ -20,6 +20,8 @@ import { MatTableModule } from '@angular/material/table';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatTooltipModule } from '@angular/material/tooltip';
 @NgModule({
   declarations: [
 
@@ -43,11 +45,12 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     FormsModule,
     ReactiveFormsModule,
     MatTableModule,
-
+    MatTooltipModule,
     MatPaginatorModule,
     MatTabsModule,
     MatStepperModule,
     MatMenuModule,
+    MatSnackBarModule
   ]
 })
 export class TransparenciaPasivaModule { }
